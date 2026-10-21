@@ -17,13 +17,16 @@ let container:HTMLDivElement;let root:Root;
 beforeEach(()=>{
  (globalThis as Record<string,unknown>).IS_REACT_ACT_ENVIRONMENT=true;
  localStorage.clear();sessionStorage.clear();authService.logout();
+ sessionStorage.setItem('av_location_enabled','true');
  localStorage.setItem('av_access_token','test-token');
+ Object.defineProperty(navigator,'geolocation',{configurable:true,value:{getCurrentPosition:(success:PositionCallback)=>success({coords:{latitude:0,longitude:0} as GeolocationCoordinates,timestamp:Date.now(),toJSON:()=>({})})}});
+ Element.prototype.scrollIntoView=vi.fn();
  container=document.createElement('div');document.body.appendChild(container);root=createRoot(container);
 });
 afterEach(async()=>{await act(async()=>root.unmount());container.remove();authService.logout();vi.unstubAllGlobals();});
 
 async function click(node:Element){await act(async()=>{node.dispatchEvent(new MouseEvent('click',{bubbles:true}));});}
-async function flush(){await act(async()=>{await new Promise(resolve=>setTimeout(resolve,0));});}
+async function flush(){await act(async()=>{await new Promise(resolve=>setTimeout(resolve,25));});}
 
 it('shows A10 while sending its backend ID in hold and booking requests',async()=>{
  const requests:{url:string;method:string;body:any}[]=[];
@@ -43,9 +46,12 @@ it('shows A10 while sending its backend ID in hold and booking requests',async()
   else if(url.endsWith('/shows'))response=[show];
   else if(url.endsWith('/reviews'))response=[];
   else if(url.endsWith('/auth/me'))response=user;
+  else if(url.endsWith(`/theatres/${theatreId}/screens`))response={content:[]};
+  else if(url.endsWith(`/waiting-list/shows/${showId}/my-offer`))response=null;
   else if(url.endsWith(`/shows/${showId}/availability`))response=availability;
   else if(url.includes('/bookings/seat-holds?'))response=[];
-  else if(url.endsWith('/bookings/seat-holds'))response=[];
+  else if(url.endsWith('/bookings/seat-holds'))response=[{expiresAt:new Date(Date.now()+60_000).toISOString()}];
+  else if(url.endsWith('/bookings/seat-holds/release'))response={};
   else if(url.endsWith('/bookings'))response={id:'booking-a',userId:user.id,showId,seatIds:[seatId],ticketCount:1,totalAmount:0,status:'CONFIRMED',confirmationStatus:'AUTO',createdAt:'2099-01-01T00:00:00Z',attended:false,movie:movie.title,theatre:theatre.name,screen:'Screen 1',date:show.date,time:show.startTime,mobile:user.mobile,email:user.email};
   else throw new Error(`Unexpected request ${method} ${url}`);
   return new Response(JSON.stringify(response),{status:200,headers:{'Content-Type':'application/json'}});
@@ -62,14 +68,23 @@ it('shows A10 while sending its backend ID in hold and booking requests',async()
  await click(a11);expect(requests.filter(request=>request.url.endsWith('/bookings/seat-holds'))).toHaveLength(0);
  await click(a10);await flush();
  expect(container.textContent).toContain('A10');
+ await click(container.querySelector('aside .booking-proceed')!);
+ await flush();
  const hold=requests.find(request=>request.method==='POST'&&request.url.endsWith('/bookings/seat-holds'))!;
  expect(hold.body).toEqual({showId,seatIds:[seatId]});
 
- await click(container.querySelector('aside .booking-proceed')!);
- const terms=Array.from(container.querySelectorAll<HTMLInputElement>('.booking-term-accept input'));
- for(const checkbox of terms)await click(checkbox);
+ const terms=Array.from(container.querySelectorAll<HTMLButtonElement>('.terms-pagination button'));
+ for(const [index,button] of terms.entries()){
+  await click(button);
+  await act(async()=>{await new Promise(resolve=>setTimeout(resolve,1500));});
+  await flush();
+  const term=container.querySelectorAll<HTMLElement>('.booking-term-card')[index];
+  const checkbox=term.querySelector<HTMLInputElement>('.booking-term-accept input')!;
+  expect(checkbox.disabled).toBe(false);
+  await click(checkbox);
+ }
  await click(container.querySelector('.terms-confirm-action .booking-proceed')!);await flush();
  const booking=requests.find(request=>request.method==='POST'&&request.url.endsWith('/bookings'))!;
  expect(booking.body).toMatchObject({showId,seatIds:[seatId],termsAccepted:true});
  expect(container.textContent).toContain('Booking complete');
-});
+},15000);

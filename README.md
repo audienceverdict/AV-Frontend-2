@@ -143,3 +143,4 @@ Quality checks: source and route/API paths were inspected. This audit does not c
 
 Movies, theatres, layouts, shows, reviews, bookings and settings still use localStorage demo repositories in `src/services/api.ts`. Payments, booking notifications and ticket QR visuals remain simulations. Existing browser demo users/bookings are not migrated into backend accounts. Real auth UUIDs are separate from seeded demo identities. The frontend admin catalogue controls are not a substitute for backend authorization on those future modules.
 "# AV-Frontend-2" 
+"# AV-Frontend-2" 

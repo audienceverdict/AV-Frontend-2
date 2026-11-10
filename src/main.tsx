@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import {LoadingScreen} from './components/LoadingScreen';
 import './styles.css';
+import './social-media.css';
 import './brand-images.css';
 import './venue-setup.css';
 import './about-page.css';

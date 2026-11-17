@@ -102,3 +102,70 @@
 .booking-seat-scroll .seat.waitlist-offered{border-color:#bd83ff!important;background:#2d1b43;color:#ecd8ff;box-shadow:0 0 0 1px #bd83ff45}.booking-seat-legend i.offered{border-color:#bd83ff;background:#2d1b43}
 
 
+.booking-times button:disabled.booking-time-unavailable{cursor:not-allowed;opacity:.78;border-style:dashed;background:#11151a}.booking-times button:disabled.booking-time-unavailable small{color:#b7bdc7;font-size:8px;white-space:normal;max-width:132px}
+.booking-schedule-list{display:grid;gap:16px}.booking-date-group{display:grid;gap:9px}.booking-date-group>h2{margin:0;padding:0 2px 7px;border-bottom:1px solid #30353c;color:#f0f2f5;font-size:14px}.booking-date-group .booking-theatre-list{gap:8px}.booking-times button strong{white-space:normal}
+/* Cinematic booking refresh */
+.booking-page{background:radial-gradient(ellipse at 78% 5%,#341819 0,transparent 38%),#090a0d}
+.booking-hero{min-height:236px;background-position:center 46%;border-bottom-color:#332126}
+.booking-hero-shade{background:linear-gradient(90deg,rgba(5,7,10,.96) 0%,rgba(8,9,12,.79) 45%,rgba(8,9,12,.15) 100%),linear-gradient(0deg,rgba(6,8,10,.38),transparent 62%)}
+.booking-hero-copy{width:min(1340px,calc(100% - 64px));padding:20px 0 18px}
+.booking-hero-copy .booking-back{margin-bottom:9px;font-size:11px}
+.booking-hero .eyebrow{display:inline-block;padding:4px 8px;border:1px solid #683038;border-radius:999px;background:#2c1318;color:#ff7770;font-size:9px;letter-spacing:.8px}
+.booking-hero h1{max-width:600px;margin:7px 0;font-size:clamp(31px,3vw,40px);line-height:.99}
+.booking-hero-copy>p{max-width:540px;font-size:12px;line-height:1.45}
+.booking-progress{gap:9px;margin-top:13px}
+.booking-progress>span{font-size:9px}
+.booking-progress>span i{width:25px;height:25px}
+.booking-progress>i{width:18px}
+.booking-content{width:min(1450px,calc(100% - 40px));padding:15px 0 24px}
+.booking-layout{grid-template-columns:minmax(0,1.85fr) minmax(290px,.88fr);gap:14px}
+.booking-main-panel,.booking-summary{border-color:#282c32;border-radius:12px;background:linear-gradient(145deg,#111419,#0d1014);box-shadow:0 15px 42px #0005}
+.booking-main-panel{padding:12px}
+.booking-controls{grid-template-columns:1fr;padding:0 0 10px}
+.booking-city{height:39px;max-width:260px;background:#101419;border-color:#333943;font-size:11px}
+.booking-schedule-list{gap:8px}
+.booking-date-group{gap:5px}
+.booking-date-group>h2{padding:0 3px 5px;border:0;color:#ff8177;font-size:11px;letter-spacing:.6px;text-transform:uppercase}
+.booking-theatre-list{gap:6px}
+.booking-theatre{grid-template-columns:minmax(0,1fr) auto;min-height:78px;padding:9px 11px;border-color:#252a31;border-radius:9px;background:linear-gradient(110deg,#11151a,#0b0e12)}
+.booking-theatre:has(.booking-times .chosen){border-color:#e95550;background:linear-gradient(105deg,#251518,#111419)}
+.booking-theatre-details h2{font-size:13px}
+.booking-theatre-details>p{margin-bottom:6px;font-size:9px}
+.booking-perks{font-size:8px}
+.booking-times{justify-content:flex-end;gap:6px}
+.booking-times button{min-width:78px;min-height:44px;padding:5px 7px;border-color:#39404a;border-radius:7px;background:#12161b}
+.booking-times button strong{font-size:9px}
+.booking-times button small{font-size:8px}
+.booking-times button.chosen{border-color:#ff6a61;background:linear-gradient(140deg,#ff6a61,#df413e)}
+.booking-times button:disabled.booking-time-unavailable{background:#13171b;opacity:.75}
+.booking-summary{top:82px;padding:13px}
+.booking-summary-movie{grid-template-columns:65px 1fr;gap:10px;padding-bottom:11px}
+.booking-summary-movie>img,.booking-summary-movie .poster-image{width:65px;height:95px}
+.booking-summary-movie .eyebrow{font-size:8px}
+.booking-summary-movie h2{font-size:16px}
+.booking-summary-movie p{font-size:9px}
+.booking-summary-movie small{font-size:9px}
+.booking-summary-lines{gap:9px;padding:11px 1px}
+.booking-summary-lines>div{grid-template-columns:17px 76px minmax(0,1fr);gap:6px}
+.booking-summary-lines span,.booking-summary-lines strong{font-size:9px}
+.booking-total{padding:10px 0}
+.booking-total strong{font-size:17px}
+.booking-cinema-note{display:flex;justify-content:space-around;gap:10px;max-width:none;min-height:54px;margin:12px 0 0;padding:8px 12px;border-style:solid;border-color:#48272d;border-radius:10px;background:linear-gradient(100deg,#211317,#121519);}
+.booking-cinema-note>svg,.booking-seat-art{display:none}
+.booking-cinema-note>div{display:flex;align-items:center;gap:9px}
+.booking-cinema-note strong{color:#f4f2f1;font-size:10px}
+.booking-cinema-note p{margin:0;font-size:9px}
+.booking-seat-step{padding-top:3px}
+@media(max-width:900px){.booking-content{width:calc(100% - 28px)}.booking-layout{grid-template-columns:minmax(0,1.45fr) minmax(260px,.9fr)}.booking-theatre{grid-template-columns:1fr}.booking-times{justify-content:flex-start}.booking-summary-lines>div{grid-template-columns:17px 69px minmax(0,1fr)}}
+@media(max-width:700px){.booking-hero{min-height:260px}.booking-hero-copy{width:calc(100% - 34px)}.booking-hero h1{font-size:34px}.booking-content{width:calc(100% - 20px);padding-top:10px}.booking-layout{grid-template-columns:1fr;gap:10px}.booking-summary{position:static;order:-1}.booking-theatre{grid-template-columns:minmax(0,1fr) auto}.booking-theatre-details h2{font-size:12px}.booking-perks{display:none}.booking-times{grid-column:auto;display:flex;justify-content:flex-end}.booking-times button{min-width:72px}.booking-cinema-note{justify-content:flex-start;flex-wrap:wrap}.booking-cinema-note>div{padding:3px 6px}.booking-summary-lines{grid-template-columns:1fr 1fr}.booking-summary-lines>div{grid-template-columns:16px minmax(0,1fr);gap:3px 6px}.booking-summary-lines>div>span{grid-column:2;grid-row:1}.booking-summary-lines>div>strong{grid-column:2;grid-row:2}.booking-summary-lines>div>svg{grid-row:1/3}}
+.booking-date-group{grid-template-columns:54px minmax(0,1fr);align-items:stretch;gap:9px}
+.booking-date-group>h2{align-self:stretch;display:flex;flex-direction:column;justify-content:center;align-items:center;margin:0;padding:6px;border:1px solid #303740;border-radius:8px;background:#12161c;color:#c7d2df;text-align:center;font-size:10px;line-height:1.25;letter-spacing:0;text-transform:none}
+.booking-date-group .booking-theatre-list{min-width:0;display:grid;gap:8px}
+.booking-date-group .booking-theatre{min-height:70px}
+.booking-cinema-note>span{display:flex;align-items:center;gap:7px;color:#cbd3de;font-size:9px;white-space:nowrap}
+.booking-cinema-note>span svg{color:#ff685e}
+.booking-cinema-note>span strong{color:#f3f4f5;font-size:9px}
+.booking-cinema-note>i{height:22px;border-left:1px solid #57353b}
+@media(max-width:700px){.booking-date-group{grid-template-columns:43px minmax(0,1fr);gap:6px}.booking-date-group>h2{font-size:9px}.booking-date-group .booking-theatre{grid-template-columns:minmax(0,1fr);gap:7px}.booking-date-group .booking-times{grid-column:auto;justify-content:flex-start}.booking-cinema-note>i{display:none}.booking-cinema-note>span{font-size:8px}}
+
+.booking-no-bookable{display:grid;gap:5px;margin:4px 0 14px;padding:14px 18px;border-color:#604743;background:rgba(114,47,43,.12)}.booking-no-bookable strong{color:#f2d2ce;font-size:13px}.booking-no-bookable span{color:#b8bec7;font-size:11px}

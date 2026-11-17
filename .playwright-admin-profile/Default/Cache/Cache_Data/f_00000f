@@ -1,0 +1,970 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/pages/LegalPages.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=a954c2dd"; const Fragment = __vite__cjsImport0_react_jsxDevRuntime["Fragment"]; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+let prevRefreshReg;
+let prevRefreshSig;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("E:/AV Website/AV-frontend/src/pages/LegalPages.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+var _s = $RefreshSig$(), _s2 = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=a954c2dd"; const useEffect = __vite__cjsImport3_react["useEffect"]; const useState = __vite__cjsImport3_react["useState"];
+import { Link } from "/node_modules/.vite/deps/react-router-dom.js?v=a954c2dd";
+import { ArrowLeft, ArrowRight, ArrowUp, ShieldCheck, Scale, AlertTriangle, Trash2, CircleCheck, UserRound, Database, Clock3, Info, Home, CalendarDays, LockKeyhole } from "/node_modules/.vite/deps/lucide-react.js?v=a954c2dd";
+import { backendRequest } from "/src/services/api.ts";
+import "/src/legal-pages.css";
+import "/src/legal-pages-overrides.css";
+const lastUpdated = "November 10, 2026";
+function LegalPage({ kind, title, description, sections }) {
+  _s();
+  const descriptionMeta = kind === "privacy" ? "Learn what information Audience Verdict handles, why it is used, and how to contact us about privacy." : "Read the terms for using Audience Verdict movie discovery, reviews, social features and any supported booking features.";
+  useEffect(() => {
+    document.title = `${title} | Audience Verdict`;
+    let meta = document.querySelector('meta[name="description"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.setAttribute("name", "description");
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute("content", descriptionMeta);
+    return () => {
+      document.title = "AV — Audience Verdict";
+      meta?.setAttribute("content", "Experience the movie. Share your verdict. Discover screenings and honest audience reviews with AV Audience Verdict.");
+    };
+  }, [descriptionMeta, title]);
+  const id = (index) => `legal-section-${index + 1}`;
+  return /* @__PURE__ */ jsxDEV("div", { id: "top", className: `legal-page legal-page-${kind}`, children: /* @__PURE__ */ jsxDEV("div", { className: "legal-shell", children: [
+    /* @__PURE__ */ jsxDEV("div", { className: "legal-breadcrumb", children: [
+      /* @__PURE__ */ jsxDEV(Link, { to: "/", children: [
+        /* @__PURE__ */ jsxDEV(Home, { size: 13 }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+          lineNumber: 34,
+          columnNumber: 144
+        }, this),
+        "Home"
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+        lineNumber: 34,
+        columnNumber: 131
+      }, this),
+      /* @__PURE__ */ jsxDEV("span", { children: "/" }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+        lineNumber: 34,
+        columnNumber: 173
+      }, this),
+      /* @__PURE__ */ jsxDEV("span", { children: title }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+        lineNumber: 34,
+        columnNumber: 187
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+      lineNumber: 34,
+      columnNumber: 97
+    }, this),
+    /* @__PURE__ */ jsxDEV("header", { className: "legal-hero", children: [
+      /* @__PURE__ */ jsxDEV("div", { className: "legal-title-row", children: [
+        /* @__PURE__ */ jsxDEV("span", { className: "legal-icon", children: kind === "privacy" ? /* @__PURE__ */ jsxDEV(ShieldCheck, { size: 23 }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+          lineNumber: 34,
+          columnNumber: 328
+        }, this) : /* @__PURE__ */ jsxDEV(Scale, { size: 23 }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+          lineNumber: 34,
+          columnNumber: 356
+        }, this) }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+          lineNumber: 34,
+          columnNumber: 277
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { children: [
+          /* @__PURE__ */ jsxDEV("span", { className: "eyebrow", children: [
+            "AUDIENCE VERDICT · ",
+            kind === "privacy" ? "PRIVACY" : "TERMS OF SERVICE"
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 34,
+            columnNumber: 388
+          }, this),
+          /* @__PURE__ */ jsxDEV("h1", { children: title }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 34,
+            columnNumber: 493
+          }, this),
+          /* @__PURE__ */ jsxDEV("p", { children: description }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 34,
+            columnNumber: 509
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+          lineNumber: 34,
+          columnNumber: 383
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+        lineNumber: 34,
+        columnNumber: 244
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "legal-doc-meta", children: [
+        /* @__PURE__ */ jsxDEV("span", { children: [
+          /* @__PURE__ */ jsxDEV(CalendarDays, { size: 14 }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 34,
+            columnNumber: 579
+          }, this),
+          " Last updated ",
+          /* @__PURE__ */ jsxDEV("strong", { children: lastUpdated }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 34,
+            columnNumber: 619
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+          lineNumber: 34,
+          columnNumber: 573
+        }, this),
+        /* @__PURE__ */ jsxDEV("span", { children: [
+          /* @__PURE__ */ jsxDEV(CalendarDays, { size: 14 }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 34,
+            columnNumber: 662
+          }, this),
+          " Effective ",
+          /* @__PURE__ */ jsxDEV("strong", { children: lastUpdated }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 34,
+            columnNumber: 699
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+          lineNumber: 34,
+          columnNumber: 656
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+        lineNumber: 34,
+        columnNumber: 541
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+      lineNumber: 34,
+      columnNumber: 213
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: "legal-layout", children: [
+      /* @__PURE__ */ jsxDEV(LegalSidebar, { active: kind }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+        lineNumber: 34,
+        columnNumber: 781
+      }, this),
+      /* @__PURE__ */ jsxDEV("main", { className: "legal-content", children: [
+        /* @__PURE__ */ jsxDEV("div", { className: "legal-summary", children: [
+          /* @__PURE__ */ jsxDEV(Info, { size: 18 }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 34,
+            columnNumber: 874
+          }, this),
+          /* @__PURE__ */ jsxDEV("p", { children: kind === "privacy" ? "Audience Verdict is a movie discovery and audience-review platform. This policy explains what information we handle, how we use it, and your privacy choices." : "These terms explain the rules for using Audience Verdict. Review each section to understand your rights and responsibilities on the platform." }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 34,
+            columnNumber: 892
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+          lineNumber: 34,
+          columnNumber: 843
+        }, this),
+        sections.map((section, index) => /* @__PURE__ */ jsxDEV("section", { id: id(index), className: "legal-section", children: [
+          /* @__PURE__ */ jsxDEV("span", { className: "legal-number", children: String(index + 1).padStart(2, "0") }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 34,
+            columnNumber: 1337
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { children: [
+            /* @__PURE__ */ jsxDEV("h2", { children: section.title }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+              lineNumber: 34,
+              columnNumber: 1416
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "legal-copy", children: section.content }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+              lineNumber: 34,
+              columnNumber: 1440
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 34,
+            columnNumber: 1411
+          }, this)
+        ] }, section.title, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+          lineNumber: 34,
+          columnNumber: 1267
+        }, this)),
+        /* @__PURE__ */ jsxDEV("div", { className: "legal-review-note", children: [
+          /* @__PURE__ */ jsxDEV("strong", { children: "Policy review note" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 34,
+            columnNumber: 1544
+          }, this),
+          /* @__PURE__ */ jsxDEV("p", { children: [
+            "Items marked ",
+            /* @__PURE__ */ jsxDEV("b", { children: "[DEVELOPER CONFIRMATION REQUIRED]" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+              lineNumber: 34,
+              columnNumber: 1595
+            }, this),
+            " need verification by the Audience Verdict team before final publication."
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 34,
+            columnNumber: 1579
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+          lineNumber: 34,
+          columnNumber: 1509
+        }, this),
+        /* @__PURE__ */ jsxDEV("a", { className: "legal-top", href: "#top", onClick: (event) => {
+          event.preventDefault();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }, children: [
+          "Back to top ",
+          /* @__PURE__ */ jsxDEV(ArrowUp, { size: 14 }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 34,
+            columnNumber: 1862
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+          lineNumber: 34,
+          columnNumber: 1718
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+        lineNumber: 34,
+        columnNumber: 811
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+      lineNumber: 34,
+      columnNumber: 751
+    }, this)
+  ] }, void 0, true, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 34,
+    columnNumber: 68
+  }, this) }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 34,
+    columnNumber: 10
+  }, this);
+}
+_s(LegalPage, "OD7bBpZva5O2jO+Puf00hKivP7c=");
+_c = LegalPage;
+function LegalSidebar({ active }) {
+  const links = [{ label: "Terms & Conditions", to: "/terms", active: active === "terms", Icon: Scale }, { label: "Privacy Policy", to: "/privacy-policy", active: active === "privacy", Icon: ShieldCheck }, { label: "Delete Account", to: "/delete-account", active: active === "delete", Icon: Trash2 }];
+  return /* @__PURE__ */ jsxDEV("aside", { className: "legal-sidebar", children: [
+    /* @__PURE__ */ jsxDEV("div", { className: "legal-sidebar-heading", children: [
+      /* @__PURE__ */ jsxDEV("span", { children: "LEGAL INFORMATION" }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+        lineNumber: 36,
+        columnNumber: 457
+      }, this),
+      /* @__PURE__ */ jsxDEV("h2", { children: "Legal & Policies" }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+        lineNumber: 36,
+        columnNumber: 487
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+      lineNumber: 36,
+      columnNumber: 418
+    }, this),
+    /* @__PURE__ */ jsxDEV("nav", { "aria-label": "Legal and policy pages", children: links.map(({ label, to, active: active2, Icon }) => /* @__PURE__ */ jsxDEV(Link, { to, className: active2 ? "active" : "", "aria-current": active2 ? "page" : void 0, children: [
+      /* @__PURE__ */ jsxDEV(Icon, { size: 15 }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+        lineNumber: 36,
+        columnNumber: 711
+      }, this),
+      /* @__PURE__ */ jsxDEV("span", { children: label }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+        lineNumber: 36,
+        columnNumber: 729
+      }, this)
+    ] }, label, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+      lineNumber: 36,
+      columnNumber: 607
+    }, this)) }, void 0, false, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+      lineNumber: 36,
+      columnNumber: 522
+    }, this)
+  ] }, void 0, true, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 36,
+    columnNumber: 385
+  }, this);
+}
+_c2 = LegalSidebar;
+const p = (...children) => /* @__PURE__ */ jsxDEV("p", { children }, void 0, false, {
+  fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+  lineNumber: 37,
+  columnNumber: 47
+}, this);
+const list = (items) => /* @__PURE__ */ jsxDEV("ul", { children: items.map((item) => /* @__PURE__ */ jsxDEV("li", { children: item }, item, false, {
+  fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+  lineNumber: 38,
+  columnNumber: 60
+}, this)) }, void 0, false, {
+  fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+  lineNumber: 38,
+  columnNumber: 35
+}, this);
+const privacySections = [
+  { title: "Information We Collect", content: /* @__PURE__ */ jsxDEV(Fragment, { children: [
+    p("Depending on the feature you use, the service may handle:"),
+    list(["Account details: name, email address and mobile number supplied during registration or profile updates. Sign-in uses email one-time passwords (OTP); the frontend sends the destination and OTP to the authentication service.", "User content: movie ratings and reviews, review titles and text, external video links and thumbnails, comments and social publishing or connected-account activity where those features are enabled.", "Booking details: selected show, seats, booking status, price, contact details and ticket information. The current frontend booking/payment flow is explicitly a demo simulation and does not collect real payment card or bank details through a payment provider.", "Technical/session information: an access token is stored in browser local and session storage to maintain the signed-in session; the browser also stores limited interface/demo state. The app uses device location only after a user invokes the location feature and grants browser permission.", "Information you choose to provide in forms, messages, uploads, reviews or support requests."]),
+    p("This frontend does not show profile-photo collection, advertising trackers, analytics SDKs or crash-reporting SDKs. The backend may process IP addresses, request logs, security events or additional information; this repository does not establish whether or how it does so. [DEVELOPER CONFIRMATION REQUIRED: verify backend logs, data fields, connected-account data, and production app behavior.]")
+  ] }, void 0, true, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 41,
+    columnNumber: 45
+  }, this) },
+  { title: "How We Use Information", content: /* @__PURE__ */ jsxDEV(Fragment, { children: [
+    p("Information is used as needed to provide the features you choose:"),
+    list(["Create and maintain accounts, verify sign-in with OTP, load your profile and protect account access.", "Show movie listings, search results, ratings, reviews and other audience content.", "Support theatre, show, seat and booking experiences where those services are enabled. The current frontend payment action is simulated; no real transaction is processed by this website flow.", "Operate social-media content and connected-account features when enabled, including displaying or managing content through integrated platforms.", "Maintain service functionality, respond to support requests, and detect or address abuse, fraud or technical problems where supported by the service."])
+  ] }, void 0, true, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 42,
+    columnNumber: 45
+  }, this) },
+  { title: "Information Sharing", content: /* @__PURE__ */ jsxDEV(Fragment, { children: [
+    p("The frontend sends account and feature requests to the Audience Verdict API over HTTPS. We may share information with service providers as needed to operate the features you use. Visible third-party services include YouTube, Instagram, Facebook, Google Drive, Google Maps links and OpenStreetMap Nominatim. The social-media management area connects to external platforms; using those features may send data to the relevant platform under its terms. OpenStreetMap Nominatim may be used for a location lookup after you choose a location-related action."),
+    p("When you follow an external link or load embedded media, that third party may receive information such as your IP address and browser/device information and may use its own technologies. Their privacy practices are governed by their own policies. No live payment-provider integration, analytics SDK or crash-reporting provider is configured in the inspected frontend. We may disclose information when required by law. [DEVELOPER CONFIRMATION REQUIRED: verify hosting providers, backend subprocessors, social-platform scopes, booking partners and any server-side analytics or payment services.]")
+  ] }, void 0, true, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 43,
+    columnNumber: 42
+  }, this) },
+  { title: "Data Storage & Security", content: /* @__PURE__ */ jsxDEV(Fragment, { children: p("The frontend stores an access token in browser local and session storage to maintain the signed-in session; the browser may also retain limited interface/demo state. The frontend communicates with the production API over HTTPS and sends bearer access tokens for authenticated requests. These facts do not establish the security controls used by backend, hosting or third-party services. No security certification is claimed. Keep OTPs private. [DEVELOPER CONFIRMATION REQUIRED: document verified backend encryption, access controls, incident response and other safeguards.]") }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 44,
+    columnNumber: 46
+  }, this) },
+  { title: "Cookies & Tracking Technologies", content: /* @__PURE__ */ jsxDEV(Fragment, { children: p("The inspected frontend does not include a cookie-consent tool, analytics SDK or advertising tracker. It uses browser local/session storage for authentication and selected app state, which is distinct from a conventional tracking cookie. Embedded media and external sites may use their own cookies or similar technologies. Confirm whether production hosting or backend adds analytics, cookies or other tracking before publication.") }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 45,
+    columnNumber: 54
+  }, this) },
+  { title: "Your Choices & Rights", content: /* @__PURE__ */ jsxDEV(Fragment, { children: p("You may request access to or correction of your personal information, ask to delete your account and eligible associated data, or contact us with a privacy concern. Requests may require identity verification. Some information may need to be retained where required by law; explain any such retention when responding. The frontend supports profile editing and logout, but account deletion is not yet connected to this page. [DEVELOPER CONFIRMATION REQUIRED: establish the request process and deletion contact before launch.]") }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 46,
+    columnNumber: 44
+  }, this) },
+  { title: "Data Retention", content: /* @__PURE__ */ jsxDEV(Fragment, { children: p("The frontend does not define a retention schedule or account-deletion workflow that establishes how long server-side account, review, booking or social data is retained. Browser-stored session tokens remain until logout, expiration handling or browser storage is cleared. [DEVELOPER CONFIRMATION REQUIRED: set retention periods and deletion rules for each server-side data category, backups and connected-platform data.]") }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 47,
+    columnNumber: 37
+  }, this) },
+  { title: "Children’s Privacy", content: /* @__PURE__ */ jsxDEV(Fragment, { children: p("Audience Verdict is not designed specifically for children. The project does not define a verified minimum age or a process for handling children’s data. [DEVELOPER CONFIRMATION REQUIRED: choose the intended minimum age and applicable parental-consent and deletion process, then have counsel review the wording.]") }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 48,
+    columnNumber: 41
+  }, this) },
+  { title: "Changes to This Policy", content: /* @__PURE__ */ jsxDEV(Fragment, { children: p("We will publish the current version on this page and update the “Last updated” date when it changes. For material changes, the operator should provide an appropriate notice through the website or another contact channel. How such notices are delivered has not been verified. [DEVELOPER CONFIRMATION REQUIRED.]") }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 49,
+    columnNumber: 45
+  }, this) },
+  { title: "Contact Us", content: /* @__PURE__ */ jsxDEV(Fragment, { children: p("Privacy contact: [DEVELOPER CONFIRMATION REQUIRED: provide a monitored official privacy/support email address before publication.] No verified support email was found in the inspected project.") }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 50,
+    columnNumber: 33
+  }, this) }
+];
+const termsSections = [
+  { title: "Introduction", content: /* @__PURE__ */ jsxDEV(Fragment, { children: p("These Terms & Conditions govern your access to Audience Verdict at audienceverdict.in. By using the service, you agree to these terms. If you do not agree, do not use the service. “Audience Verdict”, “we” and “us” refer to the operator of the platform; its legal entity is not identified in this frontend.") }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 53,
+    columnNumber: 35
+  }, this) },
+  { title: "Eligibility", content: /* @__PURE__ */ jsxDEV(Fragment, { children: p("You must be legally able to accept these terms and meet the minimum age required in your location. The product owner has not specified a verified minimum age. [DEVELOPER CONFIRMATION REQUIRED: set the age threshold and rules for minors with legal counsel.]") }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 54,
+    columnNumber: 34
+  }, this) },
+  { title: "User Accounts", content: /* @__PURE__ */ jsxDEV(Fragment, { children: p("Some features require an account. Registration and sign-in use email OTP verification; new-account setup also requests a name and mobile number. Keep your information accurate, protect access to your email and OTPs, and promptly contact the operator if you believe your account has been accessed without permission. You are responsible for activity through your account, subject to rights and protections provided by applicable law.") }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 55,
+    columnNumber: 36
+  }, this) },
+  { title: "Platform Services", content: /* @__PURE__ */ jsxDEV(Fragment, { children: p("Audience Verdict provides movie discovery and information, audience ratings and reviews, user profile and social features, and theatre/show/seat selection and booking experiences where available. Features may change or be unavailable. Movie, show, availability, venue and pricing information can depend on data supplied by third parties or operators; verify important details before relying on them.") }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 56,
+    columnNumber: 40
+  }, this) },
+  { title: "Bookings and Payments", content: /* @__PURE__ */ jsxDEV(Fragment, { children: p("The current frontend implements a demo booking and simulated payment flow; it does not call a real payment provider or establish a live ticket purchase. Any production booking or payment feature must display the applicable provider, final price, booking terms, cancellation rules and refund terms before a user confirms. No refund promise or cancellation entitlement is created by this page. [DEVELOPER CONFIRMATION REQUIRED: publish the actual booking partner, payment provider, ticketing terms, cancellation/refund rules, support process and any booking fees before enabling real transactions.]") }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 57,
+    columnNumber: 44
+  }, this) },
+  { title: "User-Generated Content", content: /* @__PURE__ */ jsxDEV(Fragment, { children: p("You retain responsibility for content you submit, including profile details, reviews, ratings, comments, posts, links and media. Only submit content you have the right to share. Do not post illegal material, threats or harassment, impersonation, spam or fraudulent material, copyright-infringing content, deliberately misleading reviews, or abusive or harmful content. Do not disclose another person’s private information without a lawful basis. You grant the operator permission to host, display and technically process your content as needed to operate the features you use; confirm the intended scope of this license with counsel before publication. The frontend includes admin content management, but no public reporting workflow or published moderation appeal process was verified. [DEVELOPER CONFIRMATION REQUIRED: document moderation, reporting and appeal procedures.]") }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 58,
+    columnNumber: 45
+  }, this) },
+  { title: "Intellectual Property", content: /* @__PURE__ */ jsxDEV(Fragment, { children: p("The Audience Verdict name, branding, website software and original platform materials are owned by or licensed to the platform operator and are protected by applicable intellectual-property laws. You may use the service for personal, lawful purposes. Do not copy, alter, reverse engineer or commercially exploit platform materials except where applicable law permits or the operator gives written permission. Third-party movie artwork, media, marks and embedded content remain subject to their owners’ rights.") }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 59,
+    columnNumber: 44
+  }, this) },
+  { title: "Third-Party Services", content: /* @__PURE__ */ jsxDEV(Fragment, { children: p("The service links to or embeds external media and may connect with social-media platforms or, in a future production booking flow, booking and payment providers. Those services operate under their own terms and privacy policies. The operator is not responsible for third-party services beyond responsibilities that cannot be excluded under applicable law.") }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 60,
+    columnNumber: 43
+  }, this) },
+  { title: "Prohibited Activities", content: /* @__PURE__ */ jsxDEV(Fragment, { children: p("You may not use the service to break the law, harm or threaten others, impersonate a person or organization, post prohibited content, infringe intellectual-property rights, send spam or commit fraud, interfere with platform security or availability, access accounts or data without authorization, or misuse booking, review or social features.") }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 61,
+    columnNumber: 44
+  }, this) },
+  { title: "Suspension and Termination", content: /* @__PURE__ */ jsxDEV(Fragment, { children: p("The operator may restrict access where reasonably necessary to protect users, the service or legal rights, including suspected fraud, security abuse or serious violations of these terms. Where appropriate and lawful, the operator should give notice and a way to seek review. Applicable consumer and other legal rights remain unaffected. [DEVELOPER CONFIRMATION REQUIRED: confirm enforcement, notice, appeal and account-closure procedures.]") }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 62,
+    columnNumber: 49
+  }, this) },
+  { title: "Disclaimers and Limitation of Liability", content: /* @__PURE__ */ jsxDEV(Fragment, { children: p("The service is provided subject to availability. To the extent permitted by law, the operator does not warrant that all listings, reviews, availability or third-party content will be uninterrupted or error-free. Nothing in these terms excludes or limits a right, remedy or liability that applicable law does not allow to be excluded or limited. Any other limitation of liability should be reviewed by qualified counsel for the operator’s jurisdiction before publication.") }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 63,
+    columnNumber: 62
+  }, this) },
+  { title: "Changes to These Terms", content: /* @__PURE__ */ jsxDEV(Fragment, { children: p("The current terms will be published on this page with a revised “Last updated” date. Continued use after an update takes effect may constitute acceptance where permitted by law. For material changes, the operator should provide reasonable notice through the service.") }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 64,
+    columnNumber: 45
+  }, this) },
+  { title: "Governing Law and Disputes", content: /* @__PURE__ */ jsxDEV(Fragment, { children: p("[DEVELOPER CONFIRMATION REQUIRED: identify the contracting legal entity and its jurisdiction, then have counsel select governing law, venue and dispute procedures. No registered entity, office or jurisdiction is asserted in this draft.]") }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 65,
+    columnNumber: 49
+  }, this) },
+  { title: "Contact", content: /* @__PURE__ */ jsxDEV(Fragment, { children: p("Questions about these terms: [DEVELOPER CONFIRMATION REQUIRED: provide the verified official support contact email. No verified support email was found in the inspected project.]") }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 66,
+    columnNumber: 30
+  }, this) }
+];
+export function PrivacyPolicy() {
+  return /* @__PURE__ */ jsxDEV(LegalPage, { kind: "privacy", title: "Privacy Policy", description: "A clear guide to the information Audience Verdict handles and the choices available to you.", sections: privacySections }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 68,
+    columnNumber: 41
+  }, this);
+}
+_c3 = PrivacyPolicy;
+export function TermsConditions() {
+  return /* @__PURE__ */ jsxDEV(LegalPage, { kind: "terms", title: "Terms & Conditions", description: "The terms for using Audience Verdict’s movie discovery, audience and social features.", sections: termsSections }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 69,
+    columnNumber: 43
+  }, this);
+}
+_c4 = TermsConditions;
+export function DeleteAccount() {
+  _s2();
+  const [confirmed, setConfirmed] = useState(false);
+  const [otpRequested, setOtpRequested] = useState(false);
+  const [requestingOtp, setRequestingOtp] = useState(false);
+  const [requestMessage, setRequestMessage] = useState("");
+  const [requestError, setRequestError] = useState("");
+  const [deletionOtp, setDeletionOtp] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deletionComplete, setDeletionComplete] = useState(false);
+  const requestDeletionOtp = async () => {
+    if (!confirmed || requestingOtp) return;
+    setRequestingOtp(true);
+    setRequestMessage("");
+    setRequestError("");
+    try {
+      const result = await backendRequest("/auth/me/deletion-otp", { method: "POST" });
+      setOtpRequested(true);
+      setDeletionOtp("");
+      setRequestMessage(result?.message || "A new deletion verification code has been sent to the contact method on your account.");
+    } catch (error) {
+      setRequestError(error instanceof Error ? error.message.split(" [POST ")[0] : "Unable to request a deletion verification code. Please try again.");
+    } finally {
+      setRequestingOtp(false);
+    }
+  };
+  const confirmDeletion = async () => {
+    const otp = deletionOtp.trim();
+    if (!otp || deleting) return;
+    setDeleting(true);
+    setRequestError("");
+    setRequestMessage("");
+    try {
+      const result = await backendRequest("/auth/me", { method: "DELETE", headers: { "X-Deletion-OTP": otp } });
+      setDeletionComplete(true);
+      setOtpRequested(false);
+      setRequestMessage(result?.message || "Your account deletion request has been completed.");
+      localStorage.removeItem("av_access_token");
+      sessionStorage.removeItem("av_access_token");
+      window.dispatchEvent(new Event("av-auth-change"));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to delete your account. Check the verification code and try again.";
+      setRequestError(message.includes("invalid or expired") ? "This code is invalid or expired. Request a new code and enter it promptly." : message.split(" [DELETE ")[0]);
+    } finally {
+      setDeleting(false);
+    }
+  };
+  useEffect(() => {
+    document.title = "Delete Account | Audience Verdict";
+    const meta = document.querySelector('meta[name="description"]');
+    meta?.setAttribute("content", "Learn how to request deletion of your Audience Verdict account and associated personal information.");
+  }, []);
+  return /* @__PURE__ */ jsxDEV("div", { className: "delete-account-page", children: /* @__PURE__ */ jsxDEV("div", { className: "delete-account-shell", children: [
+    /* @__PURE__ */ jsxDEV("div", { className: "legal-breadcrumb", children: [
+      /* @__PURE__ */ jsxDEV(Link, { to: "/", children: [
+        /* @__PURE__ */ jsxDEV(Home, { size: 14 }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+          lineNumber: 75,
+          columnNumber: 132
+        }, this),
+        "Home"
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+        lineNumber: 75,
+        columnNumber: 119
+      }, this),
+      /* @__PURE__ */ jsxDEV("span", { children: "/" }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+        lineNumber: 75,
+        columnNumber: 161
+      }, this),
+      /* @__PURE__ */ jsxDEV("span", { children: "Delete Account" }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+        lineNumber: 75,
+        columnNumber: 175
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+      lineNumber: 75,
+      columnNumber: 85
+    }, this),
+    /* @__PURE__ */ jsxDEV("header", { className: "legal-hero delete-account-hero", children: /* @__PURE__ */ jsxDEV("div", { className: "legal-title-row", children: [
+      /* @__PURE__ */ jsxDEV("span", { className: "legal-icon delete-title-icon", children: /* @__PURE__ */ jsxDEV(Trash2, { size: 21 }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+        lineNumber: 75,
+        columnNumber: 339
+      }, this) }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+        lineNumber: 75,
+        columnNumber: 292
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { children: [
+        /* @__PURE__ */ jsxDEV("span", { className: "eyebrow", children: "ACCOUNT & PRIVACY" }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+          lineNumber: 75,
+          columnNumber: 371
+        }, this),
+        /* @__PURE__ */ jsxDEV("h1", { children: "Delete Account" }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+          lineNumber: 75,
+          columnNumber: 425
+        }, this),
+        /* @__PURE__ */ jsxDEV("p", { children: "Review what account deletion means and confirm your choice below." }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+          lineNumber: 75,
+          columnNumber: 448
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+        lineNumber: 75,
+        columnNumber: 366
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+      lineNumber: 75,
+      columnNumber: 259
+    }, this) }, void 0, false, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+      lineNumber: 75,
+      columnNumber: 208
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: "legal-layout delete-account-legal-layout", children: [
+      /* @__PURE__ */ jsxDEV(LegalSidebar, { active: "delete" }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+        lineNumber: 75,
+        columnNumber: 599
+      }, this),
+      /* @__PURE__ */ jsxDEV("main", { className: "delete-account-document", children: [
+        /* @__PURE__ */ jsxDEV("div", { className: "delete-warning-card", children: [
+          /* @__PURE__ */ jsxDEV(AlertTriangle, { size: 19 }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 75,
+            columnNumber: 710
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { children: [
+            /* @__PURE__ */ jsxDEV("h2", { children: "Account deletion may be permanent" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+              lineNumber: 75,
+              columnNumber: 742
+            }, this),
+            /* @__PURE__ */ jsxDEV("p", { children: "Your profile and eligible account data may be removed. Some records may be retained where required by law." }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+              lineNumber: 75,
+              columnNumber: 784
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 75,
+            columnNumber: 737
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+          lineNumber: 75,
+          columnNumber: 673
+        }, this),
+        /* @__PURE__ */ jsxDEV("section", { className: "delete-data-card", children: [
+          /* @__PURE__ */ jsxDEV("h2", { children: "What happens to your information?" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 75,
+            columnNumber: 947
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: "delete-data-grid", children: [
+            /* @__PURE__ */ jsxDEV("article", { children: [
+              /* @__PURE__ */ jsxDEV(UserRound, { size: 17 }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+                lineNumber: 75,
+                columnNumber: 1032
+              }, this),
+              /* @__PURE__ */ jsxDEV("div", { children: [
+                /* @__PURE__ */ jsxDEV("strong", { children: "Account details" }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+                  lineNumber: 75,
+                  columnNumber: 1060
+                }, this),
+                /* @__PURE__ */ jsxDEV("p", { children: "Your profile and eligible associated data may be included in a deletion request." }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+                  lineNumber: 75,
+                  columnNumber: 1092
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+                lineNumber: 75,
+                columnNumber: 1055
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+              lineNumber: 75,
+              columnNumber: 1023
+            }, this),
+            /* @__PURE__ */ jsxDEV("article", { children: [
+              /* @__PURE__ */ jsxDEV(Database, { size: 17 }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+                lineNumber: 75,
+                columnNumber: 1204
+              }, this),
+              /* @__PURE__ */ jsxDEV("div", { children: [
+                /* @__PURE__ */ jsxDEV("strong", { children: "Required records" }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+                  lineNumber: 75,
+                  columnNumber: 1231
+                }, this),
+                /* @__PURE__ */ jsxDEV("p", { children: "Some booking, security or legal records may need to be retained." }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+                  lineNumber: 75,
+                  columnNumber: 1264
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+                lineNumber: 75,
+                columnNumber: 1226
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+              lineNumber: 75,
+              columnNumber: 1195
+            }, this),
+            /* @__PURE__ */ jsxDEV("article", { children: [
+              /* @__PURE__ */ jsxDEV(Clock3, { size: 17 }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+                lineNumber: 75,
+                columnNumber: 1360
+              }, this),
+              /* @__PURE__ */ jsxDEV("div", { children: [
+                /* @__PURE__ */ jsxDEV("strong", { children: "Processing" }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+                  lineNumber: 75,
+                  columnNumber: 1385
+                }, this),
+                /* @__PURE__ */ jsxDEV("p", { children: "The request timeline and full deletion scope are still being confirmed." }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+                  lineNumber: 75,
+                  columnNumber: 1412
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+                lineNumber: 75,
+                columnNumber: 1380
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+              lineNumber: 75,
+              columnNumber: 1351
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 75,
+            columnNumber: 989
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+          lineNumber: 75,
+          columnNumber: 909
+        }, this),
+        /* @__PURE__ */ jsxDEV("section", { className: "delete-confirm-card", children: [
+          /* @__PURE__ */ jsxDEV("div", { className: "delete-confirm-heading", children: [
+            /* @__PURE__ */ jsxDEV("span", { className: "delete-confirm-icon", children: /* @__PURE__ */ jsxDEV(LockKeyhole, { size: 18 }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+              lineNumber: 75,
+              columnNumber: 1641
+            }, this) }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+              lineNumber: 75,
+              columnNumber: 1603
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { children: [
+              /* @__PURE__ */ jsxDEV("h2", { children: "Confirm account deletion" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+                lineNumber: 75,
+                columnNumber: 1678
+              }, this),
+              /* @__PURE__ */ jsxDEV("p", { children: deletionComplete ? "Account deletion completed." : otpRequested ? "Enter the verification code sent to your account to permanently delete your account." : "Confirm below to receive a verification code before continuing." }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+                lineNumber: 75,
+                columnNumber: 1711
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+              lineNumber: 75,
+              columnNumber: 1673
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 75,
+            columnNumber: 1563
+          }, this),
+          !deletionComplete && /* @__PURE__ */ jsxDEV(Fragment, { children: [
+            /* @__PURE__ */ jsxDEV("label", { className: `delete-confirm-check${confirmed ? " checked" : ""}`, children: [
+              /* @__PURE__ */ jsxDEV("input", { type: "checkbox", checked: confirmed, onChange: (event) => {
+                setConfirmed(event.target.checked);
+                setOtpRequested(false);
+                setDeletionOtp("");
+                setRequestMessage("");
+                setRequestError("");
+              } }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+                lineNumber: 75,
+                columnNumber: 2048
+              }, this),
+              /* @__PURE__ */ jsxDEV("span", { className: "delete-checkmark", children: /* @__PURE__ */ jsxDEV(CircleCheck, { size: 17 }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+                lineNumber: 75,
+                columnNumber: 2272
+              }, this) }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+                lineNumber: 75,
+                columnNumber: 2237
+              }, this),
+              /* @__PURE__ */ jsxDEV("span", { className: "delete-confirm-copy", children: "I confirm that I want to delete my Audience Verdict account and understand that eligible account data may be permanently removed." }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+                lineNumber: 75,
+                columnNumber: 2304
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+              lineNumber: 75,
+              columnNumber: 1976
+            }, this),
+            otpRequested && /* @__PURE__ */ jsxDEV("label", { className: "delete-otp-field", children: [
+              /* @__PURE__ */ jsxDEV("span", { children: "Deletion verification code" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+                lineNumber: 75,
+                columnNumber: 2539
+              }, this),
+              /* @__PURE__ */ jsxDEV("input", { inputMode: "numeric", autoComplete: "one-time-code", value: deletionOtp, onChange: (event) => setDeletionOtp(event.target.value), placeholder: "Enter OTP", "aria-label": "Deletion verification code" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+                lineNumber: 75,
+                columnNumber: 2578
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+              lineNumber: 75,
+              columnNumber: 2503
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "delete-action-buttons", children: [
+              /* @__PURE__ */ jsxDEV("button", { type: "button", className: "delete-account-button", disabled: !confirmed || requestingOtp || deleting || otpRequested && !deletionOtp.trim(), onClick: () => void (otpRequested ? confirmDeletion() : requestDeletionOtp()), children: [
+                /* @__PURE__ */ jsxDEV(Trash2, { size: 16 }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+                  lineNumber: 75,
+                  columnNumber: 3050
+                }, this),
+                requestingOtp ? "Sending verification code…" : deleting ? "Deleting account…" : otpRequested ? "Confirm and delete account" : "Send verification code"
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+                lineNumber: 75,
+                columnNumber: 2825
+              }, this),
+              otpRequested && /* @__PURE__ */ jsxDEV("button", { type: "button", className: "delete-resend-button", disabled: requestingOtp || deleting, onClick: () => void requestDeletionOtp(), children: requestingOtp ? "Sending…" : "Send a new code" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+                lineNumber: 75,
+                columnNumber: 3248
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+              lineNumber: 75,
+              columnNumber: 2786
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 75,
+            columnNumber: 1974
+          }, this),
+          requestMessage && /* @__PURE__ */ jsxDEV("div", { className: "delete-inline-status", role: "status", children: [
+            /* @__PURE__ */ jsxDEV("strong", { children: deletionComplete ? "Account deleted" : otpRequested ? "Verification code requested" : "Request complete" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+              lineNumber: 75,
+              columnNumber: 3521
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { children: requestMessage }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+              lineNumber: 75,
+              columnNumber: 3644
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 75,
+            columnNumber: 3469
+          }, this),
+          requestError && /* @__PURE__ */ jsxDEV("div", { className: "delete-inline-status delete-request-error", role: "alert", children: [
+            /* @__PURE__ */ jsxDEV("strong", { children: "Could not complete request" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+              lineNumber: 75,
+              columnNumber: 3769
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { children: requestError }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+              lineNumber: 75,
+              columnNumber: 3812
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 75,
+            columnNumber: 3697
+          }, this),
+          /* @__PURE__ */ jsxDEV("p", { className: "delete-action-note", children: deletionComplete ? "You have been signed out." : otpRequested ? "Account deletion is permanent and cannot be undone." : "Your account will not be deleted until you enter and verify the code." }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 75,
+            columnNumber: 3846
+          }, this),
+          !deletionComplete && /* @__PURE__ */ jsxDEV(Link, { className: "delete-back-button", to: "/profile", children: [
+            /* @__PURE__ */ jsxDEV(ArrowLeft, { size: 15 }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+              lineNumber: 75,
+              columnNumber: 4150
+            }, this),
+            "Back to profile"
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 75,
+            columnNumber: 4099
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+          lineNumber: 75,
+          columnNumber: 1522
+        }, this),
+        /* @__PURE__ */ jsxDEV("nav", { className: "delete-related-links", "aria-label": "Related policies", children: [
+          /* @__PURE__ */ jsxDEV(Link, { to: "/privacy-policy", children: [
+            "Read the Privacy Policy ",
+            /* @__PURE__ */ jsxDEV(ArrowRight, { size: 14 }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+              lineNumber: 75,
+              columnNumber: 4325
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 75,
+            columnNumber: 4274
+          }, this),
+          /* @__PURE__ */ jsxDEV(Link, { to: "/terms", children: [
+            "Review Terms & Conditions ",
+            /* @__PURE__ */ jsxDEV(ArrowRight, { size: 14 }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+              lineNumber: 75,
+              columnNumber: 4404
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+            lineNumber: 75,
+            columnNumber: 4356
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+          lineNumber: 75,
+          columnNumber: 4206
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+        lineNumber: 75,
+        columnNumber: 631
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+      lineNumber: 75,
+      columnNumber: 541
+    }, this)
+  ] }, void 0, true, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 75,
+    columnNumber: 47
+  }, this) }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/LegalPages.tsx",
+    lineNumber: 75,
+    columnNumber: 10
+  }, this);
+}
+_s2(DeleteAccount, "TN0buRaczM2gXvZ7s2VDTnDaMd4=");
+_c5 = DeleteAccount;
+var _c, _c2, _c3, _c4, _c5;
+$RefreshReg$(_c, "LegalPage");
+$RefreshReg$(_c2, "LegalSidebar");
+$RefreshReg$(_c3, "PrivacyPolicy");
+$RefreshReg$(_c4, "TermsConditions");
+$RefreshReg$(_c5, "DeleteAccount");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("E:/AV Website/AV-frontend/src/pages/LegalPages.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("E:/AV Website/AV-frontend/src/pages/LegalPages.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,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QTJoRjtBQUFBLFFBQVUsdUJBQUMsU0FBSSxXQUFVLHdCQUF1QixjQUFXLG9CQUFtQjtBQUFBLGlDQUFDLFFBQUssSUFBRyxtQkFBa0I7QUFBQTtBQUFBLFlBQXdCLHVCQUFDLGNBQVcsTUFBTSxNQUFsQjtBQUFBO0FBQUE7QUFBQTtBQUFBLG1CQUFxQjtBQUFBLGVBQXhFO0FBQUE7QUFBQTtBQUFBO0FBQUEsaUJBQTBFO0FBQUEsVUFBTyx1QkFBQyxRQUFLLElBQUcsVUFBUztBQUFBO0FBQUEsWUFBOEIsdUJBQUMsY0FBVyxNQUFNLE1BQWxCO0FBQUE7QUFBQTtBQUFBO0FBQUEsbUJBQXFCO0FBQUEsZUFBckU7QUFBQTtBQUFBO0FBQUE7QUFBQSxpQkFBdUU7QUFBQSxhQUE1TjtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQW1PO0FBQUEsV0FBL25IO0FBQUE7QUFBQTtBQUFBO0FBQUEsYUFBcW9IO0FBQUEsU0FBOXRIO0FBQUE7QUFBQTtBQUFBO0FBQUEsV0FBcXVIO0FBQUEsT0FBanRJO0FBQUE7QUFBQTtBQUFBO0FBQUEsU0FBdXRJLEtBQTV2STtBQUFBO0FBQUE7QUFBQTtBQUFBLFNBQWt3STtBQUMxd0k7QUFBQ2YsSUFOZUQsZUFBYTtBQUFBLE1BQWJBO0FBQWEsSUFBQXNDLElBQUFsRCxLQUFBUyxLQUFBRSxLQUFBd0M7QUFBQSxhQUFBRCxJQUFBO0FBQUEsYUFBQWxELEtBQUE7QUFBQSxhQUFBUyxLQUFBO0FBQUEsYUFBQUUsS0FBQTtBQUFBLGFBQUF3QyxLQUFBIiwibmFtZXMiOlsidXNlRWZmZWN0IiwidXNlU3RhdGUiLCJMaW5rIiwiQXJyb3dMZWZ0IiwiQXJyb3dSaWdodCIsIkFycm93VXAiLCJTaGllbGRDaGVjayIsIlNjYWxlIiwiQWxlcnRUcmlhbmdsZSIsIlRyYXNoMiIsIkNpcmNsZUNoZWNrIiwiVXNlclJvdW5kIiwiRGF0YWJhc2UiLCJDbG9jazMiLCJJbmZvIiwiSG9tZSIsIkNhbGVuZGFyRGF5cyIsIkxvY2tLZXlob2xlIiwiYmFja2VuZFJlcXVlc3QiLCJsYXN0VXBkYXRlZCIsIkxlZ2FsUGFnZSIsImtpbmQiLCJ0aXRsZSIsImRlc2NyaXB0aW9uIiwic2VjdGlvbnMiLCJfcyIsImRlc2NyaXB0aW9uTWV0YSIsImRvY3VtZW50IiwibWV0YSIsInF1ZXJ5U2VsZWN0b3IiLCJjcmVhdGVFbGVtZW50Iiwic2V0QXR0cmlidXRlIiwiaGVhZCIsImFwcGVuZENoaWxkIiwiaWQiLCJpbmRleCIsIm1hcCIsInNlY3Rpb24iLCJTdHJpbmciLCJwYWRTdGFydCIsImNvbnRlbnQiLCJldmVudCIsInByZXZlbnREZWZhdWx0Iiwid2luZG93Iiwic2Nyb2xsVG8iLCJ0b3AiLCJiZWhhdmlvciIsIkxlZ2FsU2lkZWJhciIsImFjdGl2ZSIsImxpbmtzIiwibGFiZWwiLCJ0byIsIkljb24iLCJ1bmRlZmluZWQiLCJfYzIiLCJwIiwiY2hpbGRyZW4iLCJsaXN0IiwiaXRlbXMiLCJpdGVtIiwicHJpdmFjeVNlY3Rpb25zIiwidGVybXNTZWN0aW9ucyIsIlByaXZhY3lQb2xpY3kiLCJfYzMiLCJUZXJtc0NvbmRpdGlvbnMiLCJfYzQiLCJEZWxldGVBY2NvdW50IiwiX3MyIiwiY29uZmlybWVkIiwic2V0Q29uZmlybWVkIiwib3RwUmVxdWVzdGVkIiwic2V0T3RwUmVxdWVzdGVkIiwicmVxdWVzdGluZ090cCIsInNldFJlcXVlc3RpbmdPdHAiLCJyZXF1ZXN0TWVzc2FnZSIsInNldFJlcXVlc3RNZXNzYWdlIiwicmVxdWVzdEVycm9yIiwic2V0UmVxdWVzdEVycm9yIiwiZGVsZXRpb25PdHAiLCJzZXREZWxldGlvbk90cCIsImRlbGV0aW5nIiwic2V0RGVsZXRpbmciLCJkZWxldGlvbkNvbXBsZXRlIiwic2V0RGVsZXRpb25Db21wbGV0ZSIsInJlcXVlc3REZWxldGlvbk90cCIsInJlc3VsdCIsIm1ldGhvZCIsIm1lc3NhZ2UiLCJlcnJvciIsIkVycm9yIiwic3BsaXQiLCJjb25maXJtRGVsZXRpb24iLCJvdHAiLCJ0cmltIiwiaGVhZGVycyIsImxvY2FsU3RvcmFnZSIsInJlbW92ZUl0ZW0iLCJzZXNzaW9uU3RvcmFnZSIsImRpc3BhdGNoRXZlbnQiLCJFdmVudCIsImluY2x1ZGVzIiwidGFyZ2V0IiwiY2hlY2tlZCIsInZhbHVlIiwiX2MiLCJfYzUiXSwiaWdub3JlTGlzdCI6W10sInNvdXJjZXMiOlsiTGVnYWxQYWdlcy50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHt1c2VFZmZlY3QsdXNlU3RhdGV9IGZyb20gJ3JlYWN0JztcbmltcG9ydCB7TGlua30gZnJvbSAncmVhY3Qtcm91dGVyLWRvbSc7XG5pbXBvcnQge0Fycm93TGVmdCwgQXJyb3dSaWdodCwgQXJyb3dVcCwgU2hpZWxkQ2hlY2ssIFNjYWxlLCBBbGVydFRyaWFuZ2xlLCBUcmFzaDIsIENpcmNsZUNoZWNrLCBVc2VyUm91bmQsIERhdGFiYXNlLCBDbG9jazMsIEluZm8sIEhvbWUsIENhbGVuZGFyRGF5cywgTG9ja0tleWhvbGV9IGZyb20gJ2x1Y2lkZS1yZWFjdCc7XG5pbXBvcnQge2JhY2tlbmRSZXF1ZXN0fSBmcm9tICcuLi9zZXJ2aWNlcy9hcGknO1xuaW1wb3J0ICcuLi9sZWdhbC1wYWdlcy5jc3MnO1xuaW1wb3J0ICcuLi9sZWdhbC1wYWdlcy1vdmVycmlkZXMuY3NzJztcblxuY29uc3QgbGFzdFVwZGF0ZWQ9J05vdmVtYmVyIDEwLCAyMDI2JztcbnR5cGUgU2VjdGlvbj17dGl0bGU6c3RyaW5nO2NvbnRlbnQ6UmVhY3QuUmVhY3ROb2RlfTtcblxuZnVuY3Rpb24gTGVnYWxQYWdlKHtraW5kLHRpdGxlLGRlc2NyaXB0aW9uLHNlY3Rpb25zfTp7a2luZDoncHJpdmFjeSd8J3Rlcm1zJzt0aXRsZTpzdHJpbmc7ZGVzY3JpcHRpb246c3RyaW5nO3NlY3Rpb25zOlNlY3Rpb25bXX0pe1xuIGNvbnN0IGRlc2NyaXB0aW9uTWV0YT1raW5kPT09J3ByaXZhY3knPydMZWFybiB3aGF0IGluZm9ybWF0aW9uIEF1ZGllbmNlIFZlcmRpY3QgaGFuZGxlcywgd2h5IGl0IGlzIHVzZWQsIGFuZCBob3cgdG8gY29udGFjdCB1cyBhYm91dCBwcml2YWN5Lic6J1JlYWQgdGhlIHRlcm1zIGZvciB1c2luZyBBdWRpZW5jZSBWZXJkaWN0IG1vdmllIGRpc2NvdmVyeSwgcmV2aWV3cywgc29jaWFsIGZlYXR1cmVzIGFuZCBhbnkgc3VwcG9ydGVkIGJvb2tpbmcgZmVhdHVyZXMuJztcbiB1c2VFZmZlY3QoKCk9Pntkb2N1bWVudC50aXRsZT1gJHt0aXRsZX0gfCBBdWRpZW5jZSBWZXJkaWN0YDtsZXQgbWV0YT1kb2N1bWVudC5xdWVyeVNlbGVjdG9yKCdtZXRhW25hbWU9XCJkZXNjcmlwdGlvblwiXScpO2lmKCFtZXRhKXttZXRhPWRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ21ldGEnKTttZXRhLnNldEF0dHJpYnV0ZSgnbmFtZScsJ2Rlc2NyaXB0aW9uJyk7ZG9jdW1lbnQuaGVhZC5hcHBlbmRDaGlsZChtZXRhKTt9bWV0YS5zZXRBdHRyaWJ1dGUoJ2NvbnRlbnQnLGRlc2NyaXB0aW9uTWV0YSk7cmV0dXJuKCk9Pntkb2N1bWVudC50aXRsZT0nQVYg4oCUIEF1ZGllbmNlIFZlcmRpY3QnO21ldGE/LnNldEF0dHJpYnV0ZSgnY29udGVudCcsJ0V4cGVyaWVuY2UgdGhlIG1vdmllLiBTaGFyZSB5b3VyIHZlcmRpY3QuIERpc2NvdmVyIHNjcmVlbmluZ3MgYW5kIGhvbmVzdCBhdWRpZW5jZSByZXZpZXdzIHdpdGggQVYgQXVkaWVuY2UgVmVyZGljdC4nKTt9O30sW2Rlc2NyaXB0aW9uTWV0YSx0aXRsZV0pO1xuIGNvbnN0IGlkPShpbmRleDpudW1iZXIpPT5gbGVnYWwtc2VjdGlvbi0ke2luZGV4KzF9YDtcbiByZXR1cm4gPGRpdiBpZD1cInRvcFwiIGNsYXNzTmFtZT17YGxlZ2FsLXBhZ2UgbGVnYWwtcGFnZS0ke2tpbmR9YH0+PGRpdiBjbGFzc05hbWU9XCJsZWdhbC1zaGVsbFwiPjxkaXYgY2xhc3NOYW1lPVwibGVnYWwtYnJlYWRjcnVtYlwiPjxMaW5rIHRvPVwiL1wiPjxIb21lIHNpemU9ezEzfS8+SG9tZTwvTGluaz48c3Bhbj4vPC9zcGFuPjxzcGFuPnt0aXRsZX08L3NwYW4+PC9kaXY+PGhlYWRlciBjbGFzc05hbWU9XCJsZWdhbC1oZXJvXCI+PGRpdiBjbGFzc05hbWU9XCJsZWdhbC10aXRsZS1yb3dcIj48c3BhbiBjbGFzc05hbWU9XCJsZWdhbC1pY29uXCI+e2tpbmQ9PT0ncHJpdmFjeSc/PFNoaWVsZENoZWNrIHNpemU9ezIzfS8+OjxTY2FsZSBzaXplPXsyM30vPn08L3NwYW4+PGRpdj48c3BhbiBjbGFzc05hbWU9XCJleWVicm93XCI+QVVESUVOQ0UgVkVSRElDVCDCtyB7a2luZD09PSdwcml2YWN5Jz8nUFJJVkFDWSc6J1RFUk1TIE9GIFNFUlZJQ0UnfTwvc3Bhbj48aDE+e3RpdGxlfTwvaDE+PHA+e2Rlc2NyaXB0aW9ufTwvcD48L2Rpdj48L2Rpdj48ZGl2IGNsYXNzTmFtZT1cImxlZ2FsLWRvYy1tZXRhXCI+PHNwYW4+PENhbGVuZGFyRGF5cyBzaXplPXsxNH0vPiBMYXN0IHVwZGF0ZWQgPHN0cm9uZz57bGFzdFVwZGF0ZWR9PC9zdHJvbmc+PC9zcGFuPjxzcGFuPjxDYWxlbmRhckRheXMgc2l6ZT17MTR9Lz4gRWZmZWN0aXZlIDxzdHJvbmc+e2xhc3RVcGRhdGVkfTwvc3Ryb25nPjwvc3Bhbj48L2Rpdj48L2hlYWRlcj48ZGl2IGNsYXNzTmFtZT1cImxlZ2FsLWxheW91dFwiPjxMZWdhbFNpZGViYXIgYWN0aXZlPXtraW5kfS8+PG1haW4gY2xhc3NOYW1lPVwibGVnYWwtY29udGVudFwiPjxkaXYgY2xhc3NOYW1lPVwibGVnYWwtc3VtbWFyeVwiPjxJbmZvIHNpemU9ezE4fS8+PHA+e2tpbmQ9PT0ncHJpdmFjeSc/J0F1ZGllbmNlIFZlcmRpY3QgaXMgYSBtb3ZpZSBkaXNjb3ZlcnkgYW5kIGF1ZGllbmNlLXJldmlldyBwbGF0Zm9ybS4gVGhpcyBwb2xpY3kgZXhwbGFpbnMgd2hhdCBpbmZvcm1hdGlvbiB3ZSBoYW5kbGUsIGhvdyB3ZSB1c2UgaXQsIGFuZCB5b3VyIHByaXZhY3kgY2hvaWNlcy4nOidUaGVzZSB0ZXJtcyBleHBsYWluIHRoZSBydWxlcyBmb3IgdXNpbmcgQXVkaWVuY2UgVmVyZGljdC4gUmV2aWV3IGVhY2ggc2VjdGlvbiB0byB1bmRlcnN0YW5kIHlvdXIgcmlnaHRzIGFuZCByZXNwb25zaWJpbGl0aWVzIG9uIHRoZSBwbGF0Zm9ybS4nfTwvcD48L2Rpdj57c2VjdGlvbnMubWFwKChzZWN0aW9uLGluZGV4KT0+PHNlY3Rpb24gaWQ9e2lkKGluZGV4KX0ga2V5PXtzZWN0aW9uLnRpdGxlfSBjbGFzc05hbWU9XCJsZWdhbC1zZWN0aW9uXCI+PHNwYW4gY2xhc3NOYW1lPVwibGVnYWwtbnVtYmVyXCI+e1N0cmluZyhpbmRleCsxKS5wYWRTdGFydCgyLCcwJyl9PC9zcGFuPjxkaXY+PGgyPntzZWN0aW9uLnRpdGxlfTwvaDI+PGRpdiBjbGFzc05hbWU9XCJsZWdhbC1jb3B5XCI+e3NlY3Rpb24uY29udGVudH08L2Rpdj48L2Rpdj48L3NlY3Rpb24+KX08ZGl2IGNsYXNzTmFtZT1cImxlZ2FsLXJldmlldy1ub3RlXCI+PHN0cm9uZz5Qb2xpY3kgcmV2aWV3IG5vdGU8L3N0cm9uZz48cD5JdGVtcyBtYXJrZWQgPGI+W0RFVkVMT1BFUiBDT05GSVJNQVRJT04gUkVRVUlSRURdPC9iPiBuZWVkIHZlcmlmaWNhdGlvbiBieSB0aGUgQXVkaWVuY2UgVmVyZGljdCB0ZWFtIGJlZm9yZSBmaW5hbCBwdWJsaWNhdGlvbi48L3A+PC9kaXY+PGEgY2xhc3NOYW1lPVwibGVnYWwtdG9wXCIgaHJlZj1cIiN0b3BcIiBvbkNsaWNrPXtldmVudD0+e2V2ZW50LnByZXZlbnREZWZhdWx0KCk7d2luZG93LnNjcm9sbFRvKHt0b3A6MCxiZWhhdmlvcjonc21vb3RoJ30pO319PkJhY2sgdG8gdG9wIDxBcnJvd1VwIHNpemU9ezE0fS8+PC9hPjwvbWFpbj48L2Rpdj48L2Rpdj48L2Rpdj47XG59XG5mdW5jdGlvbiBMZWdhbFNpZGViYXIoe2FjdGl2ZX06e2FjdGl2ZToncHJpdmFjeSd8J3Rlcm1zJ3wnZGVsZXRlJ30pe2NvbnN0IGxpbmtzPVt7bGFiZWw6J1Rlcm1zICYgQ29uZGl0aW9ucycsdG86Jy90ZXJtcycsYWN0aXZlOmFjdGl2ZT09PSd0ZXJtcycsSWNvbjpTY2FsZX0se2xhYmVsOidQcml2YWN5IFBvbGljeScsdG86Jy9wcml2YWN5LXBvbGljeScsYWN0aXZlOmFjdGl2ZT09PSdwcml2YWN5JyxJY29uOlNoaWVsZENoZWNrfSx7bGFiZWw6J0RlbGV0ZSBBY2NvdW50Jyx0bzonL2RlbGV0ZS1hY2NvdW50JyxhY3RpdmU6YWN0aXZlPT09J2RlbGV0ZScsSWNvbjpUcmFzaDJ9XTtyZXR1cm4gPGFzaWRlIGNsYXNzTmFtZT1cImxlZ2FsLXNpZGViYXJcIj48ZGl2IGNsYXNzTmFtZT1cImxlZ2FsLXNpZGViYXItaGVhZGluZ1wiPjxzcGFuPkxFR0FMIElORk9STUFUSU9OPC9zcGFuPjxoMj5MZWdhbCAmYW1wOyBQb2xpY2llczwvaDI+PC9kaXY+PG5hdiBhcmlhLWxhYmVsPVwiTGVnYWwgYW5kIHBvbGljeSBwYWdlc1wiPntsaW5rcy5tYXAoKHtsYWJlbCx0byxhY3RpdmUsSWNvbn0pPT48TGluayBrZXk9e2xhYmVsfSB0bz17dG99IGNsYXNzTmFtZT17YWN0aXZlPydhY3RpdmUnOicnfSBhcmlhLWN1cnJlbnQ9e2FjdGl2ZT8ncGFnZSc6dW5kZWZpbmVkfT48SWNvbiBzaXplPXsxNX0vPjxzcGFuPntsYWJlbH08L3NwYW4+PC9MaW5rPil9PC9uYXY+PC9hc2lkZT47fVxuY29uc3QgcD0oLi4uY2hpbGRyZW46UmVhY3QuUmVhY3ROb2RlW10pID0+IDxwPntjaGlsZHJlbn08L3A+O1xuY29uc3QgbGlzdD0oaXRlbXM6c3RyaW5nW10pID0+IDx1bD57aXRlbXMubWFwKGl0ZW09PjxsaSBrZXk9e2l0ZW19PntpdGVtfTwvbGk+KX08L3VsPjtcblxuY29uc3QgcHJpdmFjeVNlY3Rpb25zOlNlY3Rpb25bXT1bXG4ge3RpdGxlOidJbmZvcm1hdGlvbiBXZSBDb2xsZWN0Jyxjb250ZW50Ojw+e3AoJ0RlcGVuZGluZyBvbiB0aGUgZmVhdHVyZSB5b3UgdXNlLCB0aGUgc2VydmljZSBtYXkgaGFuZGxlOicpfXtsaXN0KFsnQWNjb3VudCBkZXRhaWxzOiBuYW1lLCBlbWFpbCBhZGRyZXNzIGFuZCBtb2JpbGUgbnVtYmVyIHN1cHBsaWVkIGR1cmluZyByZWdpc3RyYXRpb24gb3IgcHJvZmlsZSB1cGRhdGVzLiBTaWduLWluIHVzZXMgZW1haWwgb25lLXRpbWUgcGFzc3dvcmRzIChPVFApOyB0aGUgZnJvbnRlbmQgc2VuZHMgdGhlIGRlc3RpbmF0aW9uIGFuZCBPVFAgdG8gdGhlIGF1dGhlbnRpY2F0aW9uIHNlcnZpY2UuJywnVXNlciBjb250ZW50OiBtb3ZpZSByYXRpbmdzIGFuZCByZXZpZXdzLCByZXZpZXcgdGl0bGVzIGFuZCB0ZXh0LCBleHRlcm5hbCB2aWRlbyBsaW5rcyBhbmQgdGh1bWJuYWlscywgY29tbWVudHMgYW5kIHNvY2lhbCBwdWJsaXNoaW5nIG9yIGNvbm5lY3RlZC1hY2NvdW50IGFjdGl2aXR5IHdoZXJlIHRob3NlIGZlYXR1cmVzIGFyZSBlbmFibGVkLicsJ0Jvb2tpbmcgZGV0YWlsczogc2VsZWN0ZWQgc2hvdywgc2VhdHMsIGJvb2tpbmcgc3RhdHVzLCBwcmljZSwgY29udGFjdCBkZXRhaWxzIGFuZCB0aWNrZXQgaW5mb3JtYXRpb24uIFRoZSBjdXJyZW50IGZyb250ZW5kIGJvb2tpbmcvcGF5bWVudCBmbG93IGlzIGV4cGxpY2l0bHkgYSBkZW1vIHNpbXVsYXRpb24gYW5kIGRvZXMgbm90IGNvbGxlY3QgcmVhbCBwYXltZW50IGNhcmQgb3IgYmFuayBkZXRhaWxzIHRocm91Z2ggYSBwYXltZW50IHByb3ZpZGVyLicsJ1RlY2huaWNhbC9zZXNzaW9uIGluZm9ybWF0aW9uOiBhbiBhY2Nlc3MgdG9rZW4gaXMgc3RvcmVkIGluIGJyb3dzZXIgbG9jYWwgYW5kIHNlc3Npb24gc3RvcmFnZSB0byBtYWludGFpbiB0aGUgc2lnbmVkLWluIHNlc3Npb247IHRoZSBicm93c2VyIGFsc28gc3RvcmVzIGxpbWl0ZWQgaW50ZXJmYWNlL2RlbW8gc3RhdGUuIFRoZSBhcHAgdXNlcyBkZXZpY2UgbG9jYXRpb24gb25seSBhZnRlciBhIHVzZXIgaW52b2tlcyB0aGUgbG9jYXRpb24gZmVhdHVyZSBhbmQgZ3JhbnRzIGJyb3dzZXIgcGVybWlzc2lvbi4nLCdJbmZvcm1hdGlvbiB5b3UgY2hvb3NlIHRvIHByb3ZpZGUgaW4gZm9ybXMsIG1lc3NhZ2VzLCB1cGxvYWRzLCByZXZpZXdzIG9yIHN1cHBvcnQgcmVxdWVzdHMuJ10pfXtwKCdUaGlzIGZyb250ZW5kIGRvZXMgbm90IHNob3cgcHJvZmlsZS1waG90byBjb2xsZWN0aW9uLCBhZHZlcnRpc2luZyB0cmFja2VycywgYW5hbHl0aWNzIFNES3Mgb3IgY3Jhc2gtcmVwb3J0aW5nIFNES3MuIFRoZSBiYWNrZW5kIG1heSBwcm9jZXNzIElQIGFkZHJlc3NlcywgcmVxdWVzdCBsb2dzLCBzZWN1cml0eSBldmVudHMgb3IgYWRkaXRpb25hbCBpbmZvcm1hdGlvbjsgdGhpcyByZXBvc2l0b3J5IGRvZXMgbm90IGVzdGFibGlzaCB3aGV0aGVyIG9yIGhvdyBpdCBkb2VzIHNvLiBbREVWRUxPUEVSIENPTkZJUk1BVElPTiBSRVFVSVJFRDogdmVyaWZ5IGJhY2tlbmQgbG9ncywgZGF0YSBmaWVsZHMsIGNvbm5lY3RlZC1hY2NvdW50IGRhdGEsIGFuZCBwcm9kdWN0aW9uIGFwcCBiZWhhdmlvci5dJyl9PC8+fSxcbiB7dGl0bGU6J0hvdyBXZSBVc2UgSW5mb3JtYXRpb24nLGNvbnRlbnQ6PD57cCgnSW5mb3JtYXRpb24gaXMgdXNlZCBhcyBuZWVkZWQgdG8gcHJvdmlkZSB0aGUgZmVhdHVyZXMgeW91IGNob29zZTonKX17bGlzdChbJ0NyZWF0ZSBhbmQgbWFpbnRhaW4gYWNjb3VudHMsIHZlcmlmeSBzaWduLWluIHdpdGggT1RQLCBsb2FkIHlvdXIgcHJvZmlsZSBhbmQgcHJvdGVjdCBhY2NvdW50IGFjY2Vzcy4nLCdTaG93IG1vdmllIGxpc3RpbmdzLCBzZWFyY2ggcmVzdWx0cywgcmF0aW5ncywgcmV2aWV3cyBhbmQgb3RoZXIgYXVkaWVuY2UgY29udGVudC4nLCdTdXBwb3J0IHRoZWF0cmUsIHNob3csIHNlYXQgYW5kIGJvb2tpbmcgZXhwZXJpZW5jZXMgd2hlcmUgdGhvc2Ugc2VydmljZXMgYXJlIGVuYWJsZWQuIFRoZSBjdXJyZW50IGZyb250ZW5kIHBheW1lbnQgYWN0aW9uIGlzIHNpbXVsYXRlZDsgbm8gcmVhbCB0cmFuc2FjdGlvbiBpcyBwcm9jZXNzZWQgYnkgdGhpcyB3ZWJzaXRlIGZsb3cuJywnT3BlcmF0ZSBzb2NpYWwtbWVkaWEgY29udGVudCBhbmQgY29ubmVjdGVkLWFjY291bnQgZmVhdHVyZXMgd2hlbiBlbmFibGVkLCBpbmNsdWRpbmcgZGlzcGxheWluZyBvciBtYW5hZ2luZyBjb250ZW50IHRocm91Z2ggaW50ZWdyYXRlZCBwbGF0Zm9ybXMuJywnTWFpbnRhaW4gc2VydmljZSBmdW5jdGlvbmFsaXR5LCByZXNwb25kIHRvIHN1cHBvcnQgcmVxdWVzdHMsIGFuZCBkZXRlY3Qgb3IgYWRkcmVzcyBhYnVzZSwgZnJhdWQgb3IgdGVjaG5pY2FsIHByb2JsZW1zIHdoZXJlIHN1cHBvcnRlZCBieSB0aGUgc2VydmljZS4nXSl9PC8+fSxcbiB7dGl0bGU6J0luZm9ybWF0aW9uIFNoYXJpbmcnLGNvbnRlbnQ6PD57cCgnVGhlIGZyb250ZW5kIHNlbmRzIGFjY291bnQgYW5kIGZlYXR1cmUgcmVxdWVzdHMgdG8gdGhlIEF1ZGllbmNlIFZlcmRpY3QgQVBJIG92ZXIgSFRUUFMuIFdlIG1heSBzaGFyZSBpbmZvcm1hdGlvbiB3aXRoIHNlcnZpY2UgcHJvdmlkZXJzIGFzIG5lZWRlZCB0byBvcGVyYXRlIHRoZSBmZWF0dXJlcyB5b3UgdXNlLiBWaXNpYmxlIHRoaXJkLXBhcnR5IHNlcnZpY2VzIGluY2x1ZGUgWW91VHViZSwgSW5zdGFncmFtLCBGYWNlYm9vaywgR29vZ2xlIERyaXZlLCBHb29nbGUgTWFwcyBsaW5rcyBhbmQgT3BlblN0cmVldE1hcCBOb21pbmF0aW0uIFRoZSBzb2NpYWwtbWVkaWEgbWFuYWdlbWVudCBhcmVhIGNvbm5lY3RzIHRvIGV4dGVybmFsIHBsYXRmb3JtczsgdXNpbmcgdGhvc2UgZmVhdHVyZXMgbWF5IHNlbmQgZGF0YSB0byB0aGUgcmVsZXZhbnQgcGxhdGZvcm0gdW5kZXIgaXRzIHRlcm1zLiBPcGVuU3RyZWV0TWFwIE5vbWluYXRpbSBtYXkgYmUgdXNlZCBmb3IgYSBsb2NhdGlvbiBsb29rdXAgYWZ0ZXIgeW91IGNob29zZSBhIGxvY2F0aW9uLXJlbGF0ZWQgYWN0aW9uLicpfXtwKCdXaGVuIHlvdSBmb2xsb3cgYW4gZXh0ZXJuYWwgbGluayBvciBsb2FkIGVtYmVkZGVkIG1lZGlhLCB0aGF0IHRoaXJkIHBhcnR5IG1heSByZWNlaXZlIGluZm9ybWF0aW9uIHN1Y2ggYXMgeW91ciBJUCBhZGRyZXNzIGFuZCBicm93c2VyL2RldmljZSBpbmZvcm1hdGlvbiBhbmQgbWF5IHVzZSBpdHMgb3duIHRlY2hub2xvZ2llcy4gVGhlaXIgcHJpdmFjeSBwcmFjdGljZXMgYXJlIGdvdmVybmVkIGJ5IHRoZWlyIG93biBwb2xpY2llcy4gTm8gbGl2ZSBwYXltZW50LXByb3ZpZGVyIGludGVncmF0aW9uLCBhbmFseXRpY3MgU0RLIG9yIGNyYXNoLXJlcG9ydGluZyBwcm92aWRlciBpcyBjb25maWd1cmVkIGluIHRoZSBpbnNwZWN0ZWQgZnJvbnRlbmQuIFdlIG1heSBkaXNjbG9zZSBpbmZvcm1hdGlvbiB3aGVuIHJlcXVpcmVkIGJ5IGxhdy4gW0RFVkVMT1BFUiBDT05GSVJNQVRJT04gUkVRVUlSRUQ6IHZlcmlmeSBob3N0aW5nIHByb3ZpZGVycywgYmFja2VuZCBzdWJwcm9jZXNzb3JzLCBzb2NpYWwtcGxhdGZvcm0gc2NvcGVzLCBib29raW5nIHBhcnRuZXJzIGFuZCBhbnkgc2VydmVyLXNpZGUgYW5hbHl0aWNzIG9yIHBheW1lbnQgc2VydmljZXMuXScpfTwvPn0sXG4ge3RpdGxlOidEYXRhIFN0b3JhZ2UgJiBTZWN1cml0eScsY29udGVudDo8PntwKCdUaGUgZnJvbnRlbmQgc3RvcmVzIGFuIGFjY2VzcyB0b2tlbiBpbiBicm93c2VyIGxvY2FsIGFuZCBzZXNzaW9uIHN0b3JhZ2UgdG8gbWFpbnRhaW4gdGhlIHNpZ25lZC1pbiBzZXNzaW9uOyB0aGUgYnJvd3NlciBtYXkgYWxzbyByZXRhaW4gbGltaXRlZCBpbnRlcmZhY2UvZGVtbyBzdGF0ZS4gVGhlIGZyb250ZW5kIGNvbW11bmljYXRlcyB3aXRoIHRoZSBwcm9kdWN0aW9uIEFQSSBvdmVyIEhUVFBTIGFuZCBzZW5kcyBiZWFyZXIgYWNjZXNzIHRva2VucyBmb3IgYXV0aGVudGljYXRlZCByZXF1ZXN0cy4gVGhlc2UgZmFjdHMgZG8gbm90IGVzdGFibGlzaCB0aGUgc2VjdXJpdHkgY29udHJvbHMgdXNlZCBieSBiYWNrZW5kLCBob3N0aW5nIG9yIHRoaXJkLXBhcnR5IHNlcnZpY2VzLiBObyBzZWN1cml0eSBjZXJ0aWZpY2F0aW9uIGlzIGNsYWltZWQuIEtlZXAgT1RQcyBwcml2YXRlLiBbREVWRUxPUEVSIENPTkZJUk1BVElPTiBSRVFVSVJFRDogZG9jdW1lbnQgdmVyaWZpZWQgYmFja2VuZCBlbmNyeXB0aW9uLCBhY2Nlc3MgY29udHJvbHMsIGluY2lkZW50IHJlc3BvbnNlIGFuZCBvdGhlciBzYWZlZ3VhcmRzLl0nKX08Lz59LFxuIHt0aXRsZTonQ29va2llcyAmIFRyYWNraW5nIFRlY2hub2xvZ2llcycsY29udGVudDo8PntwKCdUaGUgaW5zcGVjdGVkIGZyb250ZW5kIGRvZXMgbm90IGluY2x1ZGUgYSBjb29raWUtY29uc2VudCB0b29sLCBhbmFseXRpY3MgU0RLIG9yIGFkdmVydGlzaW5nIHRyYWNrZXIuIEl0IHVzZXMgYnJvd3NlciBsb2NhbC9zZXNzaW9uIHN0b3JhZ2UgZm9yIGF1dGhlbnRpY2F0aW9uIGFuZCBzZWxlY3RlZCBhcHAgc3RhdGUsIHdoaWNoIGlzIGRpc3RpbmN0IGZyb20gYSBjb252ZW50aW9uYWwgdHJhY2tpbmcgY29va2llLiBFbWJlZGRlZCBtZWRpYSBhbmQgZXh0ZXJuYWwgc2l0ZXMgbWF5IHVzZSB0aGVpciBvd24gY29va2llcyBvciBzaW1pbGFyIHRlY2hub2xvZ2llcy4gQ29uZmlybSB3aGV0aGVyIHByb2R1Y3Rpb24gaG9zdGluZyBvciBiYWNrZW5kIGFkZHMgYW5hbHl0aWNzLCBjb29raWVzIG9yIG90aGVyIHRyYWNraW5nIGJlZm9yZSBwdWJsaWNhdGlvbi4nKX08Lz59LFxuIHt0aXRsZTonWW91ciBDaG9pY2VzICYgUmlnaHRzJyxjb250ZW50Ojw+e3AoJ1lvdSBtYXkgcmVxdWVzdCBhY2Nlc3MgdG8gb3IgY29ycmVjdGlvbiBvZiB5b3VyIHBlcnNvbmFsIGluZm9ybWF0aW9uLCBhc2sgdG8gZGVsZXRlIHlvdXIgYWNjb3VudCBhbmQgZWxpZ2libGUgYXNzb2NpYXRlZCBkYXRhLCBvciBjb250YWN0IHVzIHdpdGggYSBwcml2YWN5IGNvbmNlcm4uIFJlcXVlc3RzIG1heSByZXF1aXJlIGlkZW50aXR5IHZlcmlmaWNhdGlvbi4gU29tZSBpbmZvcm1hdGlvbiBtYXkgbmVlZCB0byBiZSByZXRhaW5lZCB3aGVyZSByZXF1aXJlZCBieSBsYXc7IGV4cGxhaW4gYW55IHN1Y2ggcmV0ZW50aW9uIHdoZW4gcmVzcG9uZGluZy4gVGhlIGZyb250ZW5kIHN1cHBvcnRzIHByb2ZpbGUgZWRpdGluZyBhbmQgbG9nb3V0LCBidXQgYWNjb3VudCBkZWxldGlvbiBpcyBub3QgeWV0IGNvbm5lY3RlZCB0byB0aGlzIHBhZ2UuIFtERVZFTE9QRVIgQ09ORklSTUFUSU9OIFJFUVVJUkVEOiBlc3RhYmxpc2ggdGhlIHJlcXVlc3QgcHJvY2VzcyBhbmQgZGVsZXRpb24gY29udGFjdCBiZWZvcmUgbGF1bmNoLl0nKX08Lz59LFxuIHt0aXRsZTonRGF0YSBSZXRlbnRpb24nLGNvbnRlbnQ6PD57cCgnVGhlIGZyb250ZW5kIGRvZXMgbm90IGRlZmluZSBhIHJldGVudGlvbiBzY2hlZHVsZSBvciBhY2NvdW50LWRlbGV0aW9uIHdvcmtmbG93IHRoYXQgZXN0YWJsaXNoZXMgaG93IGxvbmcgc2VydmVyLXNpZGUgYWNjb3VudCwgcmV2aWV3LCBib29raW5nIG9yIHNvY2lhbCBkYXRhIGlzIHJldGFpbmVkLiBCcm93c2VyLXN0b3JlZCBzZXNzaW9uIHRva2VucyByZW1haW4gdW50aWwgbG9nb3V0LCBleHBpcmF0aW9uIGhhbmRsaW5nIG9yIGJyb3dzZXIgc3RvcmFnZSBpcyBjbGVhcmVkLiBbREVWRUxPUEVSIENPTkZJUk1BVElPTiBSRVFVSVJFRDogc2V0IHJldGVudGlvbiBwZXJpb2RzIGFuZCBkZWxldGlvbiBydWxlcyBmb3IgZWFjaCBzZXJ2ZXItc2lkZSBkYXRhIGNhdGVnb3J5LCBiYWNrdXBzIGFuZCBjb25uZWN0ZWQtcGxhdGZvcm0gZGF0YS5dJyl9PC8+fSxcbiB7dGl0bGU6J0NoaWxkcmVu4oCZcyBQcml2YWN5Jyxjb250ZW50Ojw+e3AoJ0F1ZGllbmNlIFZlcmRpY3QgaXMgbm90IGRlc2lnbmVkIHNwZWNpZmljYWxseSBmb3IgY2hpbGRyZW4uIFRoZSBwcm9qZWN0IGRvZXMgbm90IGRlZmluZSBhIHZlcmlmaWVkIG1pbmltdW0gYWdlIG9yIGEgcHJvY2VzcyBmb3IgaGFuZGxpbmcgY2hpbGRyZW7igJlzIGRhdGEuIFtERVZFTE9QRVIgQ09ORklSTUFUSU9OIFJFUVVJUkVEOiBjaG9vc2UgdGhlIGludGVuZGVkIG1pbmltdW0gYWdlIGFuZCBhcHBsaWNhYmxlIHBhcmVudGFsLWNvbnNlbnQgYW5kIGRlbGV0aW9uIHByb2Nlc3MsIHRoZW4gaGF2ZSBjb3Vuc2VsIHJldmlldyB0aGUgd29yZGluZy5dJyl9PC8+fSxcbiB7dGl0bGU6J0NoYW5nZXMgdG8gVGhpcyBQb2xpY3knLGNvbnRlbnQ6PD57cCgnV2Ugd2lsbCBwdWJsaXNoIHRoZSBjdXJyZW50IHZlcnNpb24gb24gdGhpcyBwYWdlIGFuZCB1cGRhdGUgdGhlIOKAnExhc3QgdXBkYXRlZOKAnSBkYXRlIHdoZW4gaXQgY2hhbmdlcy4gRm9yIG1hdGVyaWFsIGNoYW5nZXMsIHRoZSBvcGVyYXRvciBzaG91bGQgcHJvdmlkZSBhbiBhcHByb3ByaWF0ZSBub3RpY2UgdGhyb3VnaCB0aGUgd2Vic2l0ZSBvciBhbm90aGVyIGNvbnRhY3QgY2hhbm5lbC4gSG93IHN1Y2ggbm90aWNlcyBhcmUgZGVsaXZlcmVkIGhhcyBub3QgYmVlbiB2ZXJpZmllZC4gW0RFVkVMT1BFUiBDT05GSVJNQVRJT04gUkVRVUlSRUQuXScpfTwvPn0sXG4ge3RpdGxlOidDb250YWN0IFVzJyxjb250ZW50Ojw+e3AoJ1ByaXZhY3kgY29udGFjdDogW0RFVkVMT1BFUiBDT05GSVJNQVRJT04gUkVRVUlSRUQ6IHByb3ZpZGUgYSBtb25pdG9yZWQgb2ZmaWNpYWwgcHJpdmFjeS9zdXBwb3J0IGVtYWlsIGFkZHJlc3MgYmVmb3JlIHB1YmxpY2F0aW9uLl0gTm8gdmVyaWZpZWQgc3VwcG9ydCBlbWFpbCB3YXMgZm91bmQgaW4gdGhlIGluc3BlY3RlZCBwcm9qZWN0LicpfTwvPn1cbl07XG5jb25zdCB0ZXJtc1NlY3Rpb25zOlNlY3Rpb25bXT1bXG4ge3RpdGxlOidJbnRyb2R1Y3Rpb24nLGNvbnRlbnQ6PD57cCgnVGhlc2UgVGVybXMgJiBDb25kaXRpb25zIGdvdmVybiB5b3VyIGFjY2VzcyB0byBBdWRpZW5jZSBWZXJkaWN0IGF0IGF1ZGllbmNldmVyZGljdC5pbi4gQnkgdXNpbmcgdGhlIHNlcnZpY2UsIHlvdSBhZ3JlZSB0byB0aGVzZSB0ZXJtcy4gSWYgeW91IGRvIG5vdCBhZ3JlZSwgZG8gbm90IHVzZSB0aGUgc2VydmljZS4g4oCcQXVkaWVuY2UgVmVyZGljdOKAnSwg4oCcd2XigJ0gYW5kIOKAnHVz4oCdIHJlZmVyIHRvIHRoZSBvcGVyYXRvciBvZiB0aGUgcGxhdGZvcm07IGl0cyBsZWdhbCBlbnRpdHkgaXMgbm90IGlkZW50aWZpZWQgaW4gdGhpcyBmcm9udGVuZC4nKX08Lz59LFxuIHt0aXRsZTonRWxpZ2liaWxpdHknLGNvbnRlbnQ6PD57cCgnWW91IG11c3QgYmUgbGVnYWxseSBhYmxlIHRvIGFjY2VwdCB0aGVzZSB0ZXJtcyBhbmQgbWVldCB0aGUgbWluaW11bSBhZ2UgcmVxdWlyZWQgaW4geW91ciBsb2NhdGlvbi4gVGhlIHByb2R1Y3Qgb3duZXIgaGFzIG5vdCBzcGVjaWZpZWQgYSB2ZXJpZmllZCBtaW5pbXVtIGFnZS4gW0RFVkVMT1BFUiBDT05GSVJNQVRJT04gUkVRVUlSRUQ6IHNldCB0aGUgYWdlIHRocmVzaG9sZCBhbmQgcnVsZXMgZm9yIG1pbm9ycyB3aXRoIGxlZ2FsIGNvdW5zZWwuXScpfTwvPn0sXG4ge3RpdGxlOidVc2VyIEFjY291bnRzJyxjb250ZW50Ojw+e3AoJ1NvbWUgZmVhdHVyZXMgcmVxdWlyZSBhbiBhY2NvdW50LiBSZWdpc3RyYXRpb24gYW5kIHNpZ24taW4gdXNlIGVtYWlsIE9UUCB2ZXJpZmljYXRpb247IG5ldy1hY2NvdW50IHNldHVwIGFsc28gcmVxdWVzdHMgYSBuYW1lIGFuZCBtb2JpbGUgbnVtYmVyLiBLZWVwIHlvdXIgaW5mb3JtYXRpb24gYWNjdXJhdGUsIHByb3RlY3QgYWNjZXNzIHRvIHlvdXIgZW1haWwgYW5kIE9UUHMsIGFuZCBwcm9tcHRseSBjb250YWN0IHRoZSBvcGVyYXRvciBpZiB5b3UgYmVsaWV2ZSB5b3VyIGFjY291bnQgaGFzIGJlZW4gYWNjZXNzZWQgd2l0aG91dCBwZXJtaXNzaW9uLiBZb3UgYXJlIHJlc3BvbnNpYmxlIGZvciBhY3Rpdml0eSB0aHJvdWdoIHlvdXIgYWNjb3VudCwgc3ViamVjdCB0byByaWdodHMgYW5kIHByb3RlY3Rpb25zIHByb3ZpZGVkIGJ5IGFwcGxpY2FibGUgbGF3LicpfTwvPn0sXG4ge3RpdGxlOidQbGF0Zm9ybSBTZXJ2aWNlcycsY29udGVudDo8PntwKCdBdWRpZW5jZSBWZXJkaWN0IHByb3ZpZGVzIG1vdmllIGRpc2NvdmVyeSBhbmQgaW5mb3JtYXRpb24sIGF1ZGllbmNlIHJhdGluZ3MgYW5kIHJldmlld3MsIHVzZXIgcHJvZmlsZSBhbmQgc29jaWFsIGZlYXR1cmVzLCBhbmQgdGhlYXRyZS9zaG93L3NlYXQgc2VsZWN0aW9uIGFuZCBib29raW5nIGV4cGVyaWVuY2VzIHdoZXJlIGF2YWlsYWJsZS4gRmVhdHVyZXMgbWF5IGNoYW5nZSBvciBiZSB1bmF2YWlsYWJsZS4gTW92aWUsIHNob3csIGF2YWlsYWJpbGl0eSwgdmVudWUgYW5kIHByaWNpbmcgaW5mb3JtYXRpb24gY2FuIGRlcGVuZCBvbiBkYXRhIHN1cHBsaWVkIGJ5IHRoaXJkIHBhcnRpZXMgb3Igb3BlcmF0b3JzOyB2ZXJpZnkgaW1wb3J0YW50IGRldGFpbHMgYmVmb3JlIHJlbHlpbmcgb24gdGhlbS4nKX08Lz59LFxuIHt0aXRsZTonQm9va2luZ3MgYW5kIFBheW1lbnRzJyxjb250ZW50Ojw+e3AoJ1RoZSBjdXJyZW50IGZyb250ZW5kIGltcGxlbWVudHMgYSBkZW1vIGJvb2tpbmcgYW5kIHNpbXVsYXRlZCBwYXltZW50IGZsb3c7IGl0IGRvZXMgbm90IGNhbGwgYSByZWFsIHBheW1lbnQgcHJvdmlkZXIgb3IgZXN0YWJsaXNoIGEgbGl2ZSB0aWNrZXQgcHVyY2hhc2UuIEFueSBwcm9kdWN0aW9uIGJvb2tpbmcgb3IgcGF5bWVudCBmZWF0dXJlIG11c3QgZGlzcGxheSB0aGUgYXBwbGljYWJsZSBwcm92aWRlciwgZmluYWwgcHJpY2UsIGJvb2tpbmcgdGVybXMsIGNhbmNlbGxhdGlvbiBydWxlcyBhbmQgcmVmdW5kIHRlcm1zIGJlZm9yZSBhIHVzZXIgY29uZmlybXMuIE5vIHJlZnVuZCBwcm9taXNlIG9yIGNhbmNlbGxhdGlvbiBlbnRpdGxlbWVudCBpcyBjcmVhdGVkIGJ5IHRoaXMgcGFnZS4gW0RFVkVMT1BFUiBDT05GSVJNQVRJT04gUkVRVUlSRUQ6IHB1Ymxpc2ggdGhlIGFjdHVhbCBib29raW5nIHBhcnRuZXIsIHBheW1lbnQgcHJvdmlkZXIsIHRpY2tldGluZyB0ZXJtcywgY2FuY2VsbGF0aW9uL3JlZnVuZCBydWxlcywgc3VwcG9ydCBwcm9jZXNzIGFuZCBhbnkgYm9va2luZyBmZWVzIGJlZm9yZSBlbmFibGluZyByZWFsIHRyYW5zYWN0aW9ucy5dJyl9PC8+fSxcbiB7dGl0bGU6J1VzZXItR2VuZXJhdGVkIENvbnRlbnQnLGNvbnRlbnQ6PD57cCgnWW91IHJldGFpbiByZXNwb25zaWJpbGl0eSBmb3IgY29udGVudCB5b3Ugc3VibWl0LCBpbmNsdWRpbmcgcHJvZmlsZSBkZXRhaWxzLCByZXZpZXdzLCByYXRpbmdzLCBjb21tZW50cywgcG9zdHMsIGxpbmtzIGFuZCBtZWRpYS4gT25seSBzdWJtaXQgY29udGVudCB5b3UgaGF2ZSB0aGUgcmlnaHQgdG8gc2hhcmUuIERvIG5vdCBwb3N0IGlsbGVnYWwgbWF0ZXJpYWwsIHRocmVhdHMgb3IgaGFyYXNzbWVudCwgaW1wZXJzb25hdGlvbiwgc3BhbSBvciBmcmF1ZHVsZW50IG1hdGVyaWFsLCBjb3B5cmlnaHQtaW5mcmluZ2luZyBjb250ZW50LCBkZWxpYmVyYXRlbHkgbWlzbGVhZGluZyByZXZpZXdzLCBvciBhYnVzaXZlIG9yIGhhcm1mdWwgY29udGVudC4gRG8gbm90IGRpc2Nsb3NlIGFub3RoZXIgcGVyc29u4oCZcyBwcml2YXRlIGluZm9ybWF0aW9uIHdpdGhvdXQgYSBsYXdmdWwgYmFzaXMuIFlvdSBncmFudCB0aGUgb3BlcmF0b3IgcGVybWlzc2lvbiB0byBob3N0LCBkaXNwbGF5IGFuZCB0ZWNobmljYWxseSBwcm9jZXNzIHlvdXIgY29udGVudCBhcyBuZWVkZWQgdG8gb3BlcmF0ZSB0aGUgZmVhdHVyZXMgeW91IHVzZTsgY29uZmlybSB0aGUgaW50ZW5kZWQgc2NvcGUgb2YgdGhpcyBsaWNlbnNlIHdpdGggY291bnNlbCBiZWZvcmUgcHVibGljYXRpb24uIFRoZSBmcm9udGVuZCBpbmNsdWRlcyBhZG1pbiBjb250ZW50IG1hbmFnZW1lbnQsIGJ1dCBubyBwdWJsaWMgcmVwb3J0aW5nIHdvcmtmbG93IG9yIHB1Ymxpc2hlZCBtb2RlcmF0aW9uIGFwcGVhbCBwcm9jZXNzIHdhcyB2ZXJpZmllZC4gW0RFVkVMT1BFUiBDT05GSVJNQVRJT04gUkVRVUlSRUQ6IGRvY3VtZW50IG1vZGVyYXRpb24sIHJlcG9ydGluZyBhbmQgYXBwZWFsIHByb2NlZHVyZXMuXScpfTwvPn0sXG4ge3RpdGxlOidJbnRlbGxlY3R1YWwgUHJvcGVydHknLGNvbnRlbnQ6PD57cCgnVGhlIEF1ZGllbmNlIFZlcmRpY3QgbmFtZSwgYnJhbmRpbmcsIHdlYnNpdGUgc29mdHdhcmUgYW5kIG9yaWdpbmFsIHBsYXRmb3JtIG1hdGVyaWFscyBhcmUgb3duZWQgYnkgb3IgbGljZW5zZWQgdG8gdGhlIHBsYXRmb3JtIG9wZXJhdG9yIGFuZCBhcmUgcHJvdGVjdGVkIGJ5IGFwcGxpY2FibGUgaW50ZWxsZWN0dWFsLXByb3BlcnR5IGxhd3MuIFlvdSBtYXkgdXNlIHRoZSBzZXJ2aWNlIGZvciBwZXJzb25hbCwgbGF3ZnVsIHB1cnBvc2VzLiBEbyBub3QgY29weSwgYWx0ZXIsIHJldmVyc2UgZW5naW5lZXIgb3IgY29tbWVyY2lhbGx5IGV4cGxvaXQgcGxhdGZvcm0gbWF0ZXJpYWxzIGV4Y2VwdCB3aGVyZSBhcHBsaWNhYmxlIGxhdyBwZXJtaXRzIG9yIHRoZSBvcGVyYXRvciBnaXZlcyB3cml0dGVuIHBlcm1pc3Npb24uIFRoaXJkLXBhcnR5IG1vdmllIGFydHdvcmssIG1lZGlhLCBtYXJrcyBhbmQgZW1iZWRkZWQgY29udGVudCByZW1haW4gc3ViamVjdCB0byB0aGVpciBvd25lcnPigJkgcmlnaHRzLicpfTwvPn0sXG4ge3RpdGxlOidUaGlyZC1QYXJ0eSBTZXJ2aWNlcycsY29udGVudDo8PntwKCdUaGUgc2VydmljZSBsaW5rcyB0byBvciBlbWJlZHMgZXh0ZXJuYWwgbWVkaWEgYW5kIG1heSBjb25uZWN0IHdpdGggc29jaWFsLW1lZGlhIHBsYXRmb3JtcyBvciwgaW4gYSBmdXR1cmUgcHJvZHVjdGlvbiBib29raW5nIGZsb3csIGJvb2tpbmcgYW5kIHBheW1lbnQgcHJvdmlkZXJzLiBUaG9zZSBzZXJ2aWNlcyBvcGVyYXRlIHVuZGVyIHRoZWlyIG93biB0ZXJtcyBhbmQgcHJpdmFjeSBwb2xpY2llcy4gVGhlIG9wZXJhdG9yIGlzIG5vdCByZXNwb25zaWJsZSBmb3IgdGhpcmQtcGFydHkgc2VydmljZXMgYmV5b25kIHJlc3BvbnNpYmlsaXRpZXMgdGhhdCBjYW5ub3QgYmUgZXhjbHVkZWQgdW5kZXIgYXBwbGljYWJsZSBsYXcuJyl9PC8+fSxcbiB7dGl0bGU6J1Byb2hpYml0ZWQgQWN0aXZpdGllcycsY29udGVudDo8PntwKCdZb3UgbWF5IG5vdCB1c2UgdGhlIHNlcnZpY2UgdG8gYnJlYWsgdGhlIGxhdywgaGFybSBvciB0aHJlYXRlbiBvdGhlcnMsIGltcGVyc29uYXRlIGEgcGVyc29uIG9yIG9yZ2FuaXphdGlvbiwgcG9zdCBwcm9oaWJpdGVkIGNvbnRlbnQsIGluZnJpbmdlIGludGVsbGVjdHVhbC1wcm9wZXJ0eSByaWdodHMsIHNlbmQgc3BhbSBvciBjb21taXQgZnJhdWQsIGludGVyZmVyZSB3aXRoIHBsYXRmb3JtIHNlY3VyaXR5IG9yIGF2YWlsYWJpbGl0eSwgYWNjZXNzIGFjY291bnRzIG9yIGRhdGEgd2l0aG91dCBhdXRob3JpemF0aW9uLCBvciBtaXN1c2UgYm9va2luZywgcmV2aWV3IG9yIHNvY2lhbCBmZWF0dXJlcy4nKX08Lz59LFxuIHt0aXRsZTonU3VzcGVuc2lvbiBhbmQgVGVybWluYXRpb24nLGNvbnRlbnQ6PD57cCgnVGhlIG9wZXJhdG9yIG1heSByZXN0cmljdCBhY2Nlc3Mgd2hlcmUgcmVhc29uYWJseSBuZWNlc3NhcnkgdG8gcHJvdGVjdCB1c2VycywgdGhlIHNlcnZpY2Ugb3IgbGVnYWwgcmlnaHRzLCBpbmNsdWRpbmcgc3VzcGVjdGVkIGZyYXVkLCBzZWN1cml0eSBhYnVzZSBvciBzZXJpb3VzIHZpb2xhdGlvbnMgb2YgdGhlc2UgdGVybXMuIFdoZXJlIGFwcHJvcHJpYXRlIGFuZCBsYXdmdWwsIHRoZSBvcGVyYXRvciBzaG91bGQgZ2l2ZSBub3RpY2UgYW5kIGEgd2F5IHRvIHNlZWsgcmV2aWV3LiBBcHBsaWNhYmxlIGNvbnN1bWVyIGFuZCBvdGhlciBsZWdhbCByaWdodHMgcmVtYWluIHVuYWZmZWN0ZWQuIFtERVZFTE9QRVIgQ09ORklSTUFUSU9OIFJFUVVJUkVEOiBjb25maXJtIGVuZm9yY2VtZW50LCBub3RpY2UsIGFwcGVhbCBhbmQgYWNjb3VudC1jbG9zdXJlIHByb2NlZHVyZXMuXScpfTwvPn0sXG4ge3RpdGxlOidEaXNjbGFpbWVycyBhbmQgTGltaXRhdGlvbiBvZiBMaWFiaWxpdHknLGNvbnRlbnQ6PD57cCgnVGhlIHNlcnZpY2UgaXMgcHJvdmlkZWQgc3ViamVjdCB0byBhdmFpbGFiaWxpdHkuIFRvIHRoZSBleHRlbnQgcGVybWl0dGVkIGJ5IGxhdywgdGhlIG9wZXJhdG9yIGRvZXMgbm90IHdhcnJhbnQgdGhhdCBhbGwgbGlzdGluZ3MsIHJldmlld3MsIGF2YWlsYWJpbGl0eSBvciB0aGlyZC1wYXJ0eSBjb250ZW50IHdpbGwgYmUgdW5pbnRlcnJ1cHRlZCBvciBlcnJvci1mcmVlLiBOb3RoaW5nIGluIHRoZXNlIHRlcm1zIGV4Y2x1ZGVzIG9yIGxpbWl0cyBhIHJpZ2h0LCByZW1lZHkgb3IgbGlhYmlsaXR5IHRoYXQgYXBwbGljYWJsZSBsYXcgZG9lcyBub3QgYWxsb3cgdG8gYmUgZXhjbHVkZWQgb3IgbGltaXRlZC4gQW55IG90aGVyIGxpbWl0YXRpb24gb2YgbGlhYmlsaXR5IHNob3VsZCBiZSByZXZpZXdlZCBieSBxdWFsaWZpZWQgY291bnNlbCBmb3IgdGhlIG9wZXJhdG9y4oCZcyBqdXJpc2RpY3Rpb24gYmVmb3JlIHB1YmxpY2F0aW9uLicpfTwvPn0sXG4ge3RpdGxlOidDaGFuZ2VzIHRvIFRoZXNlIFRlcm1zJyxjb250ZW50Ojw+e3AoJ1RoZSBjdXJyZW50IHRlcm1zIHdpbGwgYmUgcHVibGlzaGVkIG9uIHRoaXMgcGFnZSB3aXRoIGEgcmV2aXNlZCDigJxMYXN0IHVwZGF0ZWTigJ0gZGF0ZS4gQ29udGludWVkIHVzZSBhZnRlciBhbiB1cGRhdGUgdGFrZXMgZWZmZWN0IG1heSBjb25zdGl0dXRlIGFjY2VwdGFuY2Ugd2hlcmUgcGVybWl0dGVkIGJ5IGxhdy4gRm9yIG1hdGVyaWFsIGNoYW5nZXMsIHRoZSBvcGVyYXRvciBzaG91bGQgcHJvdmlkZSByZWFzb25hYmxlIG5vdGljZSB0aHJvdWdoIHRoZSBzZXJ2aWNlLicpfTwvPn0sXG4ge3RpdGxlOidHb3Zlcm5pbmcgTGF3IGFuZCBEaXNwdXRlcycsY29udGVudDo8PntwKCdbREVWRUxPUEVSIENPTkZJUk1BVElPTiBSRVFVSVJFRDogaWRlbnRpZnkgdGhlIGNvbnRyYWN0aW5nIGxlZ2FsIGVudGl0eSBhbmQgaXRzIGp1cmlzZGljdGlvbiwgdGhlbiBoYXZlIGNvdW5zZWwgc2VsZWN0IGdvdmVybmluZyBsYXcsIHZlbnVlIGFuZCBkaXNwdXRlIHByb2NlZHVyZXMuIE5vIHJlZ2lzdGVyZWQgZW50aXR5LCBvZmZpY2Ugb3IganVyaXNkaWN0aW9uIGlzIGFzc2VydGVkIGluIHRoaXMgZHJhZnQuXScpfTwvPn0sXG4ge3RpdGxlOidDb250YWN0Jyxjb250ZW50Ojw+e3AoJ1F1ZXN0aW9ucyBhYm91dCB0aGVzZSB0ZXJtczogW0RFVkVMT1BFUiBDT05GSVJNQVRJT04gUkVRVUlSRUQ6IHByb3ZpZGUgdGhlIHZlcmlmaWVkIG9mZmljaWFsIHN1cHBvcnQgY29udGFjdCBlbWFpbC4gTm8gdmVyaWZpZWQgc3VwcG9ydCBlbWFpbCB3YXMgZm91bmQgaW4gdGhlIGluc3BlY3RlZCBwcm9qZWN0Ll0nKX08Lz59XG5dO1xuZXhwb3J0IGZ1bmN0aW9uIFByaXZhY3lQb2xpY3koKXtyZXR1cm4gPExlZ2FsUGFnZSBraW5kPVwicHJpdmFjeVwiIHRpdGxlPVwiUHJpdmFjeSBQb2xpY3lcIiBkZXNjcmlwdGlvbj1cIkEgY2xlYXIgZ3VpZGUgdG8gdGhlIGluZm9ybWF0aW9uIEF1ZGllbmNlIFZlcmRpY3QgaGFuZGxlcyBhbmQgdGhlIGNob2ljZXMgYXZhaWxhYmxlIHRvIHlvdS5cIiBzZWN0aW9ucz17cHJpdmFjeVNlY3Rpb25zfS8+O31cbmV4cG9ydCBmdW5jdGlvbiBUZXJtc0NvbmRpdGlvbnMoKXtyZXR1cm4gPExlZ2FsUGFnZSBraW5kPVwidGVybXNcIiB0aXRsZT1cIlRlcm1zICYgQ29uZGl0aW9uc1wiIGRlc2NyaXB0aW9uPVwiVGhlIHRlcm1zIGZvciB1c2luZyBBdWRpZW5jZSBWZXJkaWN04oCZcyBtb3ZpZSBkaXNjb3ZlcnksIGF1ZGllbmNlIGFuZCBzb2NpYWwgZmVhdHVyZXMuXCIgc2VjdGlvbnM9e3Rlcm1zU2VjdGlvbnN9Lz47fVxuZXhwb3J0IGZ1bmN0aW9uIERlbGV0ZUFjY291bnQoKXtcbiBjb25zdCBbY29uZmlybWVkLHNldENvbmZpcm1lZF09dXNlU3RhdGUoZmFsc2UpO2NvbnN0IFtvdHBSZXF1ZXN0ZWQsc2V0T3RwUmVxdWVzdGVkXT11c2VTdGF0ZShmYWxzZSk7Y29uc3QgW3JlcXVlc3RpbmdPdHAsc2V0UmVxdWVzdGluZ090cF09dXNlU3RhdGUoZmFsc2UpO2NvbnN0IFtyZXF1ZXN0TWVzc2FnZSxzZXRSZXF1ZXN0TWVzc2FnZV09dXNlU3RhdGUoJycpO2NvbnN0IFtyZXF1ZXN0RXJyb3Isc2V0UmVxdWVzdEVycm9yXT11c2VTdGF0ZSgnJyk7Y29uc3QgW2RlbGV0aW9uT3RwLHNldERlbGV0aW9uT3RwXT11c2VTdGF0ZSgnJyk7Y29uc3QgW2RlbGV0aW5nLHNldERlbGV0aW5nXT11c2VTdGF0ZShmYWxzZSk7Y29uc3QgW2RlbGV0aW9uQ29tcGxldGUsc2V0RGVsZXRpb25Db21wbGV0ZV09dXNlU3RhdGUoZmFsc2UpO1xuIGNvbnN0IHJlcXVlc3REZWxldGlvbk90cD1hc3luYygpPT57aWYoIWNvbmZpcm1lZHx8cmVxdWVzdGluZ090cClyZXR1cm47c2V0UmVxdWVzdGluZ090cCh0cnVlKTtzZXRSZXF1ZXN0TWVzc2FnZSgnJyk7c2V0UmVxdWVzdEVycm9yKCcnKTt0cnl7Y29uc3QgcmVzdWx0PWF3YWl0IGJhY2tlbmRSZXF1ZXN0PHttZXNzYWdlPzpzdHJpbmd9PignL2F1dGgvbWUvZGVsZXRpb24tb3RwJyx7bWV0aG9kOidQT1NUJ30pO3NldE90cFJlcXVlc3RlZCh0cnVlKTtzZXREZWxldGlvbk90cCgnJyk7c2V0UmVxdWVzdE1lc3NhZ2UocmVzdWx0Py5tZXNzYWdlfHwnQSBuZXcgZGVsZXRpb24gdmVyaWZpY2F0aW9uIGNvZGUgaGFzIGJlZW4gc2VudCB0byB0aGUgY29udGFjdCBtZXRob2Qgb24geW91ciBhY2NvdW50LicpO31jYXRjaChlcnJvcil7c2V0UmVxdWVzdEVycm9yKGVycm9yIGluc3RhbmNlb2YgRXJyb3I/ZXJyb3IubWVzc2FnZS5zcGxpdCgnIFtQT1NUICcpWzBdOidVbmFibGUgdG8gcmVxdWVzdCBhIGRlbGV0aW9uIHZlcmlmaWNhdGlvbiBjb2RlLiBQbGVhc2UgdHJ5IGFnYWluLicpO31maW5hbGx5e3NldFJlcXVlc3RpbmdPdHAoZmFsc2UpO319O1xuIGNvbnN0IGNvbmZpcm1EZWxldGlvbj1hc3luYygpPT57Y29uc3Qgb3RwPWRlbGV0aW9uT3RwLnRyaW0oKTtpZighb3RwfHxkZWxldGluZylyZXR1cm47c2V0RGVsZXRpbmcodHJ1ZSk7c2V0UmVxdWVzdEVycm9yKCcnKTtzZXRSZXF1ZXN0TWVzc2FnZSgnJyk7dHJ5e2NvbnN0IHJlc3VsdD1hd2FpdCBiYWNrZW5kUmVxdWVzdDx7bWVzc2FnZT86c3RyaW5nfT4oJy9hdXRoL21lJyx7bWV0aG9kOidERUxFVEUnLGhlYWRlcnM6eydYLURlbGV0aW9uLU9UUCc6b3RwfX0pO3NldERlbGV0aW9uQ29tcGxldGUodHJ1ZSk7c2V0T3RwUmVxdWVzdGVkKGZhbHNlKTtzZXRSZXF1ZXN0TWVzc2FnZShyZXN1bHQ/Lm1lc3NhZ2V8fCdZb3VyIGFjY291bnQgZGVsZXRpb24gcmVxdWVzdCBoYXMgYmVlbiBjb21wbGV0ZWQuJyk7bG9jYWxTdG9yYWdlLnJlbW92ZUl0ZW0oJ2F2X2FjY2Vzc190b2tlbicpO3Nlc3Npb25TdG9yYWdlLnJlbW92ZUl0ZW0oJ2F2X2FjY2Vzc190b2tlbicpO3dpbmRvdy5kaXNwYXRjaEV2ZW50KG5ldyBFdmVudCgnYXYtYXV0aC1jaGFuZ2UnKSk7fWNhdGNoKGVycm9yKXtjb25zdCBtZXNzYWdlPWVycm9yIGluc3RhbmNlb2YgRXJyb3I/ZXJyb3IubWVzc2FnZTonVW5hYmxlIHRvIGRlbGV0ZSB5b3VyIGFjY291bnQuIENoZWNrIHRoZSB2ZXJpZmljYXRpb24gY29kZSBhbmQgdHJ5IGFnYWluLic7c2V0UmVxdWVzdEVycm9yKG1lc3NhZ2UuaW5jbHVkZXMoJ2ludmFsaWQgb3IgZXhwaXJlZCcpPydUaGlzIGNvZGUgaXMgaW52YWxpZCBvciBleHBpcmVkLiBSZXF1ZXN0IGEgbmV3IGNvZGUgYW5kIGVudGVyIGl0IHByb21wdGx5Lic6bWVzc2FnZS5zcGxpdCgnIFtERUxFVEUgJylbMF0pO31maW5hbGx5e3NldERlbGV0aW5nKGZhbHNlKTt9fTtcbiB1c2VFZmZlY3QoKCk9Pntkb2N1bWVudC50aXRsZT0nRGVsZXRlIEFjY291bnQgfCBBdWRpZW5jZSBWZXJkaWN0Jztjb25zdCBtZXRhPWRvY3VtZW50LnF1ZXJ5U2VsZWN0b3IoJ21ldGFbbmFtZT1cImRlc2NyaXB0aW9uXCJdJyk7bWV0YT8uc2V0QXR0cmlidXRlKCdjb250ZW50JywnTGVhcm4gaG93IHRvIHJlcXVlc3QgZGVsZXRpb24gb2YgeW91ciBBdWRpZW5jZSBWZXJkaWN0IGFjY291bnQgYW5kIGFzc29jaWF0ZWQgcGVyc29uYWwgaW5mb3JtYXRpb24uJyk7fSxbXSk7XG4gcmV0dXJuIDxkaXYgY2xhc3NOYW1lPVwiZGVsZXRlLWFjY291bnQtcGFnZVwiPjxkaXYgY2xhc3NOYW1lPVwiZGVsZXRlLWFjY291bnQtc2hlbGxcIj48ZGl2IGNsYXNzTmFtZT1cImxlZ2FsLWJyZWFkY3J1bWJcIj48TGluayB0bz1cIi9cIj48SG9tZSBzaXplPXsxNH0vPkhvbWU8L0xpbms+PHNwYW4+Lzwvc3Bhbj48c3Bhbj5EZWxldGUgQWNjb3VudDwvc3Bhbj48L2Rpdj48aGVhZGVyIGNsYXNzTmFtZT1cImxlZ2FsLWhlcm8gZGVsZXRlLWFjY291bnQtaGVyb1wiPjxkaXYgY2xhc3NOYW1lPVwibGVnYWwtdGl0bGUtcm93XCI+PHNwYW4gY2xhc3NOYW1lPVwibGVnYWwtaWNvbiBkZWxldGUtdGl0bGUtaWNvblwiPjxUcmFzaDIgc2l6ZT17MjF9Lz48L3NwYW4+PGRpdj48c3BhbiBjbGFzc05hbWU9XCJleWVicm93XCI+QUNDT1VOVCAmYW1wOyBQUklWQUNZPC9zcGFuPjxoMT5EZWxldGUgQWNjb3VudDwvaDE+PHA+UmV2aWV3IHdoYXQgYWNjb3VudCBkZWxldGlvbiBtZWFucyBhbmQgY29uZmlybSB5b3VyIGNob2ljZSBiZWxvdy48L3A+PC9kaXY+PC9kaXY+PC9oZWFkZXI+PGRpdiBjbGFzc05hbWU9XCJsZWdhbC1sYXlvdXQgZGVsZXRlLWFjY291bnQtbGVnYWwtbGF5b3V0XCI+PExlZ2FsU2lkZWJhciBhY3RpdmU9XCJkZWxldGVcIi8+PG1haW4gY2xhc3NOYW1lPVwiZGVsZXRlLWFjY291bnQtZG9jdW1lbnRcIj48ZGl2IGNsYXNzTmFtZT1cImRlbGV0ZS13YXJuaW5nLWNhcmRcIj48QWxlcnRUcmlhbmdsZSBzaXplPXsxOX0vPjxkaXY+PGgyPkFjY291bnQgZGVsZXRpb24gbWF5IGJlIHBlcm1hbmVudDwvaDI+PHA+WW91ciBwcm9maWxlIGFuZCBlbGlnaWJsZSBhY2NvdW50IGRhdGEgbWF5IGJlIHJlbW92ZWQuIFNvbWUgcmVjb3JkcyBtYXkgYmUgcmV0YWluZWQgd2hlcmUgcmVxdWlyZWQgYnkgbGF3LjwvcD48L2Rpdj48L2Rpdj48c2VjdGlvbiBjbGFzc05hbWU9XCJkZWxldGUtZGF0YS1jYXJkXCI+PGgyPldoYXQgaGFwcGVucyB0byB5b3VyIGluZm9ybWF0aW9uPzwvaDI+PGRpdiBjbGFzc05hbWU9XCJkZWxldGUtZGF0YS1ncmlkXCI+PGFydGljbGU+PFVzZXJSb3VuZCBzaXplPXsxN30vPjxkaXY+PHN0cm9uZz5BY2NvdW50IGRldGFpbHM8L3N0cm9uZz48cD5Zb3VyIHByb2ZpbGUgYW5kIGVsaWdpYmxlIGFzc29jaWF0ZWQgZGF0YSBtYXkgYmUgaW5jbHVkZWQgaW4gYSBkZWxldGlvbiByZXF1ZXN0LjwvcD48L2Rpdj48L2FydGljbGU+PGFydGljbGU+PERhdGFiYXNlIHNpemU9ezE3fS8+PGRpdj48c3Ryb25nPlJlcXVpcmVkIHJlY29yZHM8L3N0cm9uZz48cD5Tb21lIGJvb2tpbmcsIHNlY3VyaXR5IG9yIGxlZ2FsIHJlY29yZHMgbWF5IG5lZWQgdG8gYmUgcmV0YWluZWQuPC9wPjwvZGl2PjwvYXJ0aWNsZT48YXJ0aWNsZT48Q2xvY2szIHNpemU9ezE3fS8+PGRpdj48c3Ryb25nPlByb2Nlc3Npbmc8L3N0cm9uZz48cD5UaGUgcmVxdWVzdCB0aW1lbGluZSBhbmQgZnVsbCBkZWxldGlvbiBzY29wZSBhcmUgc3RpbGwgYmVpbmcgY29uZmlybWVkLjwvcD48L2Rpdj48L2FydGljbGU+PC9kaXY+PC9zZWN0aW9uPjxzZWN0aW9uIGNsYXNzTmFtZT1cImRlbGV0ZS1jb25maXJtLWNhcmRcIj48ZGl2IGNsYXNzTmFtZT1cImRlbGV0ZS1jb25maXJtLWhlYWRpbmdcIj48c3BhbiBjbGFzc05hbWU9XCJkZWxldGUtY29uZmlybS1pY29uXCI+PExvY2tLZXlob2xlIHNpemU9ezE4fS8+PC9zcGFuPjxkaXY+PGgyPkNvbmZpcm0gYWNjb3VudCBkZWxldGlvbjwvaDI+PHA+e2RlbGV0aW9uQ29tcGxldGU/J0FjY291bnQgZGVsZXRpb24gY29tcGxldGVkLic6b3RwUmVxdWVzdGVkPydFbnRlciB0aGUgdmVyaWZpY2F0aW9uIGNvZGUgc2VudCB0byB5b3VyIGFjY291bnQgdG8gcGVybWFuZW50bHkgZGVsZXRlIHlvdXIgYWNjb3VudC4nOidDb25maXJtIGJlbG93IHRvIHJlY2VpdmUgYSB2ZXJpZmljYXRpb24gY29kZSBiZWZvcmUgY29udGludWluZy4nfTwvcD48L2Rpdj48L2Rpdj57IWRlbGV0aW9uQ29tcGxldGUmJjw+PGxhYmVsIGNsYXNzTmFtZT17YGRlbGV0ZS1jb25maXJtLWNoZWNrJHtjb25maXJtZWQ/JyBjaGVja2VkJzonJ31gfT48aW5wdXQgdHlwZT1cImNoZWNrYm94XCIgY2hlY2tlZD17Y29uZmlybWVkfSBvbkNoYW5nZT17ZXZlbnQ9PntzZXRDb25maXJtZWQoZXZlbnQudGFyZ2V0LmNoZWNrZWQpO3NldE90cFJlcXVlc3RlZChmYWxzZSk7c2V0RGVsZXRpb25PdHAoJycpO3NldFJlcXVlc3RNZXNzYWdlKCcnKTtzZXRSZXF1ZXN0RXJyb3IoJycpO319Lz48c3BhbiBjbGFzc05hbWU9XCJkZWxldGUtY2hlY2ttYXJrXCI+PENpcmNsZUNoZWNrIHNpemU9ezE3fS8+PC9zcGFuPjxzcGFuIGNsYXNzTmFtZT1cImRlbGV0ZS1jb25maXJtLWNvcHlcIj5JIGNvbmZpcm0gdGhhdCBJIHdhbnQgdG8gZGVsZXRlIG15IEF1ZGllbmNlIFZlcmRpY3QgYWNjb3VudCBhbmQgdW5kZXJzdGFuZCB0aGF0IGVsaWdpYmxlIGFjY291bnQgZGF0YSBtYXkgYmUgcGVybWFuZW50bHkgcmVtb3ZlZC48L3NwYW4+PC9sYWJlbD57b3RwUmVxdWVzdGVkJiY8bGFiZWwgY2xhc3NOYW1lPVwiZGVsZXRlLW90cC1maWVsZFwiPjxzcGFuPkRlbGV0aW9uIHZlcmlmaWNhdGlvbiBjb2RlPC9zcGFuPjxpbnB1dCBpbnB1dE1vZGU9XCJudW1lcmljXCIgYXV0b0NvbXBsZXRlPVwib25lLXRpbWUtY29kZVwiIHZhbHVlPXtkZWxldGlvbk90cH0gb25DaGFuZ2U9e2V2ZW50PT5zZXREZWxldGlvbk90cChldmVudC50YXJnZXQudmFsdWUpfSBwbGFjZWhvbGRlcj1cIkVudGVyIE9UUFwiIGFyaWEtbGFiZWw9XCJEZWxldGlvbiB2ZXJpZmljYXRpb24gY29kZVwiLz48L2xhYmVsPn08ZGl2IGNsYXNzTmFtZT1cImRlbGV0ZS1hY3Rpb24tYnV0dG9uc1wiPjxidXR0b24gdHlwZT1cImJ1dHRvblwiIGNsYXNzTmFtZT1cImRlbGV0ZS1hY2NvdW50LWJ1dHRvblwiIGRpc2FibGVkPXshY29uZmlybWVkfHxyZXF1ZXN0aW5nT3RwfHxkZWxldGluZ3x8KG90cFJlcXVlc3RlZCYmIWRlbGV0aW9uT3RwLnRyaW0oKSl9IG9uQ2xpY2s9eygpPT52b2lkKG90cFJlcXVlc3RlZD9jb25maXJtRGVsZXRpb24oKTpyZXF1ZXN0RGVsZXRpb25PdHAoKSl9PjxUcmFzaDIgc2l6ZT17MTZ9Lz57cmVxdWVzdGluZ090cD8nU2VuZGluZyB2ZXJpZmljYXRpb24gY29kZeKApic6ZGVsZXRpbmc/J0RlbGV0aW5nIGFjY291bnTigKYnOm90cFJlcXVlc3RlZD8nQ29uZmlybSBhbmQgZGVsZXRlIGFjY291bnQnOidTZW5kIHZlcmlmaWNhdGlvbiBjb2RlJ308L2J1dHRvbj57b3RwUmVxdWVzdGVkJiY8YnV0dG9uIHR5cGU9XCJidXR0b25cIiBjbGFzc05hbWU9XCJkZWxldGUtcmVzZW5kLWJ1dHRvblwiIGRpc2FibGVkPXtyZXF1ZXN0aW5nT3RwfHxkZWxldGluZ30gb25DbGljaz17KCk9PnZvaWQgcmVxdWVzdERlbGV0aW9uT3RwKCl9PntyZXF1ZXN0aW5nT3RwPydTZW5kaW5n4oCmJzonU2VuZCBhIG5ldyBjb2RlJ308L2J1dHRvbj59PC9kaXY+PC8+fXtyZXF1ZXN0TWVzc2FnZSYmPGRpdiBjbGFzc05hbWU9XCJkZWxldGUtaW5saW5lLXN0YXR1c1wiIHJvbGU9XCJzdGF0dXNcIj48c3Ryb25nPntkZWxldGlvbkNvbXBsZXRlPydBY2NvdW50IGRlbGV0ZWQnOm90cFJlcXVlc3RlZD8nVmVyaWZpY2F0aW9uIGNvZGUgcmVxdWVzdGVkJzonUmVxdWVzdCBjb21wbGV0ZSd9PC9zdHJvbmc+PHNwYW4+e3JlcXVlc3RNZXNzYWdlfTwvc3Bhbj48L2Rpdj59e3JlcXVlc3RFcnJvciYmPGRpdiBjbGFzc05hbWU9XCJkZWxldGUtaW5saW5lLXN0YXR1cyBkZWxldGUtcmVxdWVzdC1lcnJvclwiIHJvbGU9XCJhbGVydFwiPjxzdHJvbmc+Q291bGQgbm90IGNvbXBsZXRlIHJlcXVlc3Q8L3N0cm9uZz48c3Bhbj57cmVxdWVzdEVycm9yfTwvc3Bhbj48L2Rpdj59PHAgY2xhc3NOYW1lPVwiZGVsZXRlLWFjdGlvbi1ub3RlXCI+e2RlbGV0aW9uQ29tcGxldGU/J1lvdSBoYXZlIGJlZW4gc2lnbmVkIG91dC4nOm90cFJlcXVlc3RlZD8nQWNjb3VudCBkZWxldGlvbiBpcyBwZXJtYW5lbnQgYW5kIGNhbm5vdCBiZSB1bmRvbmUuJzonWW91ciBhY2NvdW50IHdpbGwgbm90IGJlIGRlbGV0ZWQgdW50aWwgeW91IGVudGVyIGFuZCB2ZXJpZnkgdGhlIGNvZGUuJ308L3A+eyFkZWxldGlvbkNvbXBsZXRlJiY8TGluayBjbGFzc05hbWU9XCJkZWxldGUtYmFjay1idXR0b25cIiB0bz1cIi9wcm9maWxlXCI+PEFycm93TGVmdCBzaXplPXsxNX0vPkJhY2sgdG8gcHJvZmlsZTwvTGluaz59PC9zZWN0aW9uPjxuYXYgY2xhc3NOYW1lPVwiZGVsZXRlLXJlbGF0ZWQtbGlua3NcIiBhcmlhLWxhYmVsPVwiUmVsYXRlZCBwb2xpY2llc1wiPjxMaW5rIHRvPVwiL3ByaXZhY3ktcG9saWN5XCI+UmVhZCB0aGUgUHJpdmFjeSBQb2xpY3kgPEFycm93UmlnaHQgc2l6ZT17MTR9Lz48L0xpbms+PExpbmsgdG89XCIvdGVybXNcIj5SZXZpZXcgVGVybXMgJmFtcDsgQ29uZGl0aW9ucyA8QXJyb3dSaWdodCBzaXplPXsxNH0vPjwvTGluaz48L25hdj48L21haW4+PC9kaXY+PC9kaXY+PC9kaXY+O1xufVxuIl0sImZpbGUiOiJFOi9BViBXZWJzaXRlL0FWLWZyb250ZW5kL3NyYy9wYWdlcy9MZWdhbFBhZ2VzLnRzeCJ9

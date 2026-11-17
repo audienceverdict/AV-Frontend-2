@@ -12,4 +12,6 @@ import './movies-page.css';
 import './movie-profile.css';
 import './profile-page.css';
 import './reviews-page.css';
+import './movie-reviews.css';
+import './responsive-overrides.css';
 ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><LoadingScreen><App/></LoadingScreen></React.StrictMode>);

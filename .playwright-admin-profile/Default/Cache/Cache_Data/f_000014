@@ -1,0 +1,851 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/pages/AdminQrScanner.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=a954c2dd"; const Fragment = __vite__cjsImport0_react_jsxDevRuntime["Fragment"]; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+let prevRefreshReg;
+let prevRefreshSig;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=a954c2dd"; const useEffect = __vite__cjsImport3_react["useEffect"]; const useMemo = __vite__cjsImport3_react["useMemo"]; const useRef = __vite__cjsImport3_react["useRef"]; const useState = __vite__cjsImport3_react["useState"];
+import { BrowserQRCodeReader } from "/node_modules/.vite/deps/@zxing_browser.js?v=a954c2dd";
+import { Check, Filter, RefreshCw, ScanLine, Search, ShieldCheck, VideoOff } from "/node_modules/.vite/deps/lucide-react.js?v=a954c2dd";
+import { useApp } from "/src/context/AppContext.tsx";
+import { adminScanTicket, database, getAdminBookings, getShowAvailability } from "/src/services/api.ts";
+import { createSeatLabelMap } from "/src/utils/seatLayout.ts";
+import { date, Empty, Notice, SectionHeading } from "/src/components/Common.tsx";
+import "/src/pages/admin-qr-scanner.css";
+export function AdminQrScanner() {
+  _s();
+  const { data } = useApp();
+  const [movieId, setMovieId] = useState("");
+  const [theatreId, setTheatreId] = useState("");
+  const [showId, setShowId] = useState("");
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [sort, setSort] = useState("newest");
+  const [scanning, setScanning] = useState(false);
+  const [cameraError, setCameraError] = useState("");
+  const [scanMessage, setScanMessage] = useState("");
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [scanSeatLabels, setScanSeatLabels] = useState({});
+  const videoRef = useRef(null);
+  const lastScan = useRef("");
+  const reload = async () => {
+    setLoading(true);
+    setLoadError("");
+    try {
+      const result = await getAdminBookings();
+      setBookings(result);
+      database.update((current) => {
+        current.bookings = result;
+      });
+    } catch (error) {
+      setLoadError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    void reload();
+  }, []);
+  const moviesWithBookings = useMemo(() => data.movies.filter((movie) => bookings.some((booking) => data.shows.find((show) => show.id === booking.showId)?.movieId === movie.id)), [data.movies, data.shows, bookings]);
+  const theatres = useMemo(() => data.theatres.filter((theatre) => data.shows.some((show) => show.theatreId === theatre.id && show.movieId === movieId && bookings.some((booking) => booking.showId === show.id))), [data.theatres, data.shows, bookings, movieId]);
+  const shows = useMemo(() => data.shows.filter((show) => show.movieId === movieId && show.theatreId === theatreId && bookings.some((booking) => booking.showId === show.id)), [data.shows, bookings, movieId, theatreId]);
+  const showBookings = useMemo(() => bookings.filter((booking) => booking.showId === showId), [bookings, showId]);
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return [...showBookings].filter((booking) => (statusFilter === "ALL" || (statusFilter === "ATTENDED" ? booking.attended : statusFilter === "NOT_ATTENDED" ? !booking.attended : booking.status === statusFilter)) && (!q || JSON.stringify([booking.id, booking.snapshot, booking.seatIds.map((id) => scanSeatLabels[id] || id)]).toLowerCase().includes(q))).sort((a, b) => sort === "newest" ? b.createdAt.localeCompare(a.createdAt) : sort === "oldest" ? a.createdAt.localeCompare(b.createdAt) : a.snapshot.movie.localeCompare(b.snapshot.movie));
+  }, [showBookings, query, statusFilter, sort, scanSeatLabels]);
+  const selectedShow = shows.find((show) => show.id === showId);
+  const selectedMovie = data.movies.find((movie) => movie.id === movieId);
+  const selectedTheatre = data.theatres.find((theatre) => theatre.id === theatreId);
+  useEffect(() => {
+    let active = true;
+    setScanSeatLabels({});
+    if (!showId) return;
+    getShowAvailability(showId).then((result) => {
+      if (!active) return;
+      const seats = Array.isArray(result.layout?.seats) ? result.layout.seats : [];
+      const columns = Number(result.screen?.seatsPerRow || result.layout?.version?.seatsPerRow) || 12;
+      setScanSeatLabels(createSeatLabelMap(seats, columns));
+    }).catch(() => {
+      if (active) setScanSeatLabels({});
+    });
+    return () => {
+      active = false;
+    };
+  }, [showId]);
+  useEffect(() => {
+    if (!scanning) return;
+    const reader = new BrowserQRCodeReader();
+    let controls;
+    let submitting = false;
+    setCameraError("");
+    setScanMessage("Point the camera at the booking QR code.");
+    void reader.decodeFromVideoDevice(void 0, videoRef.current, (result) => {
+      if (!result || submitting) return;
+      const raw = result.getText();
+      if (raw === lastScan.current) return;
+      lastScan.current = raw;
+      submitting = true;
+      setScanMessage("QR detected. Verifying ticket...");
+      void adminScanTicket(showId, raw).then(async (response) => {
+        const refreshed = await getAdminBookings();
+        setBookings(refreshed);
+        database.update((current) => {
+          current.bookings = refreshed;
+        });
+        const bookingId = String(response?.bookingId || "");
+        const match = refreshed.find((item) => item.id === bookingId);
+        if (!match) {
+          setSelectedBooking(null);
+          setScanMessage(String(response?.result || "The backend could not find this booking."));
+          setScanning(false);
+          return;
+        }
+        setSelectedBooking(match);
+        setScanMessage(String(response?.result || (match.attended ? "This ticket has already been checked in." : "Ticket verified and attendance recorded.")));
+        setScanning(false);
+      }).catch((error) => {
+        setSelectedBooking(null);
+        setScanMessage("");
+        setCameraError(error.message || "The backend could not verify this ticket.");
+        submitting = false;
+      });
+    }).then((next) => {
+      controls = next;
+    }).catch((error) => {
+      setCameraError(error.message || "Camera could not be opened. Check camera permission and try again.");
+      setScanning(false);
+    });
+    return () => {
+      controls?.stop();
+    };
+  }, [scanning, showId]);
+  const startScan = () => {
+    lastScan.current = "";
+    setSelectedBooking(null);
+    setScanMessage("");
+    setCameraError("");
+    setScanning(true);
+  };
+  return /* @__PURE__ */ jsxDEV("div", { className: "admin-content admin-scan-page", children: [
+    /* @__PURE__ */ jsxDEV(SectionHeading, { eyebrow: "ADMISSION CONTROL", title: "Scan booking QR", description: "Choose a screening, review its bookings, then scan a ticket to verify and record attendance." }, void 0, false, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+      lineNumber: 43,
+      columnNumber: 57
+    }, this),
+    loadError && /* @__PURE__ */ jsxDEV(Notice, { error: true, children: [
+      loadError,
+      /* @__PURE__ */ jsxDEV("button", { className: "button secondary small", onClick: () => void reload(), children: [
+        /* @__PURE__ */ jsxDEV(RefreshCw, { size: 14 }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+          lineNumber: 44,
+          columnNumber: 115
+        }, this),
+        " Retry"
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+        lineNumber: 44,
+        columnNumber: 42
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+      lineNumber: 44,
+      columnNumber: 17
+    }, this),
+    /* @__PURE__ */ jsxDEV("section", { className: "panel admin-scan-filters", children: [
+      /* @__PURE__ */ jsxDEV("label", { children: [
+        "Movie",
+        /* @__PURE__ */ jsxDEV("select", { value: movieId, onChange: (event) => {
+          setMovieId(event.target.value);
+          setTheatreId("");
+          setShowId("");
+          setSelectedBooking(null);
+          setScanMessage("");
+        }, children: [
+          /* @__PURE__ */ jsxDEV("option", { value: "", children: "Select a movie" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 45,
+            columnNumber: 216
+          }, this),
+          moviesWithBookings.map((movie) => /* @__PURE__ */ jsxDEV("option", { value: movie.id, children: movie.title }, movie.id, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 45,
+            columnNumber: 291
+          }, this))
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+          lineNumber: 45,
+          columnNumber: 61
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+        lineNumber: 45,
+        columnNumber: 49
+      }, this),
+      /* @__PURE__ */ jsxDEV("label", { children: [
+        "Theatre",
+        /* @__PURE__ */ jsxDEV("select", { value: theatreId, disabled: !movieId, onChange: (event) => {
+          setTheatreId(event.target.value);
+          setShowId("");
+          setSelectedBooking(null);
+          setScanMessage("");
+        }, children: [
+          /* @__PURE__ */ jsxDEV("option", { value: "", children: "Select a theatre" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 45,
+            columnNumber: 548
+          }, this),
+          theatres.map((theatre) => /* @__PURE__ */ jsxDEV("option", { value: theatre.id, children: [
+            theatre.name,
+            " Â· ",
+            theatre.city
+          ] }, theatre.id, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 45,
+            columnNumber: 617
+          }, this))
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+          lineNumber: 45,
+          columnNumber: 386
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+        lineNumber: 45,
+        columnNumber: 372
+      }, this),
+      /* @__PURE__ */ jsxDEV("label", { children: [
+        "Show",
+        /* @__PURE__ */ jsxDEV("select", { value: showId, disabled: !theatreId, onChange: (event) => {
+          setShowId(event.target.value);
+          setSelectedBooking(null);
+          setScanMessage("");
+        }, children: [
+          /* @__PURE__ */ jsxDEV("option", { value: "", children: "Select a show" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 45,
+            columnNumber: 876
+          }, this),
+          shows.map((show) => /* @__PURE__ */ jsxDEV("option", { value: show.id, children: [
+            date(show.date),
+            " Â· ",
+            show.startTime,
+            " Â· ",
+            data.screens.find((screen) => screen.id === show.screenId)?.name || "Screen"
+          ] }, show.id, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 45,
+            columnNumber: 936
+          }, this))
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+          lineNumber: 45,
+          columnNumber: 732
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+        lineNumber: 45,
+        columnNumber: 721
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+      lineNumber: 45,
+      columnNumber: 3
+    }, this),
+    showId && /* @__PURE__ */ jsxDEV(Fragment, { children: [
+      /* @__PURE__ */ jsxDEV("section", { className: "admin-scan-summary", children: [
+        /* @__PURE__ */ jsxDEV("div", { children: [
+          /* @__PURE__ */ jsxDEV("span", { children: "SELECTED SCREENING" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 46,
+            columnNumber: 61
+          }, this),
+          /* @__PURE__ */ jsxDEV("strong", { children: [
+            selectedMovie?.title,
+            " Â· ",
+            selectedTheatre?.name
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 46,
+            columnNumber: 92
+          }, this),
+          /* @__PURE__ */ jsxDEV("small", { children: selectedShow && `${date(selectedShow.date)} Â· ${selectedShow.startTime} Â· ${data.screens.find((screen) => screen.id === selectedShow.screenId)?.name || selectedShow.screenId}` }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 46,
+            columnNumber: 158
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+          lineNumber: 46,
+          columnNumber: 56
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "admin-scan-count", children: [
+          /* @__PURE__ */ jsxDEV("strong", { children: showBookings.length }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 46,
+            columnNumber: 392
+          }, this),
+          /* @__PURE__ */ jsxDEV("span", { children: "Total bookings" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 46,
+            columnNumber: 430
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+          lineNumber: 46,
+          columnNumber: 358
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "admin-scan-count", children: [
+          /* @__PURE__ */ jsxDEV("strong", { children: showBookings.filter((booking) => booking.attended).length }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 46,
+            columnNumber: 497
+          }, this),
+          /* @__PURE__ */ jsxDEV("span", { children: "Attended" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 46,
+            columnNumber: 573
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+          lineNumber: 46,
+          columnNumber: 463
+        }, this),
+        /* @__PURE__ */ jsxDEV("button", { className: "button", type: "button", onClick: startScan, children: [
+          /* @__PURE__ */ jsxDEV(ScanLine, { size: 17 }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 46,
+            columnNumber: 661
+          }, this),
+          " Scan QR"
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+          lineNumber: 46,
+          columnNumber: 600
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+        lineNumber: 46,
+        columnNumber: 16
+      }, this),
+      /* @__PURE__ */ jsxDEV("section", { className: "panel admin-scan-roster", children: [
+        /* @__PURE__ */ jsxDEV("div", { className: "admin-scan-toolbar", children: [
+          /* @__PURE__ */ jsxDEV("label", { className: "admin-scan-search", children: [
+            /* @__PURE__ */ jsxDEV(Search, { size: 17 }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+              lineNumber: 47,
+              columnNumber: 122
+            }, this),
+            /* @__PURE__ */ jsxDEV("input", { value: query, onChange: (event) => setQuery(event.target.value), placeholder: "Search name, mobile, email, or seat", "aria-label": "Search show bookings" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+              lineNumber: 47,
+              columnNumber: 142
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 47,
+            columnNumber: 85
+          }, this),
+          /* @__PURE__ */ jsxDEV("label", { className: "admin-scan-filter", children: [
+            /* @__PURE__ */ jsxDEV(Filter, { size: 15 }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+              lineNumber: 47,
+              columnNumber: 345
+            }, this),
+            /* @__PURE__ */ jsxDEV("select", { value: statusFilter, onChange: (event) => setStatusFilter(event.target.value), children: [
+              /* @__PURE__ */ jsxDEV("option", { value: "ALL", children: "All bookings" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                lineNumber: 47,
+                columnNumber: 452
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "CONFIRMED", children: "Confirmed" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                lineNumber: 47,
+                columnNumber: 493
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "PENDING", children: "Pending" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                lineNumber: 47,
+                columnNumber: 537
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "CANCELLED", children: "Cancelled" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                lineNumber: 47,
+                columnNumber: 577
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "ATTENDED", children: "Attended" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                lineNumber: 47,
+                columnNumber: 621
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "NOT_ATTENDED", children: "Not attended" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                lineNumber: 47,
+                columnNumber: 663
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+              lineNumber: 47,
+              columnNumber: 365
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 47,
+            columnNumber: 308
+          }, this),
+          /* @__PURE__ */ jsxDEV("label", { className: "admin-scan-filter", children: [
+            "Sort",
+            /* @__PURE__ */ jsxDEV("select", { value: sort, onChange: (event) => setSort(event.target.value), children: [
+              /* @__PURE__ */ jsxDEV("option", { value: "newest", children: "Newest first" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                lineNumber: 47,
+                columnNumber: 857
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "oldest", children: "Oldest first" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                lineNumber: 47,
+                columnNumber: 901
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "name", children: "Movie Aâ€“Z" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                lineNumber: 47,
+                columnNumber: 945
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+              lineNumber: 47,
+              columnNumber: 771
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 47,
+            columnNumber: 730
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+          lineNumber: 47,
+          columnNumber: 49
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "table-wrap", children: [
+          /* @__PURE__ */ jsxDEV("table", { children: [
+            /* @__PURE__ */ jsxDEV("thead", { children: /* @__PURE__ */ jsxDEV("tr", { children: [
+              /* @__PURE__ */ jsxDEV("th", { children: "Booking" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                lineNumber: 47,
+                columnNumber: 1055
+              }, this),
+              /* @__PURE__ */ jsxDEV("th", { children: "Audience" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                lineNumber: 47,
+                columnNumber: 1071
+              }, this),
+              /* @__PURE__ */ jsxDEV("th", { children: "Seats" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                lineNumber: 47,
+                columnNumber: 1088
+              }, this),
+              /* @__PURE__ */ jsxDEV("th", { children: "Status" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                lineNumber: 47,
+                columnNumber: 1102
+              }, this),
+              /* @__PURE__ */ jsxDEV("th", { children: "Attendance" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                lineNumber: 47,
+                columnNumber: 1117
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+              lineNumber: 47,
+              columnNumber: 1051
+            }, this) }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+              lineNumber: 47,
+              columnNumber: 1044
+            }, this),
+            /* @__PURE__ */ jsxDEV("tbody", { children: filtered.map((booking) => /* @__PURE__ */ jsxDEV("tr", { children: [
+              /* @__PURE__ */ jsxDEV("td", { children: /* @__PURE__ */ jsxDEV("strong", { children: booking.id }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                lineNumber: 47,
+                columnNumber: 1208
+              }, this) }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                lineNumber: 47,
+                columnNumber: 1204
+              }, this),
+              /* @__PURE__ */ jsxDEV("td", { children: [
+                data.users.find((user) => user.id === booking.userId)?.name || "Audience member",
+                /* @__PURE__ */ jsxDEV("small", { children: [
+                  booking.snapshot.mobile,
+                  " Â· ",
+                  booking.snapshot.email || "No email"
+                ] }, void 0, true, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                  lineNumber: 47,
+                  columnNumber: 1328
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                lineNumber: 47,
+                columnNumber: 1242
+              }, this),
+              /* @__PURE__ */ jsxDEV("td", { children: [
+                booking.seatIds.map((seatId) => scanSeatLabels[seatId] || "Seat label unavailable").join(", ") || "â€”",
+                /* @__PURE__ */ jsxDEV("small", { children: [
+                  booking.ticketCount,
+                  " ticket",
+                  booking.ticketCount === 1 ? "" : "s"
+                ] }, void 0, true, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                  lineNumber: 47,
+                  columnNumber: 1532
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                lineNumber: 47,
+                columnNumber: 1415
+              }, this),
+              /* @__PURE__ */ jsxDEV("td", { children: /* @__PURE__ */ jsxDEV("span", { className: `status ${booking.status.toLowerCase()}`, children: booking.status }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                lineNumber: 47,
+                columnNumber: 1622
+              }, this) }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                lineNumber: 47,
+                columnNumber: 1618
+              }, this),
+              /* @__PURE__ */ jsxDEV("td", { children: booking.attended ? /* @__PURE__ */ jsxDEV("span", { className: "scan-attended", children: [
+                /* @__PURE__ */ jsxDEV(Check, { size: 15 }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                  lineNumber: 47,
+                  columnNumber: 1765
+                }, this),
+                " Attended"
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                lineNumber: 47,
+                columnNumber: 1733
+              }, this) : booking.status === "CONFIRMED" ? "Not attended" : "Not eligible" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+                lineNumber: 47,
+                columnNumber: 1709
+              }, this)
+            ] }, booking.id, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+              lineNumber: 47,
+              columnNumber: 1183
+            }, this)) }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+              lineNumber: 47,
+              columnNumber: 1149
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 47,
+            columnNumber: 1037
+          }, this),
+          !filtered.length && !loading && /* @__PURE__ */ jsxDEV(Empty, { title: "No bookings match these filters." }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 47,
+            columnNumber: 1929
+          }, this),
+          loading && /* @__PURE__ */ jsxDEV("p", { className: "muted", role: "status", children: "Loading bookingsâ€¦" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 47,
+            columnNumber: 1992
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+          lineNumber: 47,
+          columnNumber: 1009
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+        lineNumber: 47,
+        columnNumber: 4
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+      lineNumber: 46,
+      columnNumber: 14
+    }, this),
+    scanning && /* @__PURE__ */ jsxDEV("div", { className: "scan-camera-backdrop", children: /* @__PURE__ */ jsxDEV("section", { className: "panel scan-camera-modal", role: "dialog", "aria-modal": "true", "aria-labelledby": "scan-camera-title", children: [
+      /* @__PURE__ */ jsxDEV("div", { className: "scan-camera-head", children: [
+        /* @__PURE__ */ jsxDEV("div", { children: [
+          /* @__PURE__ */ jsxDEV("h2", { id: "scan-camera-title", children: "Scan ticket QR" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 48,
+            columnNumber: 206
+          }, this),
+          /* @__PURE__ */ jsxDEV("p", { className: "muted", children: [
+            "Scanning for ",
+            selectedMovie?.title,
+            " Â· ",
+            selectedTheatre?.name,
+            " Â· ",
+            selectedShow && date(selectedShow.date)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 48,
+            columnNumber: 252
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+          lineNumber: 48,
+          columnNumber: 201
+        }, this),
+        /* @__PURE__ */ jsxDEV("button", { type: "button", className: "button secondary small", onClick: () => setScanning(false), children: [
+          /* @__PURE__ */ jsxDEV(VideoOff, { size: 15 }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 48,
+            columnNumber: 482
+          }, this),
+          " Stop camera"
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+          lineNumber: 48,
+          columnNumber: 390
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+        lineNumber: 48,
+        columnNumber: 167
+      }, this),
+      /* @__PURE__ */ jsxDEV("video", { ref: videoRef, className: "scan-camera-video", muted: true, playsInline: true }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+        lineNumber: 48,
+        columnNumber: 531
+      }, this),
+      /* @__PURE__ */ jsxDEV("p", { className: "muted", role: "status", children: scanMessage }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+        lineNumber: 48,
+        columnNumber: 603
+      }, this),
+      cameraError && /* @__PURE__ */ jsxDEV(Notice, { error: true, children: cameraError }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+        lineNumber: 48,
+        columnNumber: 671
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+      lineNumber: 48,
+      columnNumber: 54
+    }, this) }, void 0, false, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+      lineNumber: 48,
+      columnNumber: 16
+    }, this),
+    scanMessage && !scanning && /* @__PURE__ */ jsxDEV("section", { className: `panel scan-result ${selectedBooking?.attended ? "is-attended" : selectedBooking ? "is-valid" : ""}`, children: [
+      /* @__PURE__ */ jsxDEV("div", { className: "scan-result-heading", children: [
+        selectedBooking?.attended ? /* @__PURE__ */ jsxDEV(Check, { size: 21 }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+          lineNumber: 49,
+          columnNumber: 220
+        }, this) : selectedBooking ? /* @__PURE__ */ jsxDEV(ShieldCheck, { size: 21 }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+          lineNumber: 49,
+          columnNumber: 260
+        }, this) : /* @__PURE__ */ jsxDEV(ScanLine, { size: 21 }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+          lineNumber: 49,
+          columnNumber: 288
+        }, this),
+        /* @__PURE__ */ jsxDEV("strong", { children: scanMessage }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+          lineNumber: 49,
+          columnNumber: 311
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+        lineNumber: 49,
+        columnNumber: 154
+      }, this),
+      selectedBooking && /* @__PURE__ */ jsxDEV(Fragment, { children: [
+        /* @__PURE__ */ jsxDEV("dl", { children: [
+          /* @__PURE__ */ jsxDEV("dt", { children: "Booking ID" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 49,
+            columnNumber: 373
+          }, this),
+          /* @__PURE__ */ jsxDEV("dd", { children: selectedBooking.id }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 49,
+            columnNumber: 392
+          }, this),
+          /* @__PURE__ */ jsxDEV("dt", { children: "Movie / show" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 49,
+            columnNumber: 421
+          }, this),
+          /* @__PURE__ */ jsxDEV("dd", { children: [
+            selectedBooking.snapshot.movie,
+            " Â· ",
+            selectedBooking.snapshot.date,
+            " Â· ",
+            selectedBooking.snapshot.time
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 49,
+            columnNumber: 442
+          }, this),
+          /* @__PURE__ */ jsxDEV("dt", { children: "Theatre / screen" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 49,
+            columnNumber: 553
+          }, this),
+          /* @__PURE__ */ jsxDEV("dd", { children: [
+            selectedBooking.snapshot.theatre,
+            " Â· ",
+            selectedBooking.snapshot.screen
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 49,
+            columnNumber: 578
+          }, this),
+          /* @__PURE__ */ jsxDEV("dt", { children: "Audience" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 49,
+            columnNumber: 658
+          }, this),
+          /* @__PURE__ */ jsxDEV("dd", { children: data.users.find((user) => user.id === selectedBooking.userId)?.name || "Audience member" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 49,
+            columnNumber: 675
+          }, this),
+          /* @__PURE__ */ jsxDEV("dt", { children: "Mobile" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 49,
+            columnNumber: 774
+          }, this),
+          /* @__PURE__ */ jsxDEV("dd", { children: selectedBooking.snapshot.mobile }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 49,
+            columnNumber: 789
+          }, this),
+          /* @__PURE__ */ jsxDEV("dt", { children: "Email" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 49,
+            columnNumber: 831
+          }, this),
+          /* @__PURE__ */ jsxDEV("dd", { children: selectedBooking.snapshot.email || "Not provided" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 49,
+            columnNumber: 845
+          }, this),
+          /* @__PURE__ */ jsxDEV("dt", { children: "Seats / tickets" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 49,
+            columnNumber: 904
+          }, this),
+          /* @__PURE__ */ jsxDEV("dd", { children: [
+            selectedBooking.seatIds.map((seatId) => scanSeatLabels[seatId] || "Seat label unavailable").join(", "),
+            " Â· ",
+            selectedBooking.ticketCount
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 49,
+            columnNumber: 928
+          }, this),
+          /* @__PURE__ */ jsxDEV("dt", { children: "Booking status" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 49,
+            columnNumber: 1082
+          }, this),
+          /* @__PURE__ */ jsxDEV("dd", { children: [
+            selectedBooking.status,
+            " Â· ",
+            selectedBooking.confirmationStatus
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 49,
+            columnNumber: 1105
+          }, this),
+          /* @__PURE__ */ jsxDEV("dt", { children: "Amount" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 49,
+            columnNumber: 1178
+          }, this),
+          /* @__PURE__ */ jsxDEV("dd", { children: selectedBooking.totalAmount }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+            lineNumber: 49,
+            columnNumber: 1193
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+          lineNumber: 49,
+          columnNumber: 369
+        }, this),
+        selectedBooking.attended ? /* @__PURE__ */ jsxDEV(Notice, { children: "This ticket has already been checked in by the backend." }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+          lineNumber: 49,
+          columnNumber: 1264
+        }, this) : selectedBooking.status === "CONFIRMED" ? /* @__PURE__ */ jsxDEV(Notice, { children: "Ticket verification and attendance are handled by the backend scan endpoint." }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+          lineNumber: 49,
+          columnNumber: 1380
+        }, this) : /* @__PURE__ */ jsxDEV(Notice, { error: true, children: "Only confirmed bookings can be checked in." }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+          lineNumber: 49,
+          columnNumber: 1476
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+        lineNumber: 49,
+        columnNumber: 367
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+      lineNumber: 49,
+      columnNumber: 32
+    }, this),
+    !movieId && !loading && /* @__PURE__ */ jsxDEV(Empty, { title: "Select a movie to view its screenings and bookings.", children: /* @__PURE__ */ jsxDEV("p", { className: "muted", children: "Choose movie, theatre, and show to open the attendance scanner." }, void 0, false, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+      lineNumber: 50,
+      columnNumber: 95
+    }, this) }, void 0, false, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+      lineNumber: 50,
+      columnNumber: 28
+    }, this)
+  ] }, void 0, true, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx",
+    lineNumber: 43,
+    columnNumber: 10
+  }, this);
+}
+_s(AdminQrScanner, "jYjRwK44gDWHQHObYGVJcQFjMeM=", false, function() {
+  return [useApp];
+});
+_c = AdminQrScanner;
+var _c;
+$RefreshReg$(_c, "AdminQrScanner");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("E:/AV Website/AV-frontend/src/pages/AdminQrScanner.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,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VixNQUFNO0FBQUE7QUFBQSxLQURKVTtBQUFjLElBQUF3SDtBQUFBLGFBQUFBLElBQUEiLCJuYW1lcyI6WyJ1c2VFZmZlY3QiLCJ1c2VNZW1vIiwidXNlUmVmIiwidXNlU3RhdGUiLCJCcm93c2VyUVJDb2RlUmVhZGVyIiwiQ2hlY2siLCJGaWx0ZXIiLCJSZWZyZXNoQ3ciLCJTY2FuTGluZSIsIlNlYXJjaCIsIlNoaWVsZENoZWNrIiwiVmlkZW9PZmYiLCJ1c2VBcHAiLCJhZG1pblNjYW5UaWNrZXQiLCJkYXRhYmFzZSIsImdldEFkbWluQm9va2luZ3MiLCJnZXRTaG93QXZhaWxhYmlsaXR5IiwiY3JlYXRlU2VhdExhYmVsTWFwIiwiZGF0ZSIsIkVtcHR5IiwiTm90aWNlIiwiU2VjdGlvbkhlYWRpbmciLCJBZG1pblFyU2Nhbm5lciIsIl9zIiwiZGF0YSIsIm1vdmllSWQiLCJzZXRNb3ZpZUlkIiwidGhlYXRyZUlkIiwic2V0VGhlYXRyZUlkIiwic2hvd0lkIiwic2V0U2hvd0lkIiwiYm9va2luZ3MiLCJzZXRCb29raW5ncyIsImxvYWRpbmciLCJzZXRMb2FkaW5nIiwibG9hZEVycm9yIiwic2V0TG9hZEVycm9yIiwicXVlcnkiLCJzZXRRdWVyeSIsInN0YXR1c0ZpbHRlciIsInNldFN0YXR1c0ZpbHRlciIsInNvcnQiLCJzZXRTb3J0Iiwic2Nhbm5pbmciLCJzZXRTY2FubmluZyIsImNhbWVyYUVycm9yIiwic2V0Q2FtZXJhRXJyb3IiLCJzY2FuTWVzc2FnZSIsInNldFNjYW5NZXNzYWdlIiwic2VsZWN0ZWRCb29raW5nIiwic2V0U2VsZWN0ZWRCb29raW5nIiwic2NhblNlYXRMYWJlbHMiLCJzZXRTY2FuU2VhdExhYmVscyIsInZpZGVvUmVmIiwibGFzdFNjYW4iLCJyZWxvYWQiLCJyZXN1bHQiLCJ1cGRhdGUiLCJjdXJyZW50IiwiZXJyb3IiLCJtZXNzYWdlIiwibW92aWVzV2l0aEJvb2tpbmdzIiwibW92aWVzIiwiZmlsdGVyIiwibW92aWUiLCJzb21lIiwiYm9va2luZyIsInNob3dzIiwiZmluZCIsInNob3ciLCJpZCIsInRoZWF0cmVzIiwidGhlYXRyZSIsInNob3dCb29raW5ncyIsImZpbHRlcmVkIiwicSIsInRyaW0iLCJ0b0xvd2VyQ2FzZSIsImF0dGVuZGVkIiwic3RhdHVzIiwiSlNPTiIsInN0cmluZ2lmeSIsInNuYXBzaG90Iiwic2VhdElkcyIsIm1hcCIsImluY2x1ZGVzIiwiYSIsImIiLCJjcmVhdGVkQXQiLCJsb2NhbGVDb21wYXJlIiwic2VsZWN0ZWRTaG93Iiwic2VsZWN0ZWRNb3ZpZSIsInNlbGVjdGVkVGhlYXRyZSIsImFjdGl2ZSIsInRoZW4iLCJzZWF0cyIsIkFycmF5IiwiaXNBcnJheSIsImxheW91dCIsImNvbHVtbnMiLCJOdW1iZXIiLCJzY3JlZW4iLCJzZWF0c1BlclJvdyIsInZlcnNpb24iLCJjYXRjaCIsInJlYWRlciIsImNvbnRyb2xzIiwic3VibWl0dGluZyIsImRlY29kZUZyb21WaWRlb0RldmljZSIsInVuZGVmaW5lZCIsInJhdyIsImdldFRleHQiLCJyZXNwb25zZSIsInJlZnJlc2hlZCIsImJvb2tpbmdJZCIsIlN0cmluZyIsIm1hdGNoIiwiaXRlbSIsIm5leHQiLCJzdG9wIiwic3RhcnRTY2FuIiwiZXZlbnQiLCJ0YXJnZXQiLCJ2YWx1ZSIsInRpdGxlIiwibmFtZSIsImNpdHkiLCJzdGFydFRpbWUiLCJzY3JlZW5zIiwic2NyZWVuSWQiLCJsZW5ndGgiLCJ1c2VycyIsInVzZXIiLCJ1c2VySWQiLCJtb2JpbGUiLCJlbWFpbCIsInNlYXRJZCIsImpvaW4iLCJ0aWNrZXRDb3VudCIsInRpbWUiLCJjb25maXJtYXRpb25TdGF0dXMiLCJ0b3RhbEFtb3VudCIsIl9jIl0sImlnbm9yZUxpc3QiOltdLCJzb3VyY2VzIjpbIkFkbWluUXJTY2FubmVyLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQge3VzZUVmZmVjdCx1c2VNZW1vLHVzZVJlZix1c2VTdGF0ZX0gZnJvbSAncmVhY3QnO1xyXG5pbXBvcnQge0Jyb3dzZXJRUkNvZGVSZWFkZXJ9IGZyb20gJ0B6eGluZy9icm93c2VyJztcclxuaW1wb3J0IHtDaGVjayxGaWx0ZXIsUmVmcmVzaEN3LFNjYW5MaW5lLFNlYXJjaCxTaGllbGRDaGVjayxWaWRlbyxWaWRlb09mZn0gZnJvbSAnbHVjaWRlLXJlYWN0JztcclxuaW1wb3J0IHt1c2VBcHB9IGZyb20gJy4uL2NvbnRleHQvQXBwQ29udGV4dCc7XHJcbmltcG9ydCB7YWRtaW5TY2FuVGlja2V0LGRhdGFiYXNlLGdldEFkbWluQm9va2luZ3MsZ2V0U2hvd0F2YWlsYWJpbGl0eX0gZnJvbSAnLi4vc2VydmljZXMvYXBpJztcclxuaW1wb3J0IHtjcmVhdGVTZWF0TGFiZWxNYXB9IGZyb20gJy4uL3V0aWxzL3NlYXRMYXlvdXQnO1xyXG5pbXBvcnQge2RhdGUsRW1wdHksTm90aWNlLFNlY3Rpb25IZWFkaW5nfSBmcm9tICcuLi9jb21wb25lbnRzL0NvbW1vbic7XHJcbmltcG9ydCB0eXBlIHtCb29raW5nfSBmcm9tICcuLi90eXBlcyc7XHJcbmltcG9ydCAnLi9hZG1pbi1xci1zY2FubmVyLmNzcyc7XHJcblxyXG5leHBvcnQgZnVuY3Rpb24gQWRtaW5RclNjYW5uZXIoKXtcclxuIGNvbnN0IHtkYXRhfT11c2VBcHAoKTtjb25zdCBbbW92aWVJZCxzZXRNb3ZpZUlkXT11c2VTdGF0ZSgnJyk7Y29uc3QgW3RoZWF0cmVJZCxzZXRUaGVhdHJlSWRdPXVzZVN0YXRlKCcnKTtjb25zdCBbc2hvd0lkLHNldFNob3dJZF09dXNlU3RhdGUoJycpO2NvbnN0IFtib29raW5ncyxzZXRCb29raW5nc109dXNlU3RhdGU8Qm9va2luZ1tdPihbXSk7Y29uc3QgW2xvYWRpbmcsc2V0TG9hZGluZ109dXNlU3RhdGUodHJ1ZSk7Y29uc3QgW2xvYWRFcnJvcixzZXRMb2FkRXJyb3JdPXVzZVN0YXRlKCcnKTtjb25zdCBbcXVlcnksc2V0UXVlcnldPXVzZVN0YXRlKCcnKTtjb25zdCBbc3RhdHVzRmlsdGVyLHNldFN0YXR1c0ZpbHRlcl09dXNlU3RhdGUoJ0FMTCcpO2NvbnN0IFtzb3J0LHNldFNvcnRdPXVzZVN0YXRlPCduZXdlc3QnfCdvbGRlc3QnfCduYW1lJz4oJ25ld2VzdCcpO2NvbnN0IFtzY2FubmluZyxzZXRTY2FubmluZ109dXNlU3RhdGUoZmFsc2UpO2NvbnN0IFtjYW1lcmFFcnJvcixzZXRDYW1lcmFFcnJvcl09dXNlU3RhdGUoJycpO2NvbnN0IFtzY2FuTWVzc2FnZSxzZXRTY2FuTWVzc2FnZV09dXNlU3RhdGUoJycpO2NvbnN0IFtzZWxlY3RlZEJvb2tpbmcsc2V0U2VsZWN0ZWRCb29raW5nXT11c2VTdGF0ZTxCb29raW5nfG51bGw+KG51bGwpO2NvbnN0IFtzY2FuU2VhdExhYmVscyxzZXRTY2FuU2VhdExhYmVsc109dXNlU3RhdGU8UmVjb3JkPHN0cmluZyxzdHJpbmc+Pih7fSk7Y29uc3QgdmlkZW9SZWY9dXNlUmVmPEhUTUxWaWRlb0VsZW1lbnQ+KG51bGwpO2NvbnN0IGxhc3RTY2FuPXVzZVJlZignJyk7XHJcbiBjb25zdCByZWxvYWQ9YXN5bmMoKT0+e3NldExvYWRpbmcodHJ1ZSk7c2V0TG9hZEVycm9yKCcnKTt0cnl7Y29uc3QgcmVzdWx0PWF3YWl0IGdldEFkbWluQm9va2luZ3MoKTtzZXRCb29raW5ncyhyZXN1bHQpO2RhdGFiYXNlLnVwZGF0ZShjdXJyZW50PT57Y3VycmVudC5ib29raW5ncz1yZXN1bHQ7fSk7fWNhdGNoKGVycm9yKXtzZXRMb2FkRXJyb3IoKGVycm9yIGFzIEVycm9yKS5tZXNzYWdlKTt9ZmluYWxseXtzZXRMb2FkaW5nKGZhbHNlKTt9fTtcclxuIHVzZUVmZmVjdCgoKT0+e3ZvaWQgcmVsb2FkKCk7fSxbXSk7XHJcbiBjb25zdCBtb3ZpZXNXaXRoQm9va2luZ3M9dXNlTWVtbygoKT0+ZGF0YS5tb3ZpZXMuZmlsdGVyKG1vdmllPT5ib29raW5ncy5zb21lKGJvb2tpbmc9PmRhdGEuc2hvd3MuZmluZChzaG93PT5zaG93LmlkPT09Ym9va2luZy5zaG93SWQpPy5tb3ZpZUlkPT09bW92aWUuaWQpKSxbZGF0YS5tb3ZpZXMsZGF0YS5zaG93cyxib29raW5nc10pO1xyXG4gY29uc3QgdGhlYXRyZXM9dXNlTWVtbygoKT0+ZGF0YS50aGVhdHJlcy5maWx0ZXIodGhlYXRyZT0+ZGF0YS5zaG93cy5zb21lKHNob3c9PnNob3cudGhlYXRyZUlkPT09dGhlYXRyZS5pZCYmc2hvdy5tb3ZpZUlkPT09bW92aWVJZCYmYm9va2luZ3Muc29tZShib29raW5nPT5ib29raW5nLnNob3dJZD09PXNob3cuaWQpKSksW2RhdGEudGhlYXRyZXMsZGF0YS5zaG93cyxib29raW5ncyxtb3ZpZUlkXSk7XHJcbiBjb25zdCBzaG93cz11c2VNZW1vKCgpPT5kYXRhLnNob3dzLmZpbHRlcihzaG93PT5zaG93Lm1vdmllSWQ9PT1tb3ZpZUlkJiZzaG93LnRoZWF0cmVJZD09PXRoZWF0cmVJZCYmYm9va2luZ3Muc29tZShib29raW5nPT5ib29raW5nLnNob3dJZD09PXNob3cuaWQpKSxbZGF0YS5zaG93cyxib29raW5ncyxtb3ZpZUlkLHRoZWF0cmVJZF0pO1xyXG4gY29uc3Qgc2hvd0Jvb2tpbmdzPXVzZU1lbW8oKCk9PmJvb2tpbmdzLmZpbHRlcihib29raW5nPT5ib29raW5nLnNob3dJZD09PXNob3dJZCksW2Jvb2tpbmdzLHNob3dJZF0pO1xyXG4gY29uc3QgZmlsdGVyZWQ9dXNlTWVtbygoKT0+e2NvbnN0IHE9cXVlcnkudHJpbSgpLnRvTG93ZXJDYXNlKCk7cmV0dXJuIFsuLi5zaG93Qm9va2luZ3NdLmZpbHRlcihib29raW5nPT4oc3RhdHVzRmlsdGVyPT09J0FMTCd8fChzdGF0dXNGaWx0ZXI9PT0nQVRURU5ERUQnP2Jvb2tpbmcuYXR0ZW5kZWQ6c3RhdHVzRmlsdGVyPT09J05PVF9BVFRFTkRFRCc/IWJvb2tpbmcuYXR0ZW5kZWQ6Ym9va2luZy5zdGF0dXM9PT1zdGF0dXNGaWx0ZXIpKSYmKCFxfHxKU09OLnN0cmluZ2lmeShbYm9va2luZy5pZCxib29raW5nLnNuYXBzaG90LGJvb2tpbmcuc2VhdElkcy5tYXAoKGlkOnN0cmluZyk9PnNjYW5TZWF0TGFiZWxzW2lkXXx8aWQpXSkudG9Mb3dlckNhc2UoKS5pbmNsdWRlcyhxKSkpLnNvcnQoKGEsYik9PnNvcnQ9PT0nbmV3ZXN0Jz9iLmNyZWF0ZWRBdC5sb2NhbGVDb21wYXJlKGEuY3JlYXRlZEF0KTpzb3J0PT09J29sZGVzdCc/YS5jcmVhdGVkQXQubG9jYWxlQ29tcGFyZShiLmNyZWF0ZWRBdCk6YS5zbmFwc2hvdC5tb3ZpZS5sb2NhbGVDb21wYXJlKGIuc25hcHNob3QubW92aWUpKTt9LFtzaG93Qm9va2luZ3MscXVlcnksc3RhdHVzRmlsdGVyLHNvcnQsc2NhblNlYXRMYWJlbHNdKTtcclxuIGNvbnN0IHNlbGVjdGVkU2hvdz1zaG93cy5maW5kKHNob3c9PnNob3cuaWQ9PT1zaG93SWQpO2NvbnN0IHNlbGVjdGVkTW92aWU9ZGF0YS5tb3ZpZXMuZmluZChtb3ZpZT0+bW92aWUuaWQ9PT1tb3ZpZUlkKTtjb25zdCBzZWxlY3RlZFRoZWF0cmU9ZGF0YS50aGVhdHJlcy5maW5kKHRoZWF0cmU9PnRoZWF0cmUuaWQ9PT10aGVhdHJlSWQpO1xyXG4gdXNlRWZmZWN0KCgpPT57bGV0IGFjdGl2ZT10cnVlO3NldFNjYW5TZWF0TGFiZWxzKHt9KTtpZighc2hvd0lkKXJldHVybjtnZXRTaG93QXZhaWxhYmlsaXR5KHNob3dJZCkudGhlbihyZXN1bHQ9PntpZighYWN0aXZlKXJldHVybjtjb25zdCBzZWF0cz1BcnJheS5pc0FycmF5KHJlc3VsdC5sYXlvdXQ/LnNlYXRzKT9yZXN1bHQubGF5b3V0LnNlYXRzOltdO2NvbnN0IGNvbHVtbnM9TnVtYmVyKHJlc3VsdC5zY3JlZW4/LnNlYXRzUGVyUm93fHxyZXN1bHQubGF5b3V0Py52ZXJzaW9uPy5zZWF0c1BlclJvdyl8fDEyO3NldFNjYW5TZWF0TGFiZWxzKGNyZWF0ZVNlYXRMYWJlbE1hcChzZWF0cyxjb2x1bW5zKSk7fSkuY2F0Y2goKCk9PntpZihhY3RpdmUpc2V0U2NhblNlYXRMYWJlbHMoe30pO30pO3JldHVybigpPT57YWN0aXZlPWZhbHNlO307fSxbc2hvd0lkXSk7XHJcbiB1c2VFZmZlY3QoKCk9PntpZighc2Nhbm5pbmcpcmV0dXJuO2NvbnN0IHJlYWRlcj1uZXcgQnJvd3NlclFSQ29kZVJlYWRlcigpO2xldCBjb250cm9sczp7c3RvcDooKT0+dm9pZH18dW5kZWZpbmVkO2xldCBzdWJtaXR0aW5nPWZhbHNlO3NldENhbWVyYUVycm9yKCcnKTtzZXRTY2FuTWVzc2FnZSgnUG9pbnQgdGhlIGNhbWVyYSBhdCB0aGUgYm9va2luZyBRUiBjb2RlLicpO3ZvaWQgcmVhZGVyLmRlY29kZUZyb21WaWRlb0RldmljZSh1bmRlZmluZWQsdmlkZW9SZWYuY3VycmVudCEscmVzdWx0PT57aWYoIXJlc3VsdHx8c3VibWl0dGluZylyZXR1cm47Y29uc3QgcmF3PXJlc3VsdC5nZXRUZXh0KCk7aWYocmF3PT09bGFzdFNjYW4uY3VycmVudClyZXR1cm47bGFzdFNjYW4uY3VycmVudD1yYXc7c3VibWl0dGluZz10cnVlO3NldFNjYW5NZXNzYWdlKCdRUiBkZXRlY3RlZC4gVmVyaWZ5aW5nIHRpY2tldC4uLicpO3ZvaWQgYWRtaW5TY2FuVGlja2V0KHNob3dJZCxyYXcpLnRoZW4oYXN5bmMgcmVzcG9uc2U9Pntjb25zdCByZWZyZXNoZWQ9YXdhaXQgZ2V0QWRtaW5Cb29raW5ncygpO3NldEJvb2tpbmdzKHJlZnJlc2hlZCk7ZGF0YWJhc2UudXBkYXRlKGN1cnJlbnQ9PntjdXJyZW50LmJvb2tpbmdzPXJlZnJlc2hlZDt9KTtjb25zdCBib29raW5nSWQ9U3RyaW5nKHJlc3BvbnNlPy5ib29raW5nSWR8fCcnKTtjb25zdCBtYXRjaD1yZWZyZXNoZWQuZmluZChpdGVtPT5pdGVtLmlkPT09Ym9va2luZ0lkKTtpZighbWF0Y2gpe3NldFNlbGVjdGVkQm9va2luZyhudWxsKTtzZXRTY2FuTWVzc2FnZShTdHJpbmcocmVzcG9uc2U/LnJlc3VsdHx8J1RoZSBiYWNrZW5kIGNvdWxkIG5vdCBmaW5kIHRoaXMgYm9va2luZy4nKSk7c2V0U2Nhbm5pbmcoZmFsc2UpO3JldHVybjt9c2V0U2VsZWN0ZWRCb29raW5nKG1hdGNoKTtzZXRTY2FuTWVzc2FnZShTdHJpbmcocmVzcG9uc2U/LnJlc3VsdHx8KG1hdGNoLmF0dGVuZGVkPydUaGlzIHRpY2tldCBoYXMgYWxyZWFkeSBiZWVuIGNoZWNrZWQgaW4uJzonVGlja2V0IHZlcmlmaWVkIGFuZCBhdHRlbmRhbmNlIHJlY29yZGVkLicpKSk7c2V0U2Nhbm5pbmcoZmFsc2UpO30pLmNhdGNoKGVycm9yPT57c2V0U2VsZWN0ZWRCb29raW5nKG51bGwpO3NldFNjYW5NZXNzYWdlKCcnKTtzZXRDYW1lcmFFcnJvcigoZXJyb3IgYXMgRXJyb3IpLm1lc3NhZ2V8fCdUaGUgYmFja2VuZCBjb3VsZCBub3QgdmVyaWZ5IHRoaXMgdGlja2V0LicpO3N1Ym1pdHRpbmc9ZmFsc2U7fSk7fSkudGhlbihuZXh0PT57Y29udHJvbHM9bmV4dDt9KS5jYXRjaChlcnJvcj0+e3NldENhbWVyYUVycm9yKChlcnJvciBhcyBFcnJvcikubWVzc2FnZXx8J0NhbWVyYSBjb3VsZCBub3QgYmUgb3BlbmVkLiBDaGVjayBjYW1lcmEgcGVybWlzc2lvbiBhbmQgdHJ5IGFnYWluLicpO3NldFNjYW5uaW5nKGZhbHNlKTt9KTtyZXR1cm4oKT0+e2NvbnRyb2xzPy5zdG9wKCk7fTt9LFtzY2FubmluZyxzaG93SWRdKTtcclxuIGNvbnN0IHN0YXJ0U2Nhbj0oKT0+e2xhc3RTY2FuLmN1cnJlbnQ9Jyc7c2V0U2VsZWN0ZWRCb29raW5nKG51bGwpO3NldFNjYW5NZXNzYWdlKCcnKTtzZXRDYW1lcmFFcnJvcignJyk7c2V0U2Nhbm5pbmcodHJ1ZSk7fTtcclxuIHJldHVybiA8ZGl2IGNsYXNzTmFtZT1cImFkbWluLWNvbnRlbnQgYWRtaW4tc2Nhbi1wYWdlXCI+PFNlY3Rpb25IZWFkaW5nIGV5ZWJyb3c9XCJBRE1JU1NJT04gQ09OVFJPTFwiIHRpdGxlPVwiU2NhbiBib29raW5nIFFSXCIgZGVzY3JpcHRpb249XCJDaG9vc2UgYSBzY3JlZW5pbmcsIHJldmlldyBpdHMgYm9va2luZ3MsIHRoZW4gc2NhbiBhIHRpY2tldCB0byB2ZXJpZnkgYW5kIHJlY29yZCBhdHRlbmRhbmNlLlwiLz5cclxuICB7bG9hZEVycm9yJiY8Tm90aWNlIGVycm9yPntsb2FkRXJyb3J9PGJ1dHRvbiBjbGFzc05hbWU9XCJidXR0b24gc2Vjb25kYXJ5IHNtYWxsXCIgb25DbGljaz17KCk9PnZvaWQgcmVsb2FkKCl9PjxSZWZyZXNoQ3cgc2l6ZT17MTR9Lz4gUmV0cnk8L2J1dHRvbj48L05vdGljZT59XHJcbiAgPHNlY3Rpb24gY2xhc3NOYW1lPVwicGFuZWwgYWRtaW4tc2Nhbi1maWx0ZXJzXCI+PGxhYmVsPk1vdmllPHNlbGVjdCB2YWx1ZT17bW92aWVJZH0gb25DaGFuZ2U9e2V2ZW50PT57c2V0TW92aWVJZChldmVudC50YXJnZXQudmFsdWUpO3NldFRoZWF0cmVJZCgnJyk7c2V0U2hvd0lkKCcnKTtzZXRTZWxlY3RlZEJvb2tpbmcobnVsbCk7c2V0U2Nhbk1lc3NhZ2UoJycpO319PjxvcHRpb24gdmFsdWU9XCJcIj5TZWxlY3QgYSBtb3ZpZTwvb3B0aW9uPnttb3ZpZXNXaXRoQm9va2luZ3MubWFwKG1vdmllPT48b3B0aW9uIGtleT17bW92aWUuaWR9IHZhbHVlPXttb3ZpZS5pZH0+e21vdmllLnRpdGxlfTwvb3B0aW9uPil9PC9zZWxlY3Q+PC9sYWJlbD48bGFiZWw+VGhlYXRyZTxzZWxlY3QgdmFsdWU9e3RoZWF0cmVJZH0gZGlzYWJsZWQ9eyFtb3ZpZUlkfSBvbkNoYW5nZT17ZXZlbnQ9PntzZXRUaGVhdHJlSWQoZXZlbnQudGFyZ2V0LnZhbHVlKTtzZXRTaG93SWQoJycpO3NldFNlbGVjdGVkQm9va2luZyhudWxsKTtzZXRTY2FuTWVzc2FnZSgnJyk7fX0+PG9wdGlvbiB2YWx1ZT1cIlwiPlNlbGVjdCBhIHRoZWF0cmU8L29wdGlvbj57dGhlYXRyZXMubWFwKHRoZWF0cmU9PjxvcHRpb24ga2V5PXt0aGVhdHJlLmlkfSB2YWx1ZT17dGhlYXRyZS5pZH0+e3RoZWF0cmUubmFtZX0gw4LCtyB7dGhlYXRyZS5jaXR5fTwvb3B0aW9uPil9PC9zZWxlY3Q+PC9sYWJlbD48bGFiZWw+U2hvdzxzZWxlY3QgdmFsdWU9e3Nob3dJZH0gZGlzYWJsZWQ9eyF0aGVhdHJlSWR9IG9uQ2hhbmdlPXtldmVudD0+e3NldFNob3dJZChldmVudC50YXJnZXQudmFsdWUpO3NldFNlbGVjdGVkQm9va2luZyhudWxsKTtzZXRTY2FuTWVzc2FnZSgnJyk7fX0+PG9wdGlvbiB2YWx1ZT1cIlwiPlNlbGVjdCBhIHNob3c8L29wdGlvbj57c2hvd3MubWFwKHNob3c9PjxvcHRpb24ga2V5PXtzaG93LmlkfSB2YWx1ZT17c2hvdy5pZH0+e2RhdGUoc2hvdy5kYXRlKX0gw4LCtyB7c2hvdy5zdGFydFRpbWV9IMOCwrcge2RhdGEuc2NyZWVucy5maW5kKHNjcmVlbj0+c2NyZWVuLmlkPT09c2hvdy5zY3JlZW5JZCk/Lm5hbWV8fCdTY3JlZW4nfTwvb3B0aW9uPil9PC9zZWxlY3Q+PC9sYWJlbD48L3NlY3Rpb24+XHJcbiAge3Nob3dJZCYmPD48c2VjdGlvbiBjbGFzc05hbWU9XCJhZG1pbi1zY2FuLXN1bW1hcnlcIj48ZGl2PjxzcGFuPlNFTEVDVEVEIFNDUkVFTklORzwvc3Bhbj48c3Ryb25nPntzZWxlY3RlZE1vdmllPy50aXRsZX0gw4LCtyB7c2VsZWN0ZWRUaGVhdHJlPy5uYW1lfTwvc3Ryb25nPjxzbWFsbD57c2VsZWN0ZWRTaG93JiZgJHtkYXRlKHNlbGVjdGVkU2hvdy5kYXRlKX0gw4LCtyAke3NlbGVjdGVkU2hvdy5zdGFydFRpbWV9IMOCwrcgJHtkYXRhLnNjcmVlbnMuZmluZChzY3JlZW49PnNjcmVlbi5pZD09PXNlbGVjdGVkU2hvdy5zY3JlZW5JZCk/Lm5hbWV8fHNlbGVjdGVkU2hvdy5zY3JlZW5JZH1gfTwvc21hbGw+PC9kaXY+PGRpdiBjbGFzc05hbWU9XCJhZG1pbi1zY2FuLWNvdW50XCI+PHN0cm9uZz57c2hvd0Jvb2tpbmdzLmxlbmd0aH08L3N0cm9uZz48c3Bhbj5Ub3RhbCBib29raW5nczwvc3Bhbj48L2Rpdj48ZGl2IGNsYXNzTmFtZT1cImFkbWluLXNjYW4tY291bnRcIj48c3Ryb25nPntzaG93Qm9va2luZ3MuZmlsdGVyKGJvb2tpbmc9PmJvb2tpbmcuYXR0ZW5kZWQpLmxlbmd0aH08L3N0cm9uZz48c3Bhbj5BdHRlbmRlZDwvc3Bhbj48L2Rpdj48YnV0dG9uIGNsYXNzTmFtZT1cImJ1dHRvblwiIHR5cGU9XCJidXR0b25cIiBvbkNsaWNrPXtzdGFydFNjYW59PjxTY2FuTGluZSBzaXplPXsxN30vPiBTY2FuIFFSPC9idXR0b24+PC9zZWN0aW9uPlxyXG4gICA8c2VjdGlvbiBjbGFzc05hbWU9XCJwYW5lbCBhZG1pbi1zY2FuLXJvc3RlclwiPjxkaXYgY2xhc3NOYW1lPVwiYWRtaW4tc2Nhbi10b29sYmFyXCI+PGxhYmVsIGNsYXNzTmFtZT1cImFkbWluLXNjYW4tc2VhcmNoXCI+PFNlYXJjaCBzaXplPXsxN30vPjxpbnB1dCB2YWx1ZT17cXVlcnl9IG9uQ2hhbmdlPXtldmVudD0+c2V0UXVlcnkoZXZlbnQudGFyZ2V0LnZhbHVlKX0gcGxhY2Vob2xkZXI9XCJTZWFyY2ggbmFtZSwgbW9iaWxlLCBlbWFpbCwgb3Igc2VhdFwiIGFyaWEtbGFiZWw9XCJTZWFyY2ggc2hvdyBib29raW5nc1wiLz48L2xhYmVsPjxsYWJlbCBjbGFzc05hbWU9XCJhZG1pbi1zY2FuLWZpbHRlclwiPjxGaWx0ZXIgc2l6ZT17MTV9Lz48c2VsZWN0IHZhbHVlPXtzdGF0dXNGaWx0ZXJ9IG9uQ2hhbmdlPXtldmVudD0+c2V0U3RhdHVzRmlsdGVyKGV2ZW50LnRhcmdldC52YWx1ZSl9PjxvcHRpb24gdmFsdWU9XCJBTExcIj5BbGwgYm9va2luZ3M8L29wdGlvbj48b3B0aW9uIHZhbHVlPVwiQ09ORklSTUVEXCI+Q29uZmlybWVkPC9vcHRpb24+PG9wdGlvbiB2YWx1ZT1cIlBFTkRJTkdcIj5QZW5kaW5nPC9vcHRpb24+PG9wdGlvbiB2YWx1ZT1cIkNBTkNFTExFRFwiPkNhbmNlbGxlZDwvb3B0aW9uPjxvcHRpb24gdmFsdWU9XCJBVFRFTkRFRFwiPkF0dGVuZGVkPC9vcHRpb24+PG9wdGlvbiB2YWx1ZT1cIk5PVF9BVFRFTkRFRFwiPk5vdCBhdHRlbmRlZDwvb3B0aW9uPjwvc2VsZWN0PjwvbGFiZWw+PGxhYmVsIGNsYXNzTmFtZT1cImFkbWluLXNjYW4tZmlsdGVyXCI+U29ydDxzZWxlY3QgdmFsdWU9e3NvcnR9IG9uQ2hhbmdlPXtldmVudD0+c2V0U29ydChldmVudC50YXJnZXQudmFsdWUgYXMgdHlwZW9mIHNvcnQpfT48b3B0aW9uIHZhbHVlPVwibmV3ZXN0XCI+TmV3ZXN0IGZpcnN0PC9vcHRpb24+PG9wdGlvbiB2YWx1ZT1cIm9sZGVzdFwiPk9sZGVzdCBmaXJzdDwvb3B0aW9uPjxvcHRpb24gdmFsdWU9XCJuYW1lXCI+TW92aWUgQcOi4oKs4oCcWjwvb3B0aW9uPjwvc2VsZWN0PjwvbGFiZWw+PC9kaXY+PGRpdiBjbGFzc05hbWU9XCJ0YWJsZS13cmFwXCI+PHRhYmxlPjx0aGVhZD48dHI+PHRoPkJvb2tpbmc8L3RoPjx0aD5BdWRpZW5jZTwvdGg+PHRoPlNlYXRzPC90aD48dGg+U3RhdHVzPC90aD48dGg+QXR0ZW5kYW5jZTwvdGg+PC90cj48L3RoZWFkPjx0Ym9keT57ZmlsdGVyZWQubWFwKGJvb2tpbmc9Pjx0ciBrZXk9e2Jvb2tpbmcuaWR9Pjx0ZD48c3Ryb25nPntib29raW5nLmlkfTwvc3Ryb25nPjwvdGQ+PHRkPntkYXRhLnVzZXJzLmZpbmQodXNlcj0+dXNlci5pZD09PWJvb2tpbmcudXNlcklkKT8ubmFtZXx8J0F1ZGllbmNlIG1lbWJlcid9PHNtYWxsPntib29raW5nLnNuYXBzaG90Lm1vYmlsZX0gw4LCtyB7Ym9va2luZy5zbmFwc2hvdC5lbWFpbHx8J05vIGVtYWlsJ308L3NtYWxsPjwvdGQ+PHRkPntib29raW5nLnNlYXRJZHMubWFwKChzZWF0SWQ6c3RyaW5nKT0+c2NhblNlYXRMYWJlbHNbc2VhdElkXXx8J1NlYXQgbGFiZWwgdW5hdmFpbGFibGUnKS5qb2luKCcsICcpfHwnw6LigqzigJ0nfTxzbWFsbD57Ym9va2luZy50aWNrZXRDb3VudH0gdGlja2V0e2Jvb2tpbmcudGlja2V0Q291bnQ9PT0xPycnOidzJ308L3NtYWxsPjwvdGQ+PHRkPjxzcGFuIGNsYXNzTmFtZT17YHN0YXR1cyAke2Jvb2tpbmcuc3RhdHVzLnRvTG93ZXJDYXNlKCl9YH0+e2Jvb2tpbmcuc3RhdHVzfTwvc3Bhbj48L3RkPjx0ZD57Ym9va2luZy5hdHRlbmRlZD88c3BhbiBjbGFzc05hbWU9XCJzY2FuLWF0dGVuZGVkXCI+PENoZWNrIHNpemU9ezE1fS8+IEF0dGVuZGVkPC9zcGFuPjpib29raW5nLnN0YXR1cz09PSdDT05GSVJNRUQnPydOb3QgYXR0ZW5kZWQnOidOb3QgZWxpZ2libGUnfTwvdGQ+PC90cj4pfTwvdGJvZHk+PC90YWJsZT57IWZpbHRlcmVkLmxlbmd0aCYmIWxvYWRpbmcmJjxFbXB0eSB0aXRsZT1cIk5vIGJvb2tpbmdzIG1hdGNoIHRoZXNlIGZpbHRlcnMuXCIvPn17bG9hZGluZyYmPHAgY2xhc3NOYW1lPVwibXV0ZWRcIiByb2xlPVwic3RhdHVzXCI+TG9hZGluZyBib29raW5nc8Oi4oKswqY8L3A+fTwvZGl2Pjwvc2VjdGlvbj48Lz59XHJcbiAge3NjYW5uaW5nJiY8ZGl2IGNsYXNzTmFtZT1cInNjYW4tY2FtZXJhLWJhY2tkcm9wXCI+PHNlY3Rpb24gY2xhc3NOYW1lPVwicGFuZWwgc2Nhbi1jYW1lcmEtbW9kYWxcIiByb2xlPVwiZGlhbG9nXCIgYXJpYS1tb2RhbD1cInRydWVcIiBhcmlhLWxhYmVsbGVkYnk9XCJzY2FuLWNhbWVyYS10aXRsZVwiPjxkaXYgY2xhc3NOYW1lPVwic2Nhbi1jYW1lcmEtaGVhZFwiPjxkaXY+PGgyIGlkPVwic2Nhbi1jYW1lcmEtdGl0bGVcIj5TY2FuIHRpY2tldCBRUjwvaDI+PHAgY2xhc3NOYW1lPVwibXV0ZWRcIj5TY2FubmluZyBmb3Ige3NlbGVjdGVkTW92aWU/LnRpdGxlfSDDgsK3IHtzZWxlY3RlZFRoZWF0cmU/Lm5hbWV9IMOCwrcge3NlbGVjdGVkU2hvdyYmZGF0ZShzZWxlY3RlZFNob3cuZGF0ZSl9PC9wPjwvZGl2PjxidXR0b24gdHlwZT1cImJ1dHRvblwiIGNsYXNzTmFtZT1cImJ1dHRvbiBzZWNvbmRhcnkgc21hbGxcIiBvbkNsaWNrPXsoKT0+c2V0U2Nhbm5pbmcoZmFsc2UpfT48VmlkZW9PZmYgc2l6ZT17MTV9Lz4gU3RvcCBjYW1lcmE8L2J1dHRvbj48L2Rpdj48dmlkZW8gcmVmPXt2aWRlb1JlZn0gY2xhc3NOYW1lPVwic2Nhbi1jYW1lcmEtdmlkZW9cIiBtdXRlZCBwbGF5c0lubGluZS8+PHAgY2xhc3NOYW1lPVwibXV0ZWRcIiByb2xlPVwic3RhdHVzXCI+e3NjYW5NZXNzYWdlfTwvcD57Y2FtZXJhRXJyb3ImJjxOb3RpY2UgZXJyb3I+e2NhbWVyYUVycm9yfTwvTm90aWNlPn08L3NlY3Rpb24+PC9kaXY+fVxyXG4gIHtzY2FuTWVzc2FnZSYmIXNjYW5uaW5nJiY8c2VjdGlvbiBjbGFzc05hbWU9e2BwYW5lbCBzY2FuLXJlc3VsdCAke3NlbGVjdGVkQm9va2luZz8uYXR0ZW5kZWQ/J2lzLWF0dGVuZGVkJzpzZWxlY3RlZEJvb2tpbmc/J2lzLXZhbGlkJzonJ31gfT48ZGl2IGNsYXNzTmFtZT1cInNjYW4tcmVzdWx0LWhlYWRpbmdcIj57c2VsZWN0ZWRCb29raW5nPy5hdHRlbmRlZD88Q2hlY2sgc2l6ZT17MjF9Lz46c2VsZWN0ZWRCb29raW5nPzxTaGllbGRDaGVjayBzaXplPXsyMX0vPjo8U2NhbkxpbmUgc2l6ZT17MjF9Lz59PHN0cm9uZz57c2Nhbk1lc3NhZ2V9PC9zdHJvbmc+PC9kaXY+e3NlbGVjdGVkQm9va2luZyYmPD48ZGw+PGR0PkJvb2tpbmcgSUQ8L2R0PjxkZD57c2VsZWN0ZWRCb29raW5nLmlkfTwvZGQ+PGR0Pk1vdmllIC8gc2hvdzwvZHQ+PGRkPntzZWxlY3RlZEJvb2tpbmcuc25hcHNob3QubW92aWV9IMOCwrcge3NlbGVjdGVkQm9va2luZy5zbmFwc2hvdC5kYXRlfSDDgsK3IHtzZWxlY3RlZEJvb2tpbmcuc25hcHNob3QudGltZX08L2RkPjxkdD5UaGVhdHJlIC8gc2NyZWVuPC9kdD48ZGQ+e3NlbGVjdGVkQm9va2luZy5zbmFwc2hvdC50aGVhdHJlfSDDgsK3IHtzZWxlY3RlZEJvb2tpbmcuc25hcHNob3Quc2NyZWVufTwvZGQ+PGR0PkF1ZGllbmNlPC9kdD48ZGQ+e2RhdGEudXNlcnMuZmluZCh1c2VyPT51c2VyLmlkPT09c2VsZWN0ZWRCb29raW5nLnVzZXJJZCk/Lm5hbWV8fCdBdWRpZW5jZSBtZW1iZXInfTwvZGQ+PGR0Pk1vYmlsZTwvZHQ+PGRkPntzZWxlY3RlZEJvb2tpbmcuc25hcHNob3QubW9iaWxlfTwvZGQ+PGR0PkVtYWlsPC9kdD48ZGQ+e3NlbGVjdGVkQm9va2luZy5zbmFwc2hvdC5lbWFpbHx8J05vdCBwcm92aWRlZCd9PC9kZD48ZHQ+U2VhdHMgLyB0aWNrZXRzPC9kdD48ZGQ+e3NlbGVjdGVkQm9va2luZy5zZWF0SWRzLm1hcCgoc2VhdElkOnN0cmluZyk9PnNjYW5TZWF0TGFiZWxzW3NlYXRJZF18fCdTZWF0IGxhYmVsIHVuYXZhaWxhYmxlJykuam9pbignLCAnKX0gw4LCtyB7c2VsZWN0ZWRCb29raW5nLnRpY2tldENvdW50fTwvZGQ+PGR0PkJvb2tpbmcgc3RhdHVzPC9kdD48ZGQ+e3NlbGVjdGVkQm9va2luZy5zdGF0dXN9IMOCwrcge3NlbGVjdGVkQm9va2luZy5jb25maXJtYXRpb25TdGF0dXN9PC9kZD48ZHQ+QW1vdW50PC9kdD48ZGQ+e3NlbGVjdGVkQm9va2luZy50b3RhbEFtb3VudH08L2RkPjwvZGw+e3NlbGVjdGVkQm9va2luZy5hdHRlbmRlZD88Tm90aWNlPlRoaXMgdGlja2V0IGhhcyBhbHJlYWR5IGJlZW4gY2hlY2tlZCBpbiBieSB0aGUgYmFja2VuZC48L05vdGljZT46c2VsZWN0ZWRCb29raW5nLnN0YXR1cz09PSdDT05GSVJNRUQnPzxOb3RpY2U+VGlja2V0IHZlcmlmaWNhdGlvbiBhbmQgYXR0ZW5kYW5jZSBhcmUgaGFuZGxlZCBieSB0aGUgYmFja2VuZCBzY2FuIGVuZHBvaW50LjwvTm90aWNlPjo8Tm90aWNlIGVycm9yPk9ubHkgY29uZmlybWVkIGJvb2tpbmdzIGNhbiBiZSBjaGVja2VkIGluLjwvTm90aWNlPn08Lz59PC9zZWN0aW9uPn1cclxuICB7IW1vdmllSWQmJiFsb2FkaW5nJiY8RW1wdHkgdGl0bGU9XCJTZWxlY3QgYSBtb3ZpZSB0byB2aWV3IGl0cyBzY3JlZW5pbmdzIGFuZCBib29raW5ncy5cIj48cCBjbGFzc05hbWU9XCJtdXRlZFwiPkNob29zZSBtb3ZpZSwgdGhlYXRyZSwgYW5kIHNob3cgdG8gb3BlbiB0aGUgYXR0ZW5kYW5jZSBzY2FubmVyLjwvcD48L0VtcHR5Pn1cclxuIDwvZGl2PjtcclxufVxyXG4iXSwiZmlsZSI6IkU6L0FWIFdlYnNpdGUvQVYtZnJvbnRlbmQvc3JjL3BhZ2VzL0FkbWluUXJTY2FubmVyLnRzeCJ9

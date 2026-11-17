@@ -1,0 +1,208 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/pages/ScreenWorkspace.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=a954c2dd"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+let prevRefreshReg;
+let prevRefreshSig;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+var _s = $RefreshSig$();
+import { Link, useParams } from "/node_modules/.vite/deps/react-router-dom.js?v=a954c2dd";
+import { ArrowLeft, Save, Settings2 } from "/node_modules/.vite/deps/lucide-react.js?v=a954c2dd";
+import { useApp } from "/src/context/AppContext.tsx";
+import { repositories } from "/src/services/api.ts";
+import { LayoutBuilder } from "/src/pages/LayoutBuilder.tsx";
+import { Empty, Notice, SectionHeading } from "/src/components/Common.tsx";
+export function ScreenWorkspace() {
+  _s();
+  const { screenId } = useParams();
+  const { data } = useApp();
+  const screen = data.screens.find((item) => item.id === screenId);
+  if (!screen) return /* @__PURE__ */ jsxDEV("div", { className: "admin-content", children: /* @__PURE__ */ jsxDEV(Empty, { title: "Screen not found." }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+    lineNumber: 29,
+    columnNumber: 216
+  }, this) }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+    lineNumber: 29,
+    columnNumber: 185
+  }, this);
+  const theatre = data.theatres.find((item) => item.id === screen.theatreId);
+  const save = async (event) => {
+    event.preventDefault();
+    await repositories.screens.save(screen);
+  };
+  const update = (patch) => repositories.screens.save({ ...screen, ...patch });
+  return /* @__PURE__ */ jsxDEV("div", { className: "admin-content screen-page", children: [
+    /* @__PURE__ */ jsxDEV(Link, { className: "text-link", to: "/admin/venues", children: [
+      /* @__PURE__ */ jsxDEV(ArrowLeft, { size: 16 }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+        lineNumber: 29,
+        columnNumber: 631
+      }, this),
+      " Back to ",
+      theatre?.name || "Venues"
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+      lineNumber: 29,
+      columnNumber: 584
+    }, this),
+    /* @__PURE__ */ jsxDEV(SectionHeading, { eyebrow: "SCREEN WORKSPACE", title: screen.name, description: `${theatre?.name || "Theatre"} · Configure details and draw the exact audience seating plan.` }, void 0, false, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+      lineNumber: 29,
+      columnNumber: 697
+    }, this),
+    /* @__PURE__ */ jsxDEV("section", { className: "panel screen-details", children: [
+      /* @__PURE__ */ jsxDEV("div", { className: "screen-title", children: [
+        /* @__PURE__ */ jsxDEV(Settings2, {}, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+          lineNumber: 29,
+          columnNumber: 942
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { children: [
+          /* @__PURE__ */ jsxDEV("h3", { children: "Screen details" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+            lineNumber: 29,
+            columnNumber: 960
+          }, this),
+          /* @__PURE__ */ jsxDEV("p", { className: "muted", children: "Changes are saved for this screen only." }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+            lineNumber: 29,
+            columnNumber: 983
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+          lineNumber: 29,
+          columnNumber: 955
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+        lineNumber: 29,
+        columnNumber: 912
+      }, this),
+      /* @__PURE__ */ jsxDEV("form", { onSubmit: save, children: [
+        /* @__PURE__ */ jsxDEV("div", { className: "form-grid", children: [
+          /* @__PURE__ */ jsxDEV("label", { children: [
+            "Screen name",
+            /* @__PURE__ */ jsxDEV("input", { value: screen.name, onChange: (event) => update({ name: event.target.value }) }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+              lineNumber: 29,
+              columnNumber: 1126
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+            lineNumber: 29,
+            columnNumber: 1108
+          }, this),
+          /* @__PURE__ */ jsxDEV("label", { children: [
+            "Screen number",
+            /* @__PURE__ */ jsxDEV("input", { type: "number", min: "1", value: screen.number, onChange: (event) => update({ number: Number(event.target.value) }) }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+              lineNumber: 29,
+              columnNumber: 1242
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+            lineNumber: 29,
+            columnNumber: 1222
+          }, this),
+          /* @__PURE__ */ jsxDEV("label", { children: [
+            "Status",
+            /* @__PURE__ */ jsxDEV("select", { value: screen.status, onChange: (event) => update({ status: event.target.value }), children: [
+              /* @__PURE__ */ jsxDEV("option", { value: "ACTIVE", children: "Active" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+                lineNumber: 29,
+                columnNumber: 1496
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "INACTIVE", children: "Inactive" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+                lineNumber: 29,
+                columnNumber: 1534
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+              lineNumber: 29,
+              columnNumber: 1385
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+            lineNumber: 29,
+            columnNumber: 1372
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+          lineNumber: 29,
+          columnNumber: 1081
+        }, this),
+        /* @__PURE__ */ jsxDEV("button", { className: "button", children: [
+          /* @__PURE__ */ jsxDEV(Save, { size: 16 }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+            lineNumber: 29,
+            columnNumber: 1626
+          }, this),
+          " Save screen details"
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+          lineNumber: 29,
+          columnNumber: 1599
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+        lineNumber: 29,
+        columnNumber: 1059
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+      lineNumber: 29,
+      columnNumber: 870
+    }, this),
+    /* @__PURE__ */ jsxDEV(LayoutBuilder, { initialScreenId: screen.id }, void 0, false, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+      lineNumber: 29,
+      columnNumber: 1690
+    }, this),
+    /* @__PURE__ */ jsxDEV(Notice, { children: [
+      "This is a dedicated page for ",
+      screen.name,
+      ". Save the seat plan before returning to the venue."
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+      lineNumber: 29,
+      columnNumber: 1735
+    }, this)
+  ] }, void 0, true, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx",
+    lineNumber: 29,
+    columnNumber: 541
+  }, this);
+}
+_s(ScreenWorkspace, "7yZyyWj+CLyvtDNVckHi2qX9OeU=", false, function() {
+  return [useParams, useApp];
+});
+_c = ScreenWorkspace;
+var _c;
+$RefreshReg$(_c, "ScreenWorkspace");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("E:/AV Website/AV-frontend/src/pages/ScreenWorkspace.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,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ZWZ0IiwiU2F2ZSIsIlNldHRpbmdzMiIsInVzZUFwcCIsInJlcG9zaXRvcmllcyIsIkxheW91dEJ1aWxkZXIiLCJFbXB0eSIsIk5vdGljZSIsIlNlY3Rpb25IZWFkaW5nIiwiU2NyZWVuV29ya3NwYWNlIiwiX3MiLCJzY3JlZW5JZCIsImRhdGEiLCJzY3JlZW4iLCJzY3JlZW5zIiwiZmluZCIsIml0ZW0iLCJpZCIsInRoZWF0cmUiLCJ0aGVhdHJlcyIsInRoZWF0cmVJZCIsInNhdmUiLCJldmVudCIsInByZXZlbnREZWZhdWx0IiwidXBkYXRlIiwicGF0Y2giLCJuYW1lIiwidGFyZ2V0IiwidmFsdWUiLCJudW1iZXIiLCJOdW1iZXIiLCJzdGF0dXMiLCJfYyJdLCJpZ25vcmVMaXN0IjpbXSwic291cmNlcyI6WyJTY3JlZW5Xb3Jrc3BhY2UudHN4Il0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7dHlwZSBGb3JtRXZlbnR9IGZyb20gJ3JlYWN0JztcclxuaW1wb3J0IHtMaW5rLCB1c2VQYXJhbXN9IGZyb20gJ3JlYWN0LXJvdXRlci1kb20nO1xyXG5pbXBvcnQge0Fycm93TGVmdCwgU2F2ZSwgU2V0dGluZ3MyfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xyXG5pbXBvcnQge3VzZUFwcH0gZnJvbSAnLi4vY29udGV4dC9BcHBDb250ZXh0JztcclxuaW1wb3J0IHtyZXBvc2l0b3JpZXN9IGZyb20gJy4uL3NlcnZpY2VzL2FwaSc7XHJcbmltcG9ydCB7TGF5b3V0QnVpbGRlcn0gZnJvbSAnLi9MYXlvdXRCdWlsZGVyJztcclxuaW1wb3J0IHtFbXB0eSwgTm90aWNlLCBTZWN0aW9uSGVhZGluZ30gZnJvbSAnLi4vY29tcG9uZW50cy9Db21tb24nO1xyXG5pbXBvcnQgdHlwZSB7U2NyZWVufSBmcm9tICcuLi90eXBlcyc7XHJcblxyXG5leHBvcnQgZnVuY3Rpb24gU2NyZWVuV29ya3NwYWNlKCl7Y29uc3Qge3NjcmVlbklkfT11c2VQYXJhbXMoKTtjb25zdCB7ZGF0YX09dXNlQXBwKCk7Y29uc3Qgc2NyZWVuPWRhdGEuc2NyZWVucy5maW5kKGl0ZW09Pml0ZW0uaWQ9PT1zY3JlZW5JZCk7aWYoIXNjcmVlbilyZXR1cm4gPGRpdiBjbGFzc05hbWU9XCJhZG1pbi1jb250ZW50XCI+PEVtcHR5IHRpdGxlPVwiU2NyZWVuIG5vdCBmb3VuZC5cIi8+PC9kaXY+O2NvbnN0IHRoZWF0cmU9ZGF0YS50aGVhdHJlcy5maW5kKGl0ZW09Pml0ZW0uaWQ9PT1zY3JlZW4udGhlYXRyZUlkKTtjb25zdCBzYXZlPWFzeW5jKGV2ZW50OkZvcm1FdmVudCk9PntldmVudC5wcmV2ZW50RGVmYXVsdCgpO2F3YWl0IHJlcG9zaXRvcmllcy5zY3JlZW5zLnNhdmUoc2NyZWVuKTt9O2NvbnN0IHVwZGF0ZT0ocGF0Y2g6UGFydGlhbDxTY3JlZW4+KT0+cmVwb3NpdG9yaWVzLnNjcmVlbnMuc2F2ZSh7Li4uc2NyZWVuLC4uLnBhdGNofSk7cmV0dXJuIDxkaXYgY2xhc3NOYW1lPVwiYWRtaW4tY29udGVudCBzY3JlZW4tcGFnZVwiPjxMaW5rIGNsYXNzTmFtZT1cInRleHQtbGlua1wiIHRvPVwiL2FkbWluL3ZlbnVlc1wiPjxBcnJvd0xlZnQgc2l6ZT17MTZ9Lz4gQmFjayB0byB7dGhlYXRyZT8ubmFtZXx8J1ZlbnVlcyd9PC9MaW5rPjxTZWN0aW9uSGVhZGluZyBleWVicm93PVwiU0NSRUVOIFdPUktTUEFDRVwiIHRpdGxlPXtzY3JlZW4ubmFtZX0gZGVzY3JpcHRpb249e2Ake3RoZWF0cmU/Lm5hbWV8fCdUaGVhdHJlJ30gwrcgQ29uZmlndXJlIGRldGFpbHMgYW5kIGRyYXcgdGhlIGV4YWN0IGF1ZGllbmNlIHNlYXRpbmcgcGxhbi5gfS8+PHNlY3Rpb24gY2xhc3NOYW1lPVwicGFuZWwgc2NyZWVuLWRldGFpbHNcIj48ZGl2IGNsYXNzTmFtZT1cInNjcmVlbi10aXRsZVwiPjxTZXR0aW5nczIvPjxkaXY+PGgzPlNjcmVlbiBkZXRhaWxzPC9oMz48cCBjbGFzc05hbWU9XCJtdXRlZFwiPkNoYW5nZXMgYXJlIHNhdmVkIGZvciB0aGlzIHNjcmVlbiBvbmx5LjwvcD48L2Rpdj48L2Rpdj48Zm9ybSBvblN1Ym1pdD17c2F2ZX0+PGRpdiBjbGFzc05hbWU9XCJmb3JtLWdyaWRcIj48bGFiZWw+U2NyZWVuIG5hbWU8aW5wdXQgdmFsdWU9e3NjcmVlbi5uYW1lfSBvbkNoYW5nZT17ZXZlbnQ9PnVwZGF0ZSh7bmFtZTpldmVudC50YXJnZXQudmFsdWV9KX0vPjwvbGFiZWw+PGxhYmVsPlNjcmVlbiBudW1iZXI8aW5wdXQgdHlwZT1cIm51bWJlclwiIG1pbj1cIjFcIiB2YWx1ZT17c2NyZWVuLm51bWJlcn0gb25DaGFuZ2U9e2V2ZW50PT51cGRhdGUoe251bWJlcjpOdW1iZXIoZXZlbnQudGFyZ2V0LnZhbHVlKX0pfS8+PC9sYWJlbD48bGFiZWw+U3RhdHVzPHNlbGVjdCB2YWx1ZT17c2NyZWVuLnN0YXR1c30gb25DaGFuZ2U9e2V2ZW50PT51cGRhdGUoe3N0YXR1czpldmVudC50YXJnZXQudmFsdWUgYXMgU2NyZWVuWydzdGF0dXMnXX0pfT48b3B0aW9uIHZhbHVlPVwiQUNUSVZFXCI+QWN0aXZlPC9vcHRpb24+PG9wdGlvbiB2YWx1ZT1cIklOQUNUSVZFXCI+SW5hY3RpdmU8L29wdGlvbj48L3NlbGVjdD48L2xhYmVsPjwvZGl2PjxidXR0b24gY2xhc3NOYW1lPVwiYnV0dG9uXCI+PFNhdmUgc2l6ZT17MTZ9Lz4gU2F2ZSBzY3JlZW4gZGV0YWlsczwvYnV0dG9uPjwvZm9ybT48L3NlY3Rpb24+PExheW91dEJ1aWxkZXIgaW5pdGlhbFNjcmVlbklkPXtzY3JlZW4uaWR9Lz48Tm90aWNlPlRoaXMgaXMgYSBkZWRpY2F0ZWQgcGFnZSBmb3Ige3NjcmVlbi5uYW1lfS4gU2F2ZSB0aGUgc2VhdCBwbGFuIGJlZm9yZSByZXR1cm5pbmcgdG8gdGhlIHZlbnVlLjwvTm90aWNlPjwvZGl2Pn1cclxuIl0sImZpbGUiOiJFOi9BViBXZWJzaXRlL0FWLWZyb250ZW5kL3NyYy9wYWdlcy9TY3JlZW5Xb3Jrc3BhY2UudHN4In0=

@@ -1,0 +1,125 @@
+/* Shared viewport safeguards for public, account, and admin screens. */
+html,body,#root{width:100%;max-width:100%;overflow-x:clip}
+body{min-width:0}
+#root,main,section,article,aside,header,footer,.container,.page,.admin-main,.admin-content{min-width:0}
+img,video,iframe,canvas,svg{max-width:100%}
+input,select,textarea{max-width:100%}
+table{max-width:100%}
+.table-wrap{max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain;-webkit-overflow-scrolling:touch}
+.button,.text-button{max-width:100%;white-space:normal}
+.modal,.dialog,.modal-content{width:min(100%,760px);max-height:calc(100dvh - 32px);overflow:auto}
+.admin-reviews-table{min-width:1050px}
+.admin-review-copy{min-width:250px;max-width:420px;max-height:140px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;color:#d6deea;font-size:12px;line-height:1.55}
+.admin-review-stars{display:block;color:#ff756c;letter-spacing:2px;white-space:nowrap}
+
+@media(max-width:1150px){
+ .site-header{height:66px}
+ .nav-wrap{position:relative;width:calc(100% - 32px);gap:10px}
+ .site-header .logo{width:clamp(138px,20vw,185px);height:52px;gap:4px}
+ .site-header .brand-logo-mark{width:clamp(64px,9vw,84px);height:46px;background-size:104px 104px;background-position:center -20px}
+ .site-header .brand-logo-wordmark{width:clamp(70px,10vw,95px);height:24px;background-size:124px 124px;background-position:center -77px}
+ .site-header nav{display:none;position:absolute;z-index:40;top:100%;left:0;right:0;height:auto;max-height:calc(100dvh - 78px);overflow:auto;padding:8px 16px 14px;border:1px solid #302733;border-top:0;border-radius:0 0 12px 12px;background:rgba(14,15,19,.98);box-shadow:0 16px 36px #0009;backdrop-filter:blur(16px);flex-direction:column;align-items:stretch;gap:0}
+ .site-header nav.open{display:flex}
+ .site-header nav a{height:auto;min-height:42px;padding:11px 4px;font-size:13px}
+ .site-header nav a.active:after{bottom:4px;right:auto;width:26px}
+ .nav-actions{min-width:0;gap:8px;margin-left:auto}
+ .nav-search-form{width:40px;height:38px;min-width:40px;justify-content:center;padding:0}
+ .nav-search-form input,.nav-search-form button{display:none}
+ .nav-search-form:focus-within{position:absolute;z-index:50;right:48px;width:min(300px,calc(100vw - 190px));justify-content:flex-start;padding:0 9px;background:#111820}
+ .nav-search-form:focus-within input{display:block}
+ .nav-search-form:focus-within button{display:grid}
+ .location{display:none}
+ .site-header .mobile-menu{display:inline-flex;flex:none;width:38px;height:38px;align-items:center;justify-content:center}
+ .hero-movie-carousel{width:clamp(170px,21vw,205px);right:22px;bottom:42px}
+}
+
+@media(max-width:520px){
+ .nav-wrap{width:calc(100% - 22px);gap:5px}
+ .site-header .logo{width:128px;height:48px}
+ .site-header .brand-logo-mark{width:57px;height:42px;background-size:82px 82px;background-position:center -16px}
+ .site-header .brand-logo-wordmark{width:66px;height:20px;background-size:88px 88px;background-position:center -55px}
+ .nav-actions{gap:4px}
+ .nav-search-form{width:34px;min-width:34px;height:36px}
+ .site-header .mobile-menu{width:34px;height:36px;padding:5px}
+ .site-header .nav-actions>.button.small{min-height:34px;padding:0 6px;font-size:0;gap:0}
+ .site-header .nav-profile-link .nav-user-avatar{width:27px;height:27px;font-size:11px}
+}
+
+@media(max-width:1100px){
+ .container,.hero-content{width:calc(100% - 48px)}
+ .admin-content{padding-inline:20px}
+ .admin-two,.booking-grid{grid-template-columns:minmax(0,1fr) minmax(260px,.8fr)}
+ .avscan-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .movie-profile-detail-page{grid-template-columns:minmax(0,1fr)}
+}
+
+@media(max-width:850px){
+ .admin-two,.booking-grid,.movie-detail,.movie-profile-detail-grid,.movie-wizard-details-layout,.movie-credit-stage,.legal-layout,.delete-account-legal-layout,.delete-account-layout,.social-overview-grid,.about-policy-panel,.about-faq,.about-creators{grid-template-columns:minmax(0,1fr)}
+ .movie-profile-detail-page{grid-template-columns:minmax(0,1fr)}
+ .movie-profile-detail-page>*{min-width:0}
+ .admin-scan-filters{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .admin-scan-summary{grid-template-columns:minmax(0,1fr) auto auto}
+ .admin-heading,.venue-list-heading,.avscan-header{align-items:flex-start;flex-wrap:wrap}
+ .admin-heading>.button,.venue-list-heading>.button,.avscan-header>.button{flex:0 1 auto}
+}
+
+@media(max-width:760px){
+ .container,.hero-content{width:calc(100% - 32px)}
+ .page{padding:26px 0 46px}
+ .admin-content{padding:18px 12px 34px}
+ .admin-sidebar{padding:12px;max-width:100%}
+ .admin-sidebar nav{max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain}
+ .admin-top{grid-template-columns:minmax(0,1fr) auto;gap:8px}
+ .admin-top-actions{min-width:0;max-width:100%;flex-wrap:wrap}
+ .admin-crumb{min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .admin-two,.booking-grid,.movie-detail,.movie-profile-detail-grid,.movie-wizard-details-layout,.movie-credit-stage,.legal-layout,.delete-account-legal-layout,.delete-account-layout,.social-overview-grid,.about-policy-panel,.about-faq,.about-creators,.form-grid,.entity-form .form-grid{grid-template-columns:minmax(0,1fr)}
+ .admin-two>* ,.form-grid>*,.entity-form .form-grid>*,.booking-grid>*,.movie-detail>*,.social-overview-grid>*{min-width:0;max-width:100%}
+ .stats-grid,.movie-metric-grid,.venue-stat-grid,.booking-stat-grid,.activity-summary,.reviews-inventory-stats,.admin-posts-stats,.avscan-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .admin-scan-filters{grid-template-columns:minmax(0,1fr)}
+ .admin-scan-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+ .admin-scan-summary>div:first-child,.admin-scan-summary>.button{grid-column:1/-1}
+ .section-heading,.admin-heading,.venue-list-heading,.avscan-header,.activity-dashboard-heading{min-width:0;flex-wrap:wrap}
+ .section-heading>* ,.admin-heading>* ,.venue-list-heading>* ,.avscan-header>*{min-width:0;max-width:100%}
+ .button-row,.profile-hub-actions,.venue-card-actions{flex-wrap:wrap}
+ .profile-hub-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .movie-profile-tabs,.movie-profile-review-tabs,.tabs,.admin-tabs{max-width:100%;flex-wrap:wrap}
+ .legal-sidebar,.legal-toc{position:static;max-height:none}
+ .legal-sidebar nav,.legal-toc nav{max-height:36vh;overflow:auto}
+ .scan-result dl{grid-template-columns:minmax(0,1fr)}
+ .scan-result dd{overflow-wrap:anywhere}
+ .table-wrap{margin-inline:0}
+ .modal,.dialog,.modal-content{width:min(100%,620px);max-height:calc(100dvh - 20px)}
+}
+
+@media(max-width:520px){
+ .container,.hero-content{width:calc(100% - 24px)}
+ .page{padding-top:20px;padding-bottom:36px}
+ h1{font-size:clamp(28px,9vw,40px);letter-spacing:-1.2px;overflow-wrap:anywhere}
+ h2{font-size:clamp(20px,6.2vw,26px);letter-spacing:-.5px}
+ .admin-content{padding:14px 9px 28px}
+ .admin-top{padding-inline:8px}
+ .admin-top-actions{gap:6px}
+ .admin-account{max-width:42px;overflow:hidden}
+ .stats-grid,.movie-metric-grid,.venue-stat-grid,.booking-stat-grid,.activity-summary,.reviews-inventory-stats,.admin-posts-stats,.avscan-stats{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px}
+ .stats-grid>* ,.movie-metric-grid>* ,.venue-stat-grid>* ,.booking-stat-grid>* ,.activity-summary>* ,.reviews-inventory-stats>* ,.admin-posts-stats>* ,.avscan-stats>*{min-width:0}
+ .admin-heading>.button,.venue-list-heading>.button,.avscan-header>.button{width:100%;justify-content:center}
+ .button-row>.button,.profile-hub-actions>.button{flex:1 1 100%;width:100%;justify-content:center}
+ .form-grid label,.entity-form label{min-width:0}
+ .form-grid input,.form-grid select,.form-grid textarea,.entity-form input,.entity-form select,.entity-form textarea{width:100%;min-width:0}
+ .modal-backdrop,.dialog-backdrop{padding:10px}
+ .modal,.dialog,.modal-content{max-height:calc(100dvh - 20px);padding:16px}
+ .table-wrap table{min-width:680px}
+ .profile-card-form .profile-field{grid-template-columns:minmax(0,1fr)}
+ .movie-profile-actions{gap:7px}
+ .movie-profile-actions>.button{flex:1 1 140px;min-width:0}
+ .movie-profile-rating{align-items:flex-start}
+ .movie-profile-rating-score{font-size:10px}
+ .booking-content{width:calc(100% - 18px)}
+ .booking-main-panel,.booking-summary{min-width:0}
+ .booking-date-group,.booking-theatre,.booking-theatre-details,.booking-times{min-width:0}
+ .booking-times button{min-width:0}
+ .seat-grid{max-width:100%}
+ .footer-top,.footer-bottom{min-width:0;flex-wrap:wrap}
+}
+
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}

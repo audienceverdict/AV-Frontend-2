@@ -1,0 +1,1827 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/pages/BookMyShow.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=a954c2dd"; const Fragment = __vite__cjsImport0_react_jsxDevRuntime["Fragment"]; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+let prevRefreshReg;
+let prevRefreshSig;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=a954c2dd"; const useEffect = __vite__cjsImport3_react["useEffect"]; const useMemo = __vite__cjsImport3_react["useMemo"]; const useRef = __vite__cjsImport3_react["useRef"]; const useState = __vite__cjsImport3_react["useState"];
+import { Link, useNavigate, useParams } from "/node_modules/.vite/deps/react-router-dom.js?v=a954c2dd";
+import { ArrowLeft, ArrowRight, CalendarDays, Check, Clock3, Film, MapPin, Monitor, Ticket, Users, ShieldCheck, Armchair, ChevronLeft, ChevronRight, Wallet } from "/node_modules/.vite/deps/lucide-react.js?v=a954c2dd";
+import { useApp } from "/src/context/AppContext.tsx";
+import { createBooking, createSeatHold, createWaitlistOfferHold, getMyShowWaitlistOffer, getShowAvailability, getWaitingList, joinWaitingList, releaseSeatHold, releaseWaitlistOfferHold } from "/src/services/api.ts";
+import { normalizeSeatLayout } from "/src/utils/seatLayout.ts";
+import { Empty, Notice, Poster, date, money } from "/src/components/Common.tsx";
+import "/src/booking-page.css";
+import termsHeroImage from "/images/booking-terms-hero.png?import&url";
+import termsCardArtwork from "/images/booking-terms-cards.png?import&url";
+export function BookMyShow() {
+  _s();
+  const { movieId } = useParams();
+  const { data, user } = useApp();
+  const navigate = useNavigate();
+  const movie = data.movies.find((item) => item.id === movieId);
+  const requestedWaitlistEntryId = new URLSearchParams(window.location.search).get("waitlistEntryId") || "";
+  const [showId, setShowId] = useState(() => new URLSearchParams(window.location.search).get("show") || "");
+  const [seatMapOpen, setSeatMapOpen] = useState(() => Boolean(new URLSearchParams(window.location.search).get("show")));
+  const [selectedSeats, setSelectedSeats] = useState([]);
+  const [confirming, setConfirming] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [alternativeMobile, setAlternativeMobile] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState([]);
+  const [activeTerm, setActiveTerm] = useState(0);
+  const termsTrackRef = useRef(null);
+  const [city, setCity] = useState("");
+  const [day, setDay] = useState("");
+  const [error, setError] = useState("");
+  const [availabilityError, setAvailabilityError] = useState("");
+  const [availabilityUpdatedAt, setAvailabilityUpdatedAt] = useState(0);
+  const [availabilityNow, setAvailabilityNow] = useState(Date.now());
+  const [availabilityColumns, setAvailabilityColumns] = useState(0);
+  const [versionSeats, setVersionSeats] = useState(null);
+  const [availabilityScreen, setAvailabilityScreen] = useState(null);
+  const [backendBooked, setBackendBooked] = useState([]);
+  const [holdExpiresAt, setHoldExpiresAt] = useState(null);
+  const [holdRemaining, setHoldRemaining] = useState(0);
+  const activeHoldRef = useRef(null);
+  const [waitCount, setWaitCount] = useState(1);
+  const [waitBusy, setWaitBusy] = useState(false);
+  const [waitEntry, setWaitEntry] = useState(null);
+  const [waitlistOffer, setWaitlistOffer] = useState(null);
+  const [offerNow, setOfferNow] = useState(Date.now());
+  const [backendOfferedSeats, setBackendOfferedSeats] = useState([]);
+  const [locationEnabled, setLocationEnabled] = useState(() => sessionStorage.getItem("av_location_enabled") === "true");
+  const [locationMessage, setLocationMessage] = useState("");
+  const [typedTermText, setTypedTermText] = useState("");
+  const [completedTerms, setCompletedTerms] = useState([]);
+  const shows = useMemo(() => data.shows.filter((show2) => show2.movieId === movie?.id && show2.status === "OPEN" && /* @__PURE__ */ new Date(`${show2.date}T${show2.startTime}`) > /* @__PURE__ */ new Date() && data.theatres.some((theatre2) => theatre2.id === show2.theatreId && theatre2.status === "ACTIVE")), [data.shows, data.theatres, movie?.id]);
+  const cities = useMemo(() => [...new Set(shows.map((show2) => data.theatres.find((theatre2) => theatre2.id === show2.theatreId)?.city).filter(Boolean))], [shows, data.theatres]);
+  const activeCity = city || cities[0] || "";
+  const cityShows = shows.filter((show2) => data.theatres.find((theatre2) => theatre2.id === show2.theatreId)?.city === activeCity);
+  const dates = [...new Set(cityShows.map((show2) => show2.date))].sort();
+  const activeDay = dates.includes(day) ? day : dates[0] || "";
+  const datedShows = cityShows.filter((show2) => show2.date === activeDay);
+  const show = shows.find((item) => item.id === showId);
+  const screen = data.screens.find((item) => item.id === show?.screenId);
+  useEffect(() => {
+    if (cities.length && !city) setCity(cities.includes("Hyderabad") ? "Hyderabad" : cities[0]);
+  }, [cities, city]);
+  useEffect(() => {
+    if (dates.length && !dates.includes(day)) setDay(dates[0]);
+  }, [dates, day]);
+  useEffect(() => {
+    const timer = window.setInterval(() => setAvailabilityNow(Date.now()), 1e3);
+    return () => window.clearInterval(timer);
+  }, []);
+  useEffect(() => {
+    if (!showId) {
+      setVersionSeats(null);
+      setAvailabilityScreen(null);
+      setBackendBooked([]);
+      setBackendOfferedSeats([]);
+      setAvailabilityError("");
+      setAvailabilityColumns(0);
+      setAvailabilityUpdatedAt(0);
+      setWaitlistOffer(null);
+      return;
+    }
+    let active = true;
+    const refresh = () => {
+      getShowAvailability(showId).then((result) => {
+        if (active) {
+          const layout = result.layout || {};
+          setAvailabilityScreen(result.screen || null);
+          setBackendBooked([...result.bookedSeatIds || [], ...result.reservedSeatIds || [], ...result.heldSeatIds || []]);
+          setBackendOfferedSeats(result.waitlistOfferedSeatIds || []);
+          const columns = Number(result.screen?.seatsPerRow || layout.version?.seatsPerRow) || 0;
+          setAvailabilityColumns(columns);
+          const layoutSeats = Array.isArray(layout.seats) ? layout.seats : [];
+          setVersionSeats(normalizeSeatLayout(layoutSeats, columns || 12));
+          setAvailabilityUpdatedAt(Date.now());
+          setAvailabilityError("");
+        }
+      }).catch((reason) => {
+        if (active) {
+          setVersionSeats(null);
+          setBackendBooked([]);
+          setBackendOfferedSeats([]);
+          setAvailabilityUpdatedAt(0);
+          setAvailabilityError(reason.message);
+        }
+      });
+    };
+    const refreshOffer = () => getMyShowWaitlistOffer(showId).then((value) => {
+      if (active) setWaitlistOffer(value?.status === "ACTIVE" && new Date(value.expiresAt).getTime() > Date.now() ? value : value?.status === "COMPLETED" ? value : null);
+    }).catch(() => {
+      if (active) setWaitlistOffer(null);
+    });
+    setVersionSeats(null);
+    setAvailabilityScreen(null);
+    setBackendBooked([]);
+    setBackendOfferedSeats([]);
+    setAvailabilityError("");
+    setAvailabilityColumns(0);
+    setAvailabilityUpdatedAt(0);
+    setWaitlistOffer(null);
+    refresh();
+    void refreshOffer();
+    const timer = window.setInterval(() => {
+      refresh();
+      void refreshOffer();
+      setOfferNow(Date.now());
+    }, 5e3);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, [showId]);
+  useEffect(() => {
+    if (!showId || !user) return;
+    let active = true;
+    getWaitingList().then((entries) => {
+      if (active) setWaitEntry((requestedWaitlistEntryId ? entries.find((entry) => entry.id === requestedWaitlistEntryId && entry.showId === showId && ["WAITING", "OFFERED"].includes(String(entry.status).toUpperCase())) : null) || entries.find((entry) => entry.showId === showId && ["WAITING", "OFFERED"].includes(String(entry.status).toUpperCase())) || null);
+    }).catch(() => {
+    });
+    return () => {
+      active = false;
+    };
+  }, [showId, user?.id, requestedWaitlistEntryId]);
+  useEffect(() => {
+    if (!holdExpiresAt) {
+      setHoldRemaining(0);
+      return;
+    }
+    const tick = () => setHoldRemaining(Math.max(0, holdExpiresAt - Date.now()));
+    tick();
+    const timer = window.setInterval(tick, 1e3);
+    return () => window.clearInterval(timer);
+  }, [holdExpiresAt]);
+  useEffect(() => {
+    if (!confirming || !holdExpiresAt || Date.now() < holdExpiresAt) return;
+    const hold = activeHoldRef.current;
+    activeHoldRef.current = null;
+    if (hold) {
+      if (hold.offerId) void releaseWaitlistOfferHold(hold.showId, hold.offerId, hold.seatIds);
+      else void releaseSeatHold(hold.showId, hold.seatIds);
+    }
+    setHoldExpiresAt(null);
+    setSelectedSeats([]);
+    setAcceptedTerms([]);
+    setConfirming(false);
+    setError("Your seat hold expired. Please select seats again.");
+  }, [confirming, holdExpiresAt, holdRemaining]);
+  useEffect(() => () => {
+    const hold = activeHoldRef.current;
+    if (hold) {
+      if (hold.offerId) void releaseWaitlistOfferHold(hold.showId, hold.offerId, hold.seatIds);
+      else void releaseSeatHold(hold.showId, hold.seatIds);
+    }
+  }, []);
+  const positionedSeats = (versionSeats || []).map((seat) => ({ ...seat, row: seat.rowNumber, column: seat.columnNumber }));
+  const seatColumns = Math.max(1, availabilityColumns, ...positionedSeats.map((seat) => Number(seat.column) || 0));
+  const booked = data.bookings.filter((booking) => booking.showId === showId && booking.status !== "CANCELLED");
+  const unavailableIds = /* @__PURE__ */ new Set([...backendBooked, ...booked.flatMap((booking) => booking.seatIds)]);
+  const offerSeatIds = new Set((waitlistOffer?.remainingSeatIds || waitlistOffer?.seatIds || waitlistOffer?.offeredSeatIds || []).map(String));
+  const visibleOfferSeatIds = new Set([...offerSeatIds].filter((id) => backendOfferedSeats.includes(id) && !unavailableIds.has(id)));
+  const availableSeats = positionedSeats.filter((seat) => !seat.disabled && !unavailableIds.has(seat.id) && (seat.clickable === true || visibleOfferSeatIds.has(seat.id)) && (!backendOfferedSeats.includes(seat.id) || visibleOfferSeatIds.has(seat.id)));
+  const availabilityReady = Boolean(versionSeats && positionedSeats.length > 0 && !availabilityError && availabilityUpdatedAt > 0 && availabilityNow - availabilityUpdatedAt < 1e4);
+  const soldOut = Boolean(availabilityReady && show && availableSeats.length === 0);
+  const used = booked.filter((booking) => booking.snapshot.mobile === user?.mobile).reduce((total, booking) => total + booking.ticketCount, 0);
+  const amount = show?.ticketType === "PAID" ? selectedSeats.reduce((sum, id) => {
+    const seat = positionedSeats.find((item) => item.id === id);
+    return sum + (show.seatPrices?.[seat?.category || ""] ?? show.ticketPrice);
+  }, 0) : 0;
+  const selectedSeatLabels = selectedSeats.map((id) => positionedSeats.find((seat) => seat.id === id)?.label || "Seat label unavailable");
+  const holdSeconds = Math.ceil(holdRemaining / 1e3);
+  const holdClock = `${Math.floor(holdSeconds / 60)}:${String(holdSeconds % 60).padStart(2, "0")}`;
+  const offerSeconds = Math.max(0, Math.ceil((new Date(waitlistOffer?.expiresAt || 0).getTime() - offerNow) / 1e3));
+  const offerClock = `${Math.floor(offerSeconds / 60)}:${String(offerSeconds % 60).padStart(2, "0")}`;
+  const holdDurationMinutes = Math.max(1, Number(show?.holdMinutes) || 5);
+  const friendlyBookingError = (message) => /WAITLIST_SEAT_CLAIMED|OFFER_SEAT_UNAVAILABLE|claimed by another waitlist member/i.test(message) ? "Sorry, this seat has been booked by another waitlist member. Please choose another offered seat." : /WAITLIST_OFFER_EXPIRED|OFFER_EXPIRED/i.test(message) ? "This waitlist offer has expired. Please refresh availability and choose a regular available seat." : /SEAT_HELD|SEAT_UNAVAILABLE|held by another|currently unavailable/i.test(message) ? `That seat is currently selected by another audience member. Please choose another seat, or wait up to ${holdDurationMinutes} minutes. If they do not complete their booking within that time, the seat will be released.` : message;
+  const bookingScreen = availabilityScreen || screen;
+  const theatre = show ? data.theatres.find((item) => item.id === show.theatreId) : void 0;
+  const refreshAvailability = async (targetShowId) => {
+    try {
+      const result = await getShowAvailability(targetShowId);
+      setBackendBooked([...result.bookedSeatIds || [], ...result.reservedSeatIds || [], ...result.heldSeatIds || []]);
+      setBackendOfferedSeats(result.waitlistOfferedSeatIds || []);
+      setAvailabilityUpdatedAt(Date.now());
+    } catch {
+      setAvailabilityUpdatedAt(0);
+      setVersionSeats(null);
+    }
+  };
+  const releaseCurrentHold = async () => {
+    const hold = activeHoldRef.current;
+    if (!hold) {
+      setHoldExpiresAt(null);
+      return true;
+    }
+    try {
+      if (hold.offerId) await releaseWaitlistOfferHold(hold.showId, hold.offerId, hold.seatIds);
+      else await releaseSeatHold(hold.showId, hold.seatIds);
+      if (activeHoldRef.current === hold) activeHoldRef.current = null;
+      setHoldExpiresAt(null);
+      await refreshAvailability(hold.showId);
+      return true;
+    } catch {
+      setError("Could not release the seat hold just yet. Please try again.");
+      return false;
+    }
+  };
+  const chooseShow = (nextShow) => {
+    void releaseCurrentHold();
+    setWaitEntry(null);
+    setWaitCount(1);
+    setShowId(nextShow.id);
+    setSelectedSeats([]);
+    setVersionSeats(null);
+    setAvailabilityScreen(null);
+    setBackendBooked([]);
+    setAvailabilityColumns(0);
+    setAvailabilityError("");
+    setHoldExpiresAt(null);
+    setAcceptedTerms([]);
+    setCompletedTerms([]);
+    setTypedTermText("");
+    setActiveTerm(0);
+    setConfirming(false);
+    setSeatMapOpen(true);
+    setError("");
+  };
+  const enableLocation = () => {
+    setLocationMessage("");
+    const cached = sessionStorage.getItem("av_location_enabled");
+    if (cached === "true") {
+      setLocationEnabled(true);
+      setLocationMessage("Location access is on. You can continue booking.");
+    } else setLocationMessage("Turn on location access in your browser or device settings, then reopen the app.");
+  };
+  const toggleSeat = (seatId) => {
+    if (!show) return;
+    setError("");
+    if (selectedSeats.includes(seatId)) {
+      setAcceptedTerms([]);
+      setSelectedSeats(selectedSeats.filter((id) => id !== seatId));
+      return;
+    }
+    const seat = positionedSeats.find((item) => item.id === seatId);
+    if (seat?.clickable !== true && !visibleOfferSeatIds.has(seatId)) return;
+    if (selectedSeats.length + used >= show.maxTicketsPerMobile) return setError(`You can book a maximum of ${show.maxTicketsPerMobile} tickets for this screening using the same mobile number.`);
+    if (visibleOfferSeatIds.has(seatId) && selectedSeats.some((id) => !visibleOfferSeatIds.has(id))) return setError("Book waitlist offered seats separately from regular available seats.");
+    if (!visibleOfferSeatIds.has(seatId) && selectedSeats.some((id) => visibleOfferSeatIds.has(id))) return setError("Book waitlist offered seats separately from regular available seats.");
+    setSelectedSeats([...selectedSeats, seatId]);
+    setAcceptedTerms([]);
+  };
+  const proceedToConfirm = async () => {
+    if (!show || !selectedSeats.length) return;
+    setBusy(true);
+    setError("");
+    try {
+      const selectedOfferSeats = selectedSeats.filter((id) => visibleOfferSeatIds.has(id));
+      if (selectedOfferSeats.length) {
+        if (selectedOfferSeats.length !== selectedSeats.length) throw new Error("Please book offered seats separately from regular seats.");
+        if (!waitlistOffer?.id) throw new Error("Your waitlist offer is no longer active. Refresh the seat layout.");
+        const holds = await createWaitlistOfferHold(show.id, String(waitlistOffer.id), selectedSeats);
+        const expiresAt = Math.min(...holds.map((hold) => new Date(hold.expiresAt).getTime()).filter(Number.isFinite));
+        if (!Number.isFinite(expiresAt)) throw new Error("The server did not provide a seat reservation expiry. Please try again.");
+        activeHoldRef.current = { showId: show.id, seatIds: [...selectedSeats], offerId: String(waitlistOffer.id) };
+        setHoldExpiresAt(expiresAt);
+      } else {
+        const holds = await createSeatHold(show.id, selectedSeats, waitEntry?.id || requestedWaitlistEntryId || void 0);
+        const expiresAt = Math.min(...holds.map((hold) => new Date(hold.expiresAt).getTime()).filter(Number.isFinite));
+        if (!Number.isFinite(expiresAt)) throw new Error("Could not start the seat hold. Please try again.");
+        activeHoldRef.current = { showId: show.id, seatIds: [...selectedSeats] };
+        setHoldExpiresAt(expiresAt);
+      }
+      setAcceptedTerms([]);
+      setConfirming(true);
+    } catch (reason) {
+      setError(friendlyBookingError(reason.message));
+    } finally {
+      setBusy(false);
+    }
+  };
+  const joinWaitlist = async () => {
+    if (!show) return;
+    setWaitBusy(true);
+    setError("");
+    try {
+      const entry = await joinWaitingList(show.id, waitCount);
+      setWaitEntry(entry);
+    } catch (reason) {
+      setError(reason.message);
+    } finally {
+      setWaitBusy(false);
+    }
+  };
+  const terms = [
+    { id: "confirmation", title: /* @__PURE__ */ jsxDEV(Fragment, { children: [
+      "Stay connected",
+      /* @__PURE__ */ jsxDEV("br", {}, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+        lineNumber: 118,
+        columnNumber: 48
+      }, this),
+      "for ",
+      /* @__PURE__ */ jsxDEV("em", { children: "confirmation" }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+        lineNumber: 118,
+        columnNumber: 58
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+      lineNumber: 118,
+      columnNumber: 32
+    }, this), text: "We’ll contact you by call or email if your booking needs confirmation. Keep your contact details available." },
+    { id: "screening", title: /* @__PURE__ */ jsxDEV(Fragment, { children: [
+      "Check your show",
+      /* @__PURE__ */ jsxDEV("br", {}, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+        lineNumber: 119,
+        columnNumber: 46
+      }, this),
+      "before you ",
+      /* @__PURE__ */ jsxDEV("em", { children: "confirm" }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+        lineNumber: 119,
+        columnNumber: 63
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+      lineNumber: 119,
+      columnNumber: 29
+    }, this), text: "Review the movie, cinema, screening time, and selected seats shown above. Your ticket is valid for these details." },
+    { id: "cancellation", title: /* @__PURE__ */ jsxDEV(Fragment, { children: [
+      "Cancellation",
+      /* @__PURE__ */ jsxDEV("br", {}, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+        lineNumber: 120,
+        columnNumber: 46
+      }, this),
+      "with ",
+      /* @__PURE__ */ jsxDEV("em", { children: "clear timing" }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+        lineNumber: 120,
+        columnNumber: 57
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+      lineNumber: 120,
+      columnNumber: 32
+    }, this), text: "You may cancel up to one hour before showtime. Any refund follows the terms displayed for your booking." },
+    { id: "venue", title: /* @__PURE__ */ jsxDEV(Fragment, { children: [
+      "Follow your",
+      /* @__PURE__ */ jsxDEV("br", {}, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+        lineNumber: 121,
+        columnNumber: 38
+      }, this),
+      /* @__PURE__ */ jsxDEV("em", { children: "cinema’s rules" }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+        lineNumber: 121,
+        columnNumber: 44
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+      lineNumber: 121,
+      columnNumber: 25
+    }, this), text: "Entry, age restrictions, and venue policies are set by the cinema. Please follow staff instructions." }
+  ];
+  const confirm = async () => {
+    if (acceptedTerms.length !== terms.length) {
+      setError("Please agree to all four conditions before confirming.");
+      return;
+    }
+    if (!show || !user) {
+      navigate(`/login?next=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+    setBusy(true);
+    try {
+      const claimOfferId = activeHoldRef.current?.offerId;
+      const currentEntries = await getWaitingList().catch(() => []);
+      const matchingEntry = (waitEntry && waitEntry.showId === show.id ? waitEntry : null) || currentEntries.find((entry) => entry.id === requestedWaitlistEntryId && entry.showId === show.id && ["WAITING", "OFFERED"].includes(String(entry.status).toUpperCase())) || currentEntries.find((entry) => entry.showId === show.id && ["WAITING", "OFFERED"].includes(String(entry.status).toUpperCase()));
+      const booking = await createBooking(user, show.id, selectedSeats, alternativeMobile, true, matchingEntry?.id, claimOfferId);
+      activeHoldRef.current = null;
+      navigate(`/booking/${booking.id}`);
+    } catch (reason) {
+      const message = reason.message;
+      if (message.includes("Authentication required") || message.includes("Backend request failed (401)")) {
+        void releaseCurrentHold();
+        navigate(`/login?next=${encodeURIComponent(window.location.pathname)}`);
+        return;
+      }
+      setError(friendlyBookingError(message));
+      await releaseCurrentHold();
+      setConfirming(false);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const stepNumber = confirming ? 3 : seatMapOpen ? 2 : 1;
+  const stepLabel = (number, label) => /* @__PURE__ */ jsxDEV("span", { className: stepNumber === number ? "active" : "", children: [
+    /* @__PURE__ */ jsxDEV("i", { children: stepNumber > number ? /* @__PURE__ */ jsxDEV(Check, { size: 14 }, void 0, false, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+      lineNumber: 126,
+      columnNumber: 138
+    }, this) : number }, void 0, false, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+      lineNumber: 126,
+      columnNumber: 112
+    }, this),
+    label
+  ] }, void 0, true, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+    lineNumber: 126,
+    columnNumber: 56
+  }, this);
+  const dayLabel = (value) => {
+    const parsed = /* @__PURE__ */ new Date(`${value}T12:00:00`);
+    return { weekday: new Intl.DateTimeFormat("en", { weekday: "short" }).format(parsed), day: new Intl.DateTimeFormat("en", { day: "2-digit" }).format(parsed), month: new Intl.DateTimeFormat("en", { month: "short" }).format(parsed) };
+  };
+  const activeTermIndex = (direction) => {
+    const next = Math.max(0, Math.min(terms.length - 1, activeTerm + direction));
+    setActiveTerm(next);
+    termsTrackRef.current?.children[next]?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+  };
+  const toggleTerm = (id) => {
+    if (!completedTerms.includes(id)) return;
+    setAcceptedTerms((current) => current.includes(id) ? current.filter((item) => item !== id) : current.concat(id));
+  };
+  useEffect(() => {
+    if (!confirming) return;
+    const term = terms[activeTerm];
+    if (!term) return;
+    if (completedTerms.includes(term.id)) {
+      setTypedTermText(term.text);
+      return;
+    }
+    setTypedTermText("");
+    let index = 0;
+    const timer = window.setInterval(() => {
+      index = Math.min(term.text.length, index + 2);
+      setTypedTermText(term.text.slice(0, index));
+      if (index >= term.text.length) {
+        setCompletedTerms((current) => current.includes(term.id) ? current : [...current, term.id]);
+        window.clearInterval(timer);
+      }
+    }, 16);
+    return () => window.clearInterval(timer);
+  }, [confirming, activeTerm, completedTerms]);
+  if (!movie || !user) return /* @__PURE__ */ jsxDEV(Empty, { title: "Movie not found" }, void 0, false, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+    lineNumber: 133,
+    columnNumber: 31
+  }, this);
+  return /* @__PURE__ */ jsxDEV("main", { className: "booking-page", children: [
+    /* @__PURE__ */ jsxDEV("section", { className: `booking-hero${confirming ? " booking-hero-terms" : ""}`, style: confirming ? { backgroundImage: `linear-gradient(90deg,rgba(7,10,12,.96) 0%,rgba(9,10,14,.84) 42%,rgba(9,10,14,.14) 100%),linear-gradient(0deg,rgba(6,8,10,.46),transparent 65%),url("${termsHeroImage}")` } : void 0, "aria-label": "Cinema audience enjoying a movie", children: [
+      /* @__PURE__ */ jsxDEV("div", { className: "booking-hero-shade" }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+        lineNumber: 137,
+        columnNumber: 7
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "booking-hero-copy", children: [
+        confirming ? /* @__PURE__ */ jsxDEV("button", { type: "button", className: "booking-back", disabled: busy, onClick: async () => {
+          setBusy(true);
+          const released = await releaseCurrentHold();
+          if (released) {
+            setConfirming(false);
+            setSelectedSeats([]);
+            setAcceptedTerms([]);
+            setError("");
+          }
+          setBusy(false);
+        }, children: [
+          /* @__PURE__ */ jsxDEV(ArrowLeft, { size: 15 }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+            lineNumber: 139,
+            columnNumber: 276
+          }, this),
+          " Back to booking"
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+          lineNumber: 139,
+          columnNumber: 23
+        }, this) : /* @__PURE__ */ jsxDEV(Link, { className: "booking-back", to: `/movie/${movie.id}`, children: [
+          /* @__PURE__ */ jsxDEV(ArrowLeft, { size: 15 }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+            lineNumber: 139,
+            columnNumber: 384
+          }, this),
+          " Back to ",
+          movie.title
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+          lineNumber: 139,
+          columnNumber: 327
+        }, this),
+        /* @__PURE__ */ jsxDEV("span", { className: "eyebrow", children: confirming ? "IMPORTANT BEFORE YOU CONFIRM" : "BOOK YOUR EXPERIENCE" }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+          lineNumber: 140,
+          columnNumber: 9
+        }, this),
+        /* @__PURE__ */ jsxDEV("h1", { children: confirming ? /* @__PURE__ */ jsxDEV(Fragment, { children: [
+          "Terms & ",
+          /* @__PURE__ */ jsxDEV("em", { children: "Conditions" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+            lineNumber: 141,
+            columnNumber: 41
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+          lineNumber: 141,
+          columnNumber: 27
+        }, this) : /* @__PURE__ */ jsxDEV(Fragment, { children: [
+          "Choose a cinema,",
+          /* @__PURE__ */ jsxDEV("br", {}, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+            lineNumber: 141,
+            columnNumber: 84
+          }, this),
+          "then choose ",
+          /* @__PURE__ */ jsxDEV("em", { children: "your seat." }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+            lineNumber: 141,
+            columnNumber: 102
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+          lineNumber: 141,
+          columnNumber: 66
+        }, this) }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+          lineNumber: 141,
+          columnNumber: 9
+        }, this),
+        /* @__PURE__ */ jsxDEV("p", { children: confirming ? "Please review your booking details and agree to the conditions below for a smooth movie experience." : "Great stories deserve the big screen. Find the best showtimes near you and book your seats in a few clicks." }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+          lineNumber: 142,
+          columnNumber: 9
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "booking-progress", children: [
+          stepLabel(1, "Theatre & Show"),
+          /* @__PURE__ */ jsxDEV("i", {}, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+            lineNumber: 143,
+            columnNumber: 75
+          }, this),
+          stepLabel(2, "Seats"),
+          /* @__PURE__ */ jsxDEV("i", {}, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+            lineNumber: 143,
+            columnNumber: 103
+          }, this),
+          stepLabel(3, "Confirm")
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+          lineNumber: 143,
+          columnNumber: 9
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+        lineNumber: 138,
+        columnNumber: 7
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+      lineNumber: 136,
+      columnNumber: 5
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: "booking-content", children: [
+      !shows.length ? /* @__PURE__ */ jsxDEV(Empty, { title: "No shows are currently available for this movie." }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+        lineNumber: 148,
+        columnNumber: 24
+      }, this) : /* @__PURE__ */ jsxDEV("div", { className: `booking-layout${confirming ? " booking-layout-confirming" : ""}`, children: [
+        /* @__PURE__ */ jsxDEV("section", { className: "booking-main-panel", children: [
+          !seatMapOpen && !confirming && /* @__PURE__ */ jsxDEV(Fragment, { children: [
+            /* @__PURE__ */ jsxDEV("div", { className: "booking-controls", children: [
+              /* @__PURE__ */ jsxDEV("label", { className: "booking-city", children: [
+                /* @__PURE__ */ jsxDEV(MapPin, { size: 18 }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 152,
+                  columnNumber: 47
+                }, this),
+                /* @__PURE__ */ jsxDEV("select", { "aria-label": "Choose a city", value: activeCity, onChange: (event) => {
+                  setCity(event.target.value);
+                  setDay("");
+                  setShowId("");
+                  setSelectedSeats([]);
+                }, children: cities.map((value) => /* @__PURE__ */ jsxDEV("option", { value, children: [
+                  value,
+                  ", Telangana"
+                ] }, value, true, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 152,
+                  columnNumber: 243
+                }, this)) }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 152,
+                  columnNumber: 67
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 152,
+                columnNumber: 15
+              }, this),
+              /* @__PURE__ */ jsxDEV("div", { className: "booking-date-list", "aria-label": "Choose a date", children: dates.map((value) => {
+                const label = dayLabel(value);
+                return /* @__PURE__ */ jsxDEV("button", { type: "button", className: activeDay === value ? "selected" : "", onClick: () => {
+                  setDay(value);
+                  setShowId("");
+                  setSelectedSeats([]);
+                }, children: [
+                  /* @__PURE__ */ jsxDEV("span", { children: label.weekday }, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 153,
+                    columnNumber: 289
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("strong", { children: [
+                    label.day,
+                    " ",
+                    label.month
+                  ] }, void 0, true, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 153,
+                    columnNumber: 317
+                  }, this)
+                ] }, value, true, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 153,
+                  columnNumber: 137
+                }, this);
+              }) }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 153,
+                columnNumber: 15
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 151,
+              columnNumber: 13
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "booking-theatre-list", children: [
+              data.theatres.filter((item) => item.status === "ACTIVE" && item.city === activeCity && datedShows.some((showing) => showing.theatreId === item.id)).map((item) => {
+                const itemShows = datedShows.filter((showing) => showing.theatreId === item.id);
+                return /* @__PURE__ */ jsxDEV("article", { className: "booking-theatre", children: [
+                  /* @__PURE__ */ jsxDEV("div", { className: "booking-theatre-details", children: [
+                    /* @__PURE__ */ jsxDEV("h2", { children: item.name }, void 0, false, {
+                      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                      lineNumber: 158,
+                      columnNumber: 58
+                    }, this),
+                    /* @__PURE__ */ jsxDEV("p", { children: [
+                      /* @__PURE__ */ jsxDEV(MapPin, { size: 13 }, void 0, false, {
+                        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                        lineNumber: 158,
+                        columnNumber: 81
+                      }, this),
+                      item.address,
+                      ", ",
+                      item.city
+                    ] }, void 0, true, {
+                      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                      lineNumber: 158,
+                      columnNumber: 78
+                    }, this),
+                    /* @__PURE__ */ jsxDEV("div", { className: "booking-perks", children: [
+                      /* @__PURE__ */ jsxDEV("span", { children: [
+                        /* @__PURE__ */ jsxDEV(Monitor, { size: 12 }, void 0, false, {
+                          fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                          lineNumber: 158,
+                          columnNumber: 169
+                        }, this),
+                        "Dolby Atmos"
+                      ] }, void 0, true, {
+                        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                        lineNumber: 158,
+                        columnNumber: 163
+                      }, this),
+                      /* @__PURE__ */ jsxDEV("i", {}, void 0, false, {
+                        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                        lineNumber: 158,
+                        columnNumber: 208
+                      }, this),
+                      " ",
+                      /* @__PURE__ */ jsxDEV("span", { children: "Recliners" }, void 0, false, {
+                        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                        lineNumber: 158,
+                        columnNumber: 214
+                      }, this),
+                      /* @__PURE__ */ jsxDEV("i", {}, void 0, false, {
+                        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                        lineNumber: 158,
+                        columnNumber: 236
+                      }, this),
+                      " ",
+                      /* @__PURE__ */ jsxDEV("span", { children: "Food & beverages" }, void 0, false, {
+                        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                        lineNumber: 158,
+                        columnNumber: 242
+                      }, this),
+                      /* @__PURE__ */ jsxDEV("i", {}, void 0, false, {
+                        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                        lineNumber: 158,
+                        columnNumber: 271
+                      }, this),
+                      " ",
+                      /* @__PURE__ */ jsxDEV("span", { children: "Parking" }, void 0, false, {
+                        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                        lineNumber: 158,
+                        columnNumber: 277
+                      }, this)
+                    ] }, void 0, true, {
+                      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                      lineNumber: 158,
+                      columnNumber: 132
+                    }, this)
+                  ] }, void 0, true, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 158,
+                    columnNumber: 17
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("div", { className: "booking-times", children: itemShows.map((itemShow) => /* @__PURE__ */ jsxDEV("button", { type: "button", className: showId === itemShow.id ? "chosen" : "", onClick: () => {
+                    const enabled = sessionStorage.getItem("av_location_enabled") === "true";
+                    setLocationEnabled(enabled);
+                    if (!enabled) {
+                      setLocationMessage("Turn on location to book your ticket.");
+                      return;
+                    }
+                    chooseShow(itemShow);
+                  }, children: [
+                    /* @__PURE__ */ jsxDEV("strong", { children: itemShow.startTime }, void 0, false, {
+                      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                      lineNumber: 159,
+                      columnNumber: 392
+                    }, this),
+                    /* @__PURE__ */ jsxDEV("small", { children: itemShow.ticketType === "FREE" ? "FREE" : money(itemShow.ticketPrice) }, void 0, false, {
+                      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                      lineNumber: 159,
+                      columnNumber: 429
+                    }, this)
+                  ] }, itemShow.id, true, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 159,
+                    columnNumber: 77
+                  }, this)) }, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 159,
+                    columnNumber: 17
+                  }, this)
+                ] }, item.id, true, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 157,
+                  columnNumber: 24
+                }, this);
+              }),
+              !datedShows.length && /* @__PURE__ */ jsxDEV("div", { className: "booking-no-shows", children: "No showtimes are available on this date. Choose another day." }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 161,
+                columnNumber: 41
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 155,
+              columnNumber: 13
+            }, this),
+            !!locationMessage && /* @__PURE__ */ jsxDEV("div", { className: "booking-location-prompt", role: "status", children: [
+              /* @__PURE__ */ jsxDEV(MapPin, { size: 20 }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 162,
+                columnNumber: 90
+              }, this),
+              /* @__PURE__ */ jsxDEV("div", { children: [
+                /* @__PURE__ */ jsxDEV("strong", { children: "Location is turned off" }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 162,
+                  columnNumber: 115
+                }, this),
+                /* @__PURE__ */ jsxDEV("p", { children: locationMessage }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 162,
+                  columnNumber: 154
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 162,
+                columnNumber: 110
+              }, this),
+              /* @__PURE__ */ jsxDEV("button", { type: "button", className: "button small", onClick: enableLocation, children: "Turn on location" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 162,
+                columnNumber: 184
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 162,
+              columnNumber: 35
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+            lineNumber: 150,
+            columnNumber: 43
+          }, this),
+          seatMapOpen && show && !confirming && /* @__PURE__ */ jsxDEV("div", { className: "booking-seat-step", children: [
+            /* @__PURE__ */ jsxDEV("button", { type: "button", className: "booking-step-back", onClick: () => {
+              setSeatMapOpen(false);
+              setShowId("");
+              setSelectedSeats([]);
+              setError("");
+            }, children: [
+              /* @__PURE__ */ jsxDEV(ArrowLeft, { size: 16 }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 166,
+                columnNumber: 154
+              }, this),
+              " Back to cinemas"
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 166,
+              columnNumber: 13
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "booking-seat-heading", children: [
+              /* @__PURE__ */ jsxDEV("div", { children: [
+                /* @__PURE__ */ jsxDEV("span", { className: "eyebrow", children: "SELECT YOUR SEATS" }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 167,
+                  columnNumber: 56
+                }, this),
+                /* @__PURE__ */ jsxDEV("h2", { children: theatre?.name }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 167,
+                  columnNumber: 106
+                }, this),
+                /* @__PURE__ */ jsxDEV("p", { children: [
+                  /* @__PURE__ */ jsxDEV(CalendarDays, { size: 14 }, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 167,
+                    columnNumber: 133
+                  }, this),
+                  date(show.date),
+                  " ",
+                  /* @__PURE__ */ jsxDEV("span", { children: "·" }, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 167,
+                    columnNumber: 177
+                  }, this),
+                  /* @__PURE__ */ jsxDEV(Clock3, { size: 14 }, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 167,
+                    columnNumber: 191
+                  }, this),
+                  show.startTime,
+                  " ",
+                  /* @__PURE__ */ jsxDEV("span", { children: "·" }, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 167,
+                    columnNumber: 228
+                  }, this),
+                  bookingScreen?.name || "Screen"
+                ] }, void 0, true, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 167,
+                  columnNumber: 130
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 167,
+                columnNumber: 51
+              }, this),
+              /* @__PURE__ */ jsxDEV("span", { className: "booking-seat-count", children: [
+                selectedSeats.length,
+                " selected"
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 167,
+                columnNumber: 285
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 167,
+              columnNumber: 13
+            }, this),
+            waitlistOffer && (waitlistOffer.status === "COMPLETED" || offerSeconds > 0) && /* @__PURE__ */ jsxDEV("div", { className: "waitlist-offer-panel", role: "status", children: [
+              /* @__PURE__ */ jsxDEV("span", { className: "eyebrow", children: "WAITLIST OFFER" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 168,
+                columnNumber: 145
+              }, this),
+              waitlistOffer.status === "COMPLETED" ? /* @__PURE__ */ jsxDEV("strong", { children: "All offered seats have been booked by other waitlist members." }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 168,
+                columnNumber: 232
+              }, this) : /* @__PURE__ */ jsxDEV("strong", { children: [
+                visibleOfferSeatIds.size,
+                " ",
+                visibleOfferSeatIds.size === 1 ? "seat" : "seats",
+                " remaining | offer ends in ",
+                /* @__PURE__ */ jsxDEV("b", { children: offerClock }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 168,
+                  columnNumber: 426
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 168,
+                columnNumber: 313
+              }, this),
+              waitlistOffer.status !== "COMPLETED" && /* @__PURE__ */ jsxDEV("p", { children: "Choose any remaining offered seat. You can also select regular seats outside this offer." }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 168,
+                columnNumber: 496
+              }, this),
+              visibleOfferSeatIds.size > 0 && /* @__PURE__ */ jsxDEV("button", { type: "button", className: "button small", disabled: !selectedSeats.length || selectedSeats.some((id) => !visibleOfferSeatIds.has(id)) || busy, onClick: () => void proceedToConfirm(), children: [
+                "Convert and select seats ",
+                /* @__PURE__ */ jsxDEV(ArrowRight, { size: 15 }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 168,
+                  columnNumber: 838
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 168,
+                columnNumber: 625
+              }, this),
+              waitlistOffer.status !== "COMPLETED" && visibleOfferSeatIds.size === 0 && /* @__PURE__ */ jsxDEV("p", { className: "waitlist-offer-empty", children: "No offered seats remain. Check the latest availability." }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 168,
+                columnNumber: 947
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 168,
+              columnNumber: 93
+            }, this),
+            soldOut ? /* @__PURE__ */ jsxDEV("div", { className: "booking-soldout", children: [
+              /* @__PURE__ */ jsxDEV("span", { className: "eyebrow", children: "THIS SHOW IS FULL" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 169,
+                columnNumber: 59
+              }, this),
+              /* @__PURE__ */ jsxDEV("h3", { children: "Join the waiting list" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 169,
+                columnNumber: 109
+              }, this),
+              /* @__PURE__ */ jsxDEV("p", { children: "If seats become available, we’ll email you. Cancelled seats return to the regular seat layout and anyone can book them." }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 169,
+                columnNumber: 139
+              }, this),
+              /* @__PURE__ */ jsxDEV("label", { children: [
+                "Tickets needed",
+                /* @__PURE__ */ jsxDEV("select", { value: waitCount, onChange: (event) => setWaitCount(Number(event.target.value)), children: Array.from({ length: show.maxTicketsPerMobile }, (_, index) => /* @__PURE__ */ jsxDEV("option", { value: index + 1, children: [
+                  index + 1,
+                  " ",
+                  index === 0 ? "ticket" : "tickets"
+                ] }, index + 1, true, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 169,
+                  columnNumber: 439
+                }, this)) }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 169,
+                  columnNumber: 286
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 169,
+                columnNumber: 265
+              }, this),
+              waitEntry ? /* @__PURE__ */ jsxDEV("div", { className: "booking-waitlist-success", role: "status", children: [
+                /* @__PURE__ */ jsxDEV("span", { className: "eyebrow", children: "YOU’RE ON THE WAITING LIST" }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 169,
+                  columnNumber: 626
+                }, this),
+                /* @__PURE__ */ jsxDEV("strong", { children: "Your request has been added." }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 169,
+                  columnNumber: 685
+                }, this),
+                /* @__PURE__ */ jsxDEV("p", { children: "We’ll email you if seats open up. You can book any seats that are available through the normal seat layout." }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 169,
+                  columnNumber: 730
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 169,
+                columnNumber: 570
+              }, this) : /* @__PURE__ */ jsxDEV("button", { className: "button", disabled: waitBusy, onClick: joinWaitlist, children: [
+                waitBusy ? "Joining…" : "Join waiting list",
+                /* @__PURE__ */ jsxDEV(ArrowRight, { size: 16 }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 169,
+                  columnNumber: 968
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 169,
+                columnNumber: 853
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 169,
+              columnNumber: 26
+            }, this) : /* @__PURE__ */ jsxDEV(Fragment, { children: [
+              /* @__PURE__ */ jsxDEV("div", { className: "booking-screen-label", children: "SCREEN" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 170,
+                columnNumber: 15
+              }, this),
+              !availabilityReady ? /* @__PURE__ */ jsxDEV("p", { className: "booking-no-shows", children: availabilityError || "Checking the latest seat availability… Seats will appear when the server confirms availability." }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 170,
+                columnNumber: 87
+              }, this) : /* @__PURE__ */ jsxDEV("div", { className: "booking-seat-scroll", children: /* @__PURE__ */ jsxDEV("div", { className: "seat-grid", style: { gridTemplateColumns: `repeat(${seatColumns}, minmax(24px, 32px))` }, children: positionedSeats.map((seat) => {
+                const selected = selectedSeats.includes(seat.id);
+                const isOffered = backendOfferedSeats.includes(seat.id);
+                const unavailable = seat.disabled || unavailableIds.has(seat.id) || isOffered && !visibleOfferSeatIds.has(seat.id) || seat.clickable !== true && !visibleOfferSeatIds.has(seat.id);
+                return /* @__PURE__ */ jsxDEV("button", { title: isOffered ? "Waitlist offered seat" : seat.label, "aria-label": `${seat.label}, ${isOffered ? "waitlist offered, " : ""}${unavailable ? "unavailable" : selected ? "selected" : "available"}`, className: `seat ${seat.category === "PREMIUM" ? "premium" : ""} ${selected ? "selected" : ""} ${unavailable ? "booked" : ""}`, style: { gridColumn: seat.column, gridRow: seat.row, borderColor: seat.color || void 0 }, disabled: !selected && unavailable, onClick: () => void toggleSeat(seat.id), children: seat.label }, seat.id, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 170,
+                  columnNumber: 711
+                }, this);
+              }) }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 170,
+                columnNumber: 283
+              }, this) }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 170,
+                columnNumber: 246
+              }, this),
+              /* @__PURE__ */ jsxDEV("div", { className: "booking-seat-legend", children: [
+                /* @__PURE__ */ jsxDEV("span", { children: [
+                  /* @__PURE__ */ jsxDEV("i", {}, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 171,
+                    columnNumber: 58
+                  }, this),
+                  "Available"
+                ] }, void 0, true, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 171,
+                  columnNumber: 52
+                }, this),
+                /* @__PURE__ */ jsxDEV("span", { children: [
+                  /* @__PURE__ */ jsxDEV("i", { className: "premium" }, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 171,
+                    columnNumber: 85
+                  }, this),
+                  "Premium"
+                ] }, void 0, true, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 171,
+                  columnNumber: 79
+                }, this),
+                /* @__PURE__ */ jsxDEV("span", { children: [
+                  /* @__PURE__ */ jsxDEV("i", { className: "selected" }, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 171,
+                    columnNumber: 130
+                  }, this),
+                  "Selected"
+                ] }, void 0, true, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 171,
+                  columnNumber: 124
+                }, this),
+                backendOfferedSeats.length > 0 && /* @__PURE__ */ jsxDEV("span", { children: [
+                  /* @__PURE__ */ jsxDEV("i", { className: "offered" }, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 171,
+                    columnNumber: 212
+                  }, this),
+                  "Waitlist offer"
+                ] }, void 0, true, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 171,
+                  columnNumber: 206
+                }, this),
+                /* @__PURE__ */ jsxDEV("span", { children: [
+                  /* @__PURE__ */ jsxDEV("i", { className: "booked" }, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 171,
+                    columnNumber: 265
+                  }, this),
+                  "Unavailable"
+                ] }, void 0, true, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 171,
+                  columnNumber: 259
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 171,
+                columnNumber: 15
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 169,
+              columnNumber: 1011
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+            lineNumber: 165,
+            columnNumber: 50
+          }, this),
+          confirming && show && /* @__PURE__ */ jsxDEV("div", { className: "booking-confirm-step booking-confirm-terms", children: [
+            waitlistOffer && offerSeconds > 0 && /* @__PURE__ */ jsxDEV(Notice, { children: [
+              "Waitlist offer ends in ",
+              offerClock,
+              ". This offer timer is separate from your booking seat hold."
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 176,
+              columnNumber: 51
+            }, this),
+            holdRemaining > 0 && /* @__PURE__ */ jsxDEV(Notice, { children: [
+              "Your booking seats are held for ",
+              holdClock,
+              ". Complete your booking before this seat-hold timer ends."
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 176,
+              columnNumber: 185
+            }, this),
+            /* @__PURE__ */ jsxDEV("section", { className: "terms-booking-details", "aria-labelledby": "terms-booking-title", children: [
+              /* @__PURE__ */ jsxDEV("div", { className: "terms-details-heading", children: [
+                /* @__PURE__ */ jsxDEV("h2", { id: "terms-booking-title", children: "Your Booking Details" }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 177,
+                  columnNumber: 133
+                }, this),
+                /* @__PURE__ */ jsxDEV("span", { children: [
+                  /* @__PURE__ */ jsxDEV(ShieldCheck, { size: 16 }, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 177,
+                    columnNumber: 193
+                  }, this),
+                  "Please review your booking details and agree to the terms below."
+                ] }, void 0, true, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 177,
+                  columnNumber: 187
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 177,
+                columnNumber: 94
+              }, this),
+              /* @__PURE__ */ jsxDEV("div", { className: "terms-details-grid", children: [
+                /* @__PURE__ */ jsxDEV("div", { className: "terms-movie-detail", children: [
+                  /* @__PURE__ */ jsxDEV(Poster, { movie }, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 177,
+                    columnNumber: 367
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("div", { children: [
+                    /* @__PURE__ */ jsxDEV("h3", { children: movie.title }, void 0, false, {
+                      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                      lineNumber: 177,
+                      columnNumber: 396
+                    }, this),
+                    /* @__PURE__ */ jsxDEV("p", { children: [
+                      /* @__PURE__ */ jsxDEV(Film, { size: 14 }, void 0, false, {
+                        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                        lineNumber: 177,
+                        columnNumber: 421
+                      }, this),
+                      movie.language,
+                      /* @__PURE__ */ jsxDEV("span", { children: "·" }, void 0, false, {
+                        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                        lineNumber: 177,
+                        columnNumber: 455
+                      }, this),
+                      /* @__PURE__ */ jsxDEV(Clock3, { size: 14 }, void 0, false, {
+                        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                        lineNumber: 177,
+                        columnNumber: 469
+                      }, this),
+                      Math.floor(movie.duration / 60),
+                      "h ",
+                      movie.duration % 60,
+                      "m"
+                    ] }, void 0, true, {
+                      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                      lineNumber: 177,
+                      columnNumber: 418
+                    }, this),
+                    /* @__PURE__ */ jsxDEV("small", { children: movie.genre.join(" / ") }, void 0, false, {
+                      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                      lineNumber: 177,
+                      columnNumber: 550
+                    }, this)
+                  ] }, void 0, true, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 177,
+                    columnNumber: 391
+                  }, this)
+                ] }, void 0, true, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 177,
+                  columnNumber: 331
+                }, this),
+                /* @__PURE__ */ jsxDEV("div", { className: "terms-detail-item", children: [
+                  /* @__PURE__ */ jsxDEV(MapPin, {}, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 177,
+                    columnNumber: 637
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("div", { children: [
+                    /* @__PURE__ */ jsxDEV("span", { children: "Selected theatre" }, void 0, false, {
+                      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                      lineNumber: 177,
+                      columnNumber: 652
+                    }, this),
+                    /* @__PURE__ */ jsxDEV("strong", { children: theatre?.name || "—" }, void 0, false, {
+                      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                      lineNumber: 177,
+                      columnNumber: 681
+                    }, this),
+                    /* @__PURE__ */ jsxDEV("small", { children: [
+                      theatre?.address || "",
+                      theatre?.city ? `, ${theatre.city}` : "",
+                      bookingScreen ? ` · ${bookingScreen.name}` : ""
+                    ] }, void 0, true, {
+                      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                      lineNumber: 177,
+                      columnNumber: 720
+                    }, this)
+                  ] }, void 0, true, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 177,
+                    columnNumber: 647
+                  }, this)
+                ] }, void 0, true, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 177,
+                  columnNumber: 602
+                }, this),
+                /* @__PURE__ */ jsxDEV("div", { className: "terms-detail-item", children: [
+                  /* @__PURE__ */ jsxDEV(CalendarDays, {}, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 177,
+                    columnNumber: 897
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("div", { children: [
+                    /* @__PURE__ */ jsxDEV("span", { children: "Show date & time" }, void 0, false, {
+                      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                      lineNumber: 177,
+                      columnNumber: 918
+                    }, this),
+                    /* @__PURE__ */ jsxDEV("strong", { children: new Intl.DateTimeFormat("en-IN", { weekday: "long", day: "2-digit", month: "short", year: "numeric" }).format(/* @__PURE__ */ new Date(`${show.date}T12:00:00`)) }, void 0, false, {
+                      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                      lineNumber: 177,
+                      columnNumber: 951
+                    }, this),
+                    /* @__PURE__ */ jsxDEV("small", { children: show.startTime }, void 0, false, {
+                      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                      lineNumber: 177,
+                      columnNumber: 1114
+                    }, this)
+                  ] }, void 0, true, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 177,
+                    columnNumber: 913
+                  }, this)
+                ] }, void 0, true, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 177,
+                  columnNumber: 862
+                }, this),
+                /* @__PURE__ */ jsxDEV("div", { className: "terms-detail-item", children: [
+                  /* @__PURE__ */ jsxDEV(Armchair, {}, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 177,
+                    columnNumber: 1192
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("div", { children: [
+                    /* @__PURE__ */ jsxDEV("span", { children: "Seats selected" }, void 0, false, {
+                      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                      lineNumber: 177,
+                      columnNumber: 1209
+                    }, this),
+                    /* @__PURE__ */ jsxDEV("strong", { children: selectedSeatLabels.join(", ") }, void 0, false, {
+                      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                      lineNumber: 177,
+                      columnNumber: 1236
+                    }, this),
+                    /* @__PURE__ */ jsxDEV("small", { children: [
+                      selectedSeats.length,
+                      " ",
+                      selectedSeats.length === 1 ? "ticket" : "tickets"
+                    ] }, void 0, true, {
+                      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                      lineNumber: 177,
+                      columnNumber: 1284
+                    }, this)
+                  ] }, void 0, true, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 177,
+                    columnNumber: 1204
+                  }, this)
+                ] }, void 0, true, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 177,
+                  columnNumber: 1157
+                }, this),
+                /* @__PURE__ */ jsxDEV("div", { className: "terms-detail-item terms-amount", children: [
+                  /* @__PURE__ */ jsxDEV(Wallet, {}, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 177,
+                    columnNumber: 1433
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("div", { children: [
+                    /* @__PURE__ */ jsxDEV("span", { children: "Total amount" }, void 0, false, {
+                      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                      lineNumber: 177,
+                      columnNumber: 1448
+                    }, this),
+                    /* @__PURE__ */ jsxDEV("strong", { children: money(amount) }, void 0, false, {
+                      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                      lineNumber: 177,
+                      columnNumber: 1473
+                    }, this)
+                  ] }, void 0, true, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 177,
+                    columnNumber: 1443
+                  }, this)
+                ] }, void 0, true, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 177,
+                  columnNumber: 1385
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 177,
+                columnNumber: 295
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 177,
+              columnNumber: 13
+            }, this),
+            /* @__PURE__ */ jsxDEV("label", { className: "terms-mobile-field", children: [
+              "Alternative mobile (optional)",
+              /* @__PURE__ */ jsxDEV("input", { type: "tel", value: alternativeMobile, onChange: (event) => setAlternativeMobile(event.target.value.replace(/\D/g, "")), maxLength: 10, placeholder: "For booking updates" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 178,
+                columnNumber: 80
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 178,
+              columnNumber: 13
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "terms-section-heading", children: [
+              /* @__PURE__ */ jsxDEV("h2", { children: "Terms & Conditions" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 179,
+                columnNumber: 52
+              }, this),
+              /* @__PURE__ */ jsxDEV("p", { children: "Please read and agree to each condition to continue." }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 179,
+                columnNumber: 83
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 179,
+              columnNumber: 13
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "booking-terms-carousel", children: [
+              /* @__PURE__ */ jsxDEV("button", { type: "button", className: "terms-carousel-arrow", "aria-label": "Previous condition", disabled: activeTerm === 0, onClick: () => activeTermIndex(-1), children: /* @__PURE__ */ jsxDEV(ChevronLeft, { size: 20 }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 180,
+                columnNumber: 204
+              }, this) }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 180,
+                columnNumber: 53
+              }, this),
+              /* @__PURE__ */ jsxDEV("div", { className: "booking-terms-track", ref: termsTrackRef, children: terms.map((term, index) => {
+                const accepted = acceptedTerms.includes(term.id);
+                const typed = completedTerms.includes(term.id);
+                return /* @__PURE__ */ jsxDEV("article", { className: `booking-term-card${activeTerm === index ? " active" : ""}${accepted ? " accepted" : ""}`, onClick: () => setActiveTerm(index), children: [
+                  /* @__PURE__ */ jsxDEV("span", { className: "booking-term-number", children: String(index + 1).padStart(2, "0") }, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 180,
+                    columnNumber: 589
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("div", { className: `booking-term-art term-art-${term.id}`, style: { backgroundImage: `url("${termsCardArtwork}")` }, "aria-hidden": "true" }, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 180,
+                    columnNumber: 670
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("h3", { children: term.title }, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 180,
+                    columnNumber: 805
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("p", { children: typed ? term.text : activeTerm === index ? typedTermText : "" }, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 180,
+                    columnNumber: 826
+                  }, this),
+                  !typed && activeTerm === index && /* @__PURE__ */ jsxDEV("small", { className: "terms-typing-status", children: "Reading condition…" }, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 180,
+                    columnNumber: 931
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("label", { className: "booking-term-accept", onClick: (event) => event.stopPropagation(), children: [
+                    /* @__PURE__ */ jsxDEV("input", { type: "checkbox", checked: accepted, disabled: !typed, onChange: () => toggleTerm(term.id) }, void 0, false, {
+                      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                      lineNumber: 180,
+                      columnNumber: 1081
+                    }, this),
+                    /* @__PURE__ */ jsxDEV("span", { children: typed ? "I agree to this condition." : "Read the full condition to continue." }, void 0, false, {
+                      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                      lineNumber: 180,
+                      columnNumber: 1180
+                    }, this)
+                  ] }, void 0, true, {
+                    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                    lineNumber: 180,
+                    columnNumber: 997
+                  }, this)
+                ] }, term.id, true, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 180,
+                  columnNumber: 427
+                }, this);
+              }) }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 180,
+                columnNumber: 238
+              }, this),
+              /* @__PURE__ */ jsxDEV("button", { type: "button", className: "terms-carousel-arrow", "aria-label": "Next condition", disabled: activeTerm === terms.length - 1, onClick: () => activeTermIndex(1), children: /* @__PURE__ */ jsxDEV(ChevronRight, { size: 20 }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 180,
+                columnNumber: 1461
+              }, this) }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 180,
+                columnNumber: 1300
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 180,
+              columnNumber: 13
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "terms-pagination", "aria-label": "Choose a condition", children: terms.map((term, index) => /* @__PURE__ */ jsxDEV("button", { type: "button", "aria-label": `Show condition ${index + 1}`, "aria-current": activeTerm === index ? "step" : void 0, className: activeTerm === index ? "active" : "", onClick: () => {
+              setActiveTerm(index);
+              termsTrackRef.current?.children[index]?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+            } }, term.id, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 181,
+              columnNumber: 107
+            }, this)) }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 181,
+              columnNumber: 13
+            }, this),
+            error && /* @__PURE__ */ jsxDEV(Notice, { error: true, children: error }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 182,
+              columnNumber: 23
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "terms-confirm-action", children: [
+              /* @__PURE__ */ jsxDEV("button", { type: "button", className: "button full booking-proceed", disabled: acceptedTerms.length !== terms.length || busy, onClick: () => void confirm(), children: [
+                busy ? "Preparing your booking…" : "Confirm booking",
+                " ",
+                /* @__PURE__ */ jsxDEV(ArrowRight, { size: 18 }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 182,
+                  columnNumber: 297
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 182,
+                columnNumber: 92
+              }, this),
+              /* @__PURE__ */ jsxDEV("p", { children: acceptedTerms.length === terms.length ? "Your booking will be confirmed using the details above." : `Please agree to all ${terms.length} conditions to proceed.` }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 182,
+                columnNumber: 330
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 182,
+              columnNumber: 54
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "terms-payment-note", children: [
+              /* @__PURE__ */ jsxDEV(Check, { size: 18 }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 183,
+                columnNumber: 49
+              }, this),
+              show.ticketType === "FREE" ? "This is a free demo screening. No payment is required." : "Payment is simulated. No money is charged."
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 183,
+              columnNumber: 13
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+            lineNumber: 175,
+            columnNumber: 34
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+          lineNumber: 149,
+          columnNumber: 9
+        }, this),
+        !confirming && /* @__PURE__ */ jsxDEV("aside", { className: "booking-summary", children: [
+          /* @__PURE__ */ jsxDEV("div", { className: "booking-summary-movie", children: [
+            /* @__PURE__ */ jsxDEV(Poster, { movie }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 188,
+              columnNumber: 50
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { children: [
+              /* @__PURE__ */ jsxDEV("span", { className: "eyebrow", children: "YOUR MOVIE" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 188,
+                columnNumber: 79
+              }, this),
+              /* @__PURE__ */ jsxDEV("h2", { children: movie.title }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 188,
+                columnNumber: 122
+              }, this),
+              /* @__PURE__ */ jsxDEV("p", { children: [
+                /* @__PURE__ */ jsxDEV(Film, { size: 13 }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 188,
+                  columnNumber: 147
+                }, this),
+                movie.language,
+                /* @__PURE__ */ jsxDEV(Users, { size: 13 }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                  lineNumber: 188,
+                  columnNumber: 181
+                }, this),
+                movie.duration,
+                " min"
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 188,
+                columnNumber: 144
+              }, this),
+              /* @__PURE__ */ jsxDEV("small", { children: movie.genre.join(" / ") }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 188,
+                columnNumber: 224
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 188,
+              columnNumber: 74
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+            lineNumber: 188,
+            columnNumber: 11
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: "booking-summary-lines", children: [
+            /* @__PURE__ */ jsxDEV("div", { children: [
+              /* @__PURE__ */ jsxDEV(MapPin, {}, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 189,
+                columnNumber: 55
+              }, this),
+              /* @__PURE__ */ jsxDEV("span", { children: "Selected theatre" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 189,
+                columnNumber: 65
+              }, this),
+              /* @__PURE__ */ jsxDEV("strong", { children: theatre?.name || "Choose a theatre" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 189,
+                columnNumber: 94
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 189,
+              columnNumber: 50
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { children: [
+              /* @__PURE__ */ jsxDEV(CalendarDays, {}, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 189,
+                columnNumber: 159
+              }, this),
+              /* @__PURE__ */ jsxDEV("span", { children: "Showtime" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 189,
+                columnNumber: 175
+              }, this),
+              /* @__PURE__ */ jsxDEV("strong", { children: show ? `${date(show.date)} · ${show.startTime}` : "Choose a showtime" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 189,
+                columnNumber: 196
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 189,
+              columnNumber: 154
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { children: [
+              /* @__PURE__ */ jsxDEV(Monitor, {}, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 189,
+                columnNumber: 295
+              }, this),
+              /* @__PURE__ */ jsxDEV("span", { children: "Seats" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 189,
+                columnNumber: 306
+              }, this),
+              /* @__PURE__ */ jsxDEV("strong", { children: selectedSeatLabels.join(", ") || "Select seats" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 189,
+                columnNumber: 324
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 189,
+              columnNumber: 290
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { children: [
+              /* @__PURE__ */ jsxDEV(Ticket, {}, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 189,
+                columnNumber: 401
+              }, this),
+              /* @__PURE__ */ jsxDEV("span", { children: "Tickets" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 189,
+                columnNumber: 411
+              }, this),
+              /* @__PURE__ */ jsxDEV("strong", { children: selectedSeats.length }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+                lineNumber: 189,
+                columnNumber: 431
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 189,
+              columnNumber: 396
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+            lineNumber: 189,
+            columnNumber: 11
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: "booking-total", children: [
+            /* @__PURE__ */ jsxDEV("span", { children: "Total amount" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 190,
+              columnNumber: 42
+            }, this),
+            /* @__PURE__ */ jsxDEV("strong", { children: money(amount) }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 190,
+              columnNumber: 67
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+            lineNumber: 190,
+            columnNumber: 11
+          }, this),
+          holdRemaining > 0 && /* @__PURE__ */ jsxDEV(Notice, { children: [
+            "Your seats are held for ",
+            Math.ceil(holdRemaining / 1e3),
+            " seconds."
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+            lineNumber: 191,
+            columnNumber: 33
+          }, this),
+          holdExpiresAt && holdRemaining === 0 && selectedSeats.length > 0 && /* @__PURE__ */ jsxDEV(Notice, { error: true, children: "Your seat hold has expired. Please select seats again." }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+            lineNumber: 191,
+            columnNumber: 186
+          }, this),
+          error && /* @__PURE__ */ jsxDEV(Notice, { error: true, children: error }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+            lineNumber: 191,
+            columnNumber: 274
+          }, this),
+          (!soldOut || confirming) && /* @__PURE__ */ jsxDEV("button", { className: "button full booking-proceed", disabled: !show || !selectedSeats.length || busy, onClick: () => confirming ? void confirm() : seatMapOpen ? void proceedToConfirm() : setSeatMapOpen(true), children: busy ? "Preparing your ticket…" : confirming ? "Confirm booking" : /* @__PURE__ */ jsxDEV(Fragment, { children: [
+            /* @__PURE__ */ jsxDEV(Ticket, { size: 16 }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 192,
+              columnNumber: 315
+            }, this),
+            seatMapOpen ? selectedSeats.some((id) => visibleOfferSeatIds.has(id)) ? "Convert and select seats" : "Proceed to confirm" : "Proceed to select seats",
+            /* @__PURE__ */ jsxDEV(ArrowRight, { size: 16 }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+              lineNumber: 192,
+              columnNumber: 486
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+            lineNumber: 192,
+            columnNumber: 313
+          }, this) }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+            lineNumber: 192,
+            columnNumber: 40
+          }, this),
+          /* @__PURE__ */ jsxDEV("p", { className: "booking-demo-note", children: "Frontend preview · No real tickets or payments" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+            lineNumber: 193,
+            columnNumber: 11
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+          lineNumber: 187,
+          columnNumber: 25
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+        lineNumber: 148,
+        columnNumber: 93
+      }, this),
+      /* @__PURE__ */ jsxDEV("aside", { className: "booking-cinema-note", children: [
+        /* @__PURE__ */ jsxDEV(Ticket, { size: 37 }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+          lineNumber: 196,
+          columnNumber: 46
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { children: [
+          /* @__PURE__ */ jsxDEV("strong", { children: "Enjoy the big screen experience!" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+            lineNumber: 196,
+            columnNumber: 71
+          }, this),
+          /* @__PURE__ */ jsxDEV("p", { children: "Great stories are always better with an audience." }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+            lineNumber: 196,
+            columnNumber: 120
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+          lineNumber: 196,
+          columnNumber: 66
+        }, this),
+        /* @__PURE__ */ jsxDEV("span", { className: "booking-seat-art" }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+          lineNumber: 196,
+          columnNumber: 182
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+        lineNumber: 196,
+        columnNumber: 7
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+      lineNumber: 147,
+      columnNumber: 5
+    }, this)
+  ] }, void 0, true, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx",
+    lineNumber: 135,
+    columnNumber: 10
+  }, this);
+}
+_s(BookMyShow, "SwSk2VZJsYycCxANl/iI+npCHWE=", false, function() {
+  return [useParams, useApp, useNavigate];
+});
+_c = BookMyShow;
+var _c;
+$RefreshReg$(_c, "BookMyShow");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("E:/AV Website/AV-frontend/src/pages/BookMyShow.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,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LDhEQUFqQztBQUFBO0FBQUE7QUFBQTtBQUFBLGlCQUErRTtBQUFBLGFBTm5FO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFPZDtBQUFBLFdBOUMrRTtBQUFBO0FBQUE7QUFBQTtBQUFBLGFBK0NqRjtBQUFBLE1BQ0EsdUJBQUMsV0FBTSxXQUFVLHVCQUFzQjtBQUFBLCtCQUFDLFVBQU8sTUFBTSxNQUFkO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFBaUI7QUFBQSxRQUFFLHVCQUFDLFNBQUk7QUFBQSxpQ0FBQyxZQUFPLGdEQUFSO0FBQUE7QUFBQTtBQUFBO0FBQUEsaUJBQXdDO0FBQUEsVUFBUyx1QkFBQyxPQUFFLGlFQUFIO0FBQUE7QUFBQTtBQUFBO0FBQUEsaUJBQW9EO0FBQUEsYUFBMUc7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQUE4RztBQUFBLFFBQU0sdUJBQUMsVUFBSyxXQUFVLHNCQUFoQjtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBQWtDO0FBQUEsV0FBaE47QUFBQTtBQUFBO0FBQUE7QUFBQSxhQUFrTjtBQUFBLFNBakRwTjtBQUFBO0FBQUE7QUFBQTtBQUFBLFdBa0RBO0FBQUEsT0E5REs7QUFBQTtBQUFBO0FBQUE7QUFBQSxTQStEUDtBQUNGO0FBQUNULEdBeEtlRCxZQUFVO0FBQUEsVUFDUmxDLFdBQ0VnQixRQUNIakIsV0FBVztBQUFBO0FBQUEsS0FIWm1DO0FBQVUsSUFBQWlSO0FBQUEsYUFBQUEsSUFBQSIsIm5hbWVzIjpbInVzZUVmZmVjdCIsInVzZU1lbW8iLCJ1c2VSZWYiLCJ1c2VTdGF0ZSIsIkxpbmsiLCJ1c2VOYXZpZ2F0ZSIsInVzZVBhcmFtcyIsIkFycm93TGVmdCIsIkFycm93UmlnaHQiLCJDYWxlbmRhckRheXMiLCJDaGVjayIsIkNsb2NrMyIsIkZpbG0iLCJNYXBQaW4iLCJNb25pdG9yIiwiVGlja2V0IiwiVXNlcnMiLCJTaGllbGRDaGVjayIsIkFybWNoYWlyIiwiQ2hldnJvbkxlZnQiLCJDaGV2cm9uUmlnaHQiLCJXYWxsZXQiLCJ1c2VBcHAiLCJjcmVhdGVCb29raW5nIiwiY3JlYXRlU2VhdEhvbGQiLCJjcmVhdGVXYWl0bGlzdE9mZmVySG9sZCIsImdldE15U2hvd1dhaXRsaXN0T2ZmZXIiLCJnZXRTaG93QXZhaWxhYmlsaXR5IiwiZ2V0V2FpdGluZ0xpc3QiLCJqb2luV2FpdGluZ0xpc3QiLCJyZWxlYXNlU2VhdEhvbGQiLCJyZWxlYXNlV2FpdGxpc3RPZmZlckhvbGQiLCJub3JtYWxpemVTZWF0TGF5b3V0IiwiRW1wdHkiLCJOb3RpY2UiLCJQb3N0ZXIiLCJkYXRlIiwibW9uZXkiLCJ0ZXJtc0hlcm9JbWFnZSIsInRlcm1zQ2FyZEFydHdvcmsiLCJCb29rTXlTaG93IiwiX3MiLCJtb3ZpZUlkIiwiZGF0YSIsInVzZXIiLCJuYXZpZ2F0ZSIsIm1vdmllIiwibW92aWVzIiwiZmluZCIsIml0ZW0iLCJpZCIsInJlcXVlc3RlZFdhaXRsaXN0RW50cnlJZCIsIlVSTFNlYXJjaFBhcmFtcyIsIndpbmRvdyIsImxvY2F0aW9uIiwic2VhcmNoIiwiZ2V0Iiwic2hvd0lkIiwic2V0U2hvd0lkIiwic2VhdE1hcE9wZW4iLCJzZXRTZWF0TWFwT3BlbiIsIkJvb2xlYW4iLCJzZWxlY3RlZFNlYXRzIiwic2V0U2VsZWN0ZWRTZWF0cyIsImNvbmZpcm1pbmciLCJzZXRDb25maXJtaW5nIiwiYnVzeSIsInNldEJ1c3kiLCJhbHRlcm5hdGl2ZU1vYmlsZSIsInNldEFsdGVybmF0aXZlTW9iaWxlIiwiYWNjZXB0ZWRUZXJtcyIsInNldEFjY2VwdGVkVGVybXMiLCJhY3RpdmVUZXJtIiwic2V0QWN0aXZlVGVybSIsInRlcm1zVHJhY2tSZWYiLCJjaXR5Iiwic2V0Q2l0eSIsImRheSIsInNldERheSIsImVycm9yIiwic2V0RXJyb3IiLCJhdmFpbGFiaWxpdHlFcnJvciIsInNldEF2YWlsYWJpbGl0eUVycm9yIiwiYXZhaWxhYmlsaXR5VXBkYXRlZEF0Iiwic2V0QXZhaWxhYmlsaXR5VXBkYXRlZEF0IiwiYXZhaWxhYmlsaXR5Tm93Iiwic2V0QXZhaWxhYmlsaXR5Tm93IiwiRGF0ZSIsIm5vdyIsImF2YWlsYWJpbGl0eUNvbHVtbnMiLCJzZXRBdmFpbGFiaWxpdHlDb2x1bW5zIiwidmVyc2lvblNlYXRzIiwic2V0VmVyc2lvblNlYXRzIiwiYXZhaWxhYmlsaXR5U2NyZWVuIiwic2V0QXZhaWxhYmlsaXR5U2NyZWVuIiwiYmFja2VuZEJvb2tlZCIsInNldEJhY2tlbmRCb29rZWQiLCJob2xkRXhwaXJlc0F0Iiwic2V0SG9sZEV4cGlyZXNBdCIsImhvbGRSZW1haW5pbmciLCJzZXRIb2xkUmVtYWluaW5nIiwiYWN0aXZlSG9sZFJlZiIsIndhaXRDb3VudCIsInNldFdhaXRDb3VudCIsIndhaXRCdXN5Iiwic2V0V2FpdEJ1c3kiLCJ3YWl0RW50cnkiLCJzZXRXYWl0RW50cnkiLCJ3YWl0bGlzdE9mZmVyIiwic2V0V2FpdGxpc3RPZmZlciIsIm9mZmVyTm93Iiwic2V0T2ZmZXJOb3ciLCJiYWNrZW5kT2ZmZXJlZFNlYXRzIiwic2V0QmFja2VuZE9mZmVyZWRTZWF0cyIsImxvY2F0aW9uRW5hYmxlZCIsInNldExvY2F0aW9uRW5hYmxlZCIsInNlc3Npb25TdG9yYWdlIiwiZ2V0SXRlbSIsImxvY2F0aW9uTWVzc2FnZSIsInNldExvY2F0aW9uTWVzc2FnZSIsInR5cGVkVGVybVRleHQiLCJzZXRUeXBlZFRlcm1UZXh0IiwiY29tcGxldGVkVGVybXMiLCJzZXRDb21wbGV0ZWRUZXJtcyIsInNob3dzIiwiZmlsdGVyIiwic2hvdyIsInN0YXR1cyIsInN0YXJ0VGltZSIsInRoZWF0cmVzIiwic29tZSIsInRoZWF0cmUiLCJ0aGVhdHJlSWQiLCJjaXRpZXMiLCJTZXQiLCJtYXAiLCJhY3RpdmVDaXR5IiwiY2l0eVNob3dzIiwiZGF0ZXMiLCJzb3J0IiwiYWN0aXZlRGF5IiwiaW5jbHVkZXMiLCJkYXRlZFNob3dzIiwic2NyZWVuIiwic2NyZWVucyIsInNjcmVlbklkIiwibGVuZ3RoIiwidGltZXIiLCJzZXRJbnRlcnZhbCIsImNsZWFySW50ZXJ2YWwiLCJhY3RpdmUiLCJyZWZyZXNoIiwidGhlbiIsInJlc3VsdCIsImxheW91dCIsImJvb2tlZFNlYXRJZHMiLCJyZXNlcnZlZFNlYXRJZHMiLCJoZWxkU2VhdElkcyIsIndhaXRsaXN0T2ZmZXJlZFNlYXRJZHMiLCJjb2x1bW5zIiwiTnVtYmVyIiwic2VhdHNQZXJSb3ciLCJ2ZXJzaW9uIiwibGF5b3V0U2VhdHMiLCJBcnJheSIsImlzQXJyYXkiLCJzZWF0cyIsImNhdGNoIiwicmVhc29uIiwibWVzc2FnZSIsInJlZnJlc2hPZmZlciIsInZhbHVlIiwiZXhwaXJlc0F0IiwiZ2V0VGltZSIsImVudHJpZXMiLCJlbnRyeSIsIlN0cmluZyIsInRvVXBwZXJDYXNlIiwidGljayIsIk1hdGgiLCJtYXgiLCJob2xkIiwiY3VycmVudCIsIm9mZmVySWQiLCJzZWF0SWRzIiwicG9zaXRpb25lZFNlYXRzIiwic2VhdCIsInJvdyIsInJvd051bWJlciIsImNvbHVtbiIsImNvbHVtbk51bWJlciIsInNlYXRDb2x1bW5zIiwiYm9va2VkIiwiYm9va2luZ3MiLCJib29raW5nIiwidW5hdmFpbGFibGVJZHMiLCJmbGF0TWFwIiwib2ZmZXJTZWF0SWRzIiwicmVtYWluaW5nU2VhdElkcyIsIm9mZmVyZWRTZWF0SWRzIiwidmlzaWJsZU9mZmVyU2VhdElkcyIsImhhcyIsImF2YWlsYWJsZVNlYXRzIiwiZGlzYWJsZWQiLCJjbGlja2FibGUiLCJhdmFpbGFiaWxpdHlSZWFkeSIsInNvbGRPdXQiLCJ1c2VkIiwic25hcHNob3QiLCJtb2JpbGUiLCJyZWR1Y2UiLCJ0b3RhbCIsInRpY2tldENvdW50IiwiYW1vdW50IiwidGlja2V0VHlwZSIsInN1bSIsInNlYXRQcmljZXMiLCJjYXRlZ29yeSIsInRpY2tldFByaWNlIiwic2VsZWN0ZWRTZWF0TGFiZWxzIiwibGFiZWwiLCJob2xkU2Vjb25kcyIsImNlaWwiLCJob2xkQ2xvY2siLCJmbG9vciIsInBhZFN0YXJ0Iiwib2ZmZXJTZWNvbmRzIiwib2ZmZXJDbG9jayIsImhvbGREdXJhdGlvbk1pbnV0ZXMiLCJob2xkTWludXRlcyIsImZyaWVuZGx5Qm9va2luZ0Vycm9yIiwidGVzdCIsImJvb2tpbmdTY3JlZW4iLCJ1bmRlZmluZWQiLCJyZWZyZXNoQXZhaWxhYmlsaXR5IiwidGFyZ2V0U2hvd0lkIiwicmVsZWFzZUN1cnJlbnRIb2xkIiwiY2hvb3NlU2hvdyIsIm5leHRTaG93IiwiZW5hYmxlTG9jYXRpb24iLCJjYWNoZWQiLCJ0b2dnbGVTZWF0Iiwic2VhdElkIiwibWF4VGlja2V0c1Blck1vYmlsZSIsInByb2NlZWRUb0NvbmZpcm0iLCJzZWxlY3RlZE9mZmVyU2VhdHMiLCJFcnJvciIsImhvbGRzIiwibWluIiwiaXNGaW5pdGUiLCJqb2luV2FpdGxpc3QiLCJ0ZXJtcyIsInRpdGxlIiwidGV4dCIsImNvbmZpcm0iLCJlbmNvZGVVUklDb21wb25lbnQiLCJwYXRobmFtZSIsImNsYWltT2ZmZXJJZCIsImN1cnJlbnRFbnRyaWVzIiwibWF0Y2hpbmdFbnRyeSIsInN0ZXBOdW1iZXIiLCJzdGVwTGFiZWwiLCJudW1iZXIiLCJkYXlMYWJlbCIsInBhcnNlZCIsIndlZWtkYXkiLCJJbnRsIiwiRGF0ZVRpbWVGb3JtYXQiLCJmb3JtYXQiLCJtb250aCIsImFjdGl2ZVRlcm1JbmRleCIsImRpcmVjdGlvbiIsIm5leHQiLCJjaGlsZHJlbiIsInNjcm9sbEludG9WaWV3IiwiYmVoYXZpb3IiLCJibG9jayIsImlubGluZSIsInRvZ2dsZVRlcm0iLCJjb25jYXQiLCJ0ZXJtIiwiaW5kZXgiLCJzbGljZSIsImJhY2tncm91bmRJbWFnZSIsInJlbGVhc2VkIiwiZXZlbnQiLCJ0YXJnZXQiLCJzaG93aW5nIiwiaXRlbVNob3dzIiwibmFtZSIsImFkZHJlc3MiLCJpdGVtU2hvdyIsImVuYWJsZWQiLCJzaXplIiwiZnJvbSIsIl8iLCJncmlkVGVtcGxhdGVDb2x1bW5zIiwic2VsZWN0ZWQiLCJpc09mZmVyZWQiLCJ1bmF2YWlsYWJsZSIsImdyaWRDb2x1bW4iLCJncmlkUm93IiwiYm9yZGVyQ29sb3IiLCJjb2xvciIsImxhbmd1YWdlIiwiZHVyYXRpb24iLCJnZW5yZSIsImpvaW4iLCJ5ZWFyIiwicmVwbGFjZSIsImFjY2VwdGVkIiwidHlwZWQiLCJzdG9wUHJvcGFnYXRpb24iLCJfYyJdLCJpZ25vcmVMaXN0IjpbXSwic291cmNlcyI6WyJCb29rTXlTaG93LnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQge3VzZUVmZmVjdCwgdXNlTWVtbywgdXNlUmVmLCB1c2VTdGF0ZX0gZnJvbSAncmVhY3QnO1xyXG5pbXBvcnQge0xpbmssIHVzZU5hdmlnYXRlLCB1c2VQYXJhbXN9IGZyb20gJ3JlYWN0LXJvdXRlci1kb20nO1xyXG5pbXBvcnQge0Fycm93TGVmdCwgQXJyb3dSaWdodCwgQ2FsZW5kYXJEYXlzLCBDaGVjaywgQ2xvY2szLCBGaWxtLCBNYXBQaW4sIE1vbml0b3IsIFRpY2tldCwgVXNlcnMsIFNoaWVsZENoZWNrLCBBcm1jaGFpciwgQ2hldnJvbkxlZnQsIENoZXZyb25SaWdodCwgV2FsbGV0fSBmcm9tICdsdWNpZGUtcmVhY3QnO1xyXG5pbXBvcnQge3VzZUFwcH0gZnJvbSAnLi4vY29udGV4dC9BcHBDb250ZXh0JztcclxuaW1wb3J0IHtjcmVhdGVCb29raW5nLCBjcmVhdGVTZWF0SG9sZCwgY3JlYXRlV2FpdGxpc3RPZmZlckhvbGQsIGdldE15U2hvd1dhaXRsaXN0T2ZmZXIsIGdldFNob3dBdmFpbGFiaWxpdHksIGdldFdhaXRpbmdMaXN0LCBqb2luV2FpdGluZ0xpc3QsIHJlbGVhc2VTZWF0SG9sZCwgcmVsZWFzZVdhaXRsaXN0T2ZmZXJIb2xkfSBmcm9tICcuLi9zZXJ2aWNlcy9hcGknO1xyXG5pbXBvcnQge25vcm1hbGl6ZVNlYXRMYXlvdXR9IGZyb20gJy4uL3V0aWxzL3NlYXRMYXlvdXQnO1xyXG5pbXBvcnQge0VtcHR5LCBOb3RpY2UsIFBvc3RlciwgZGF0ZSwgbW9uZXl9IGZyb20gJy4uL2NvbXBvbmVudHMvQ29tbW9uJztcclxuaW1wb3J0ICcuLi9ib29raW5nLXBhZ2UuY3NzJztcclxuaW1wb3J0IHRlcm1zSGVyb0ltYWdlIGZyb20gJy4uLy4uL2ltYWdlcy9ib29raW5nLXRlcm1zLWhlcm8ucG5nP3VybCc7XHJcbmltcG9ydCB0ZXJtc0NhcmRBcnR3b3JrIGZyb20gJy4uLy4uL2ltYWdlcy9ib29raW5nLXRlcm1zLWNhcmRzLnBuZz91cmwnO1xyXG5cclxuZXhwb3J0IGZ1bmN0aW9uIEJvb2tNeVNob3coKSB7XHJcbiAgY29uc3Qge21vdmllSWR9PXVzZVBhcmFtcygpO1xyXG4gIGNvbnN0IHtkYXRhLHVzZXJ9PXVzZUFwcCgpO1xyXG4gIGNvbnN0IG5hdmlnYXRlPXVzZU5hdmlnYXRlKCk7XHJcbiAgY29uc3QgbW92aWU9ZGF0YS5tb3ZpZXMuZmluZChpdGVtPT5pdGVtLmlkPT09bW92aWVJZCk7XHJcbiAgY29uc3QgcmVxdWVzdGVkV2FpdGxpc3RFbnRyeUlkPW5ldyBVUkxTZWFyY2hQYXJhbXMod2luZG93LmxvY2F0aW9uLnNlYXJjaCkuZ2V0KCd3YWl0bGlzdEVudHJ5SWQnKXx8Jyc7XHJcbiAgY29uc3QgW3Nob3dJZCxzZXRTaG93SWRdPXVzZVN0YXRlKCgpPT5uZXcgVVJMU2VhcmNoUGFyYW1zKHdpbmRvdy5sb2NhdGlvbi5zZWFyY2gpLmdldCgnc2hvdycpfHwnJyk7XHJcbiAgY29uc3QgW3NlYXRNYXBPcGVuLHNldFNlYXRNYXBPcGVuXT11c2VTdGF0ZSgoKT0+Qm9vbGVhbihuZXcgVVJMU2VhcmNoUGFyYW1zKHdpbmRvdy5sb2NhdGlvbi5zZWFyY2gpLmdldCgnc2hvdycpKSk7XHJcbiAgY29uc3QgW3NlbGVjdGVkU2VhdHMsc2V0U2VsZWN0ZWRTZWF0c109dXNlU3RhdGU8c3RyaW5nW10+KFtdKTtcclxuICBjb25zdCBbY29uZmlybWluZyxzZXRDb25maXJtaW5nXT11c2VTdGF0ZShmYWxzZSk7XHJcbiAgY29uc3QgW2J1c3ksc2V0QnVzeV09dXNlU3RhdGUoZmFsc2UpO1xyXG4gIGNvbnN0IFthbHRlcm5hdGl2ZU1vYmlsZSxzZXRBbHRlcm5hdGl2ZU1vYmlsZV09dXNlU3RhdGUoJycpO1xyXG4gIGNvbnN0IFthY2NlcHRlZFRlcm1zLHNldEFjY2VwdGVkVGVybXNdPXVzZVN0YXRlPHN0cmluZ1tdPihbXSk7XHJcbiAgY29uc3QgW2FjdGl2ZVRlcm0sc2V0QWN0aXZlVGVybV09dXNlU3RhdGUoMCk7XHJcbiAgY29uc3QgdGVybXNUcmFja1JlZj11c2VSZWY8SFRNTERpdkVsZW1lbnR8bnVsbD4obnVsbCk7XHJcbiAgY29uc3QgW2NpdHksc2V0Q2l0eV09dXNlU3RhdGUoJycpO1xyXG4gIGNvbnN0IFtkYXksc2V0RGF5XT11c2VTdGF0ZSgnJyk7XHJcbiAgY29uc3QgW2Vycm9yLHNldEVycm9yXT11c2VTdGF0ZSgnJyk7XHJcbiAgY29uc3QgW2F2YWlsYWJpbGl0eUVycm9yLHNldEF2YWlsYWJpbGl0eUVycm9yXT11c2VTdGF0ZSgnJyk7XHJcbiAgY29uc3QgW2F2YWlsYWJpbGl0eVVwZGF0ZWRBdCxzZXRBdmFpbGFiaWxpdHlVcGRhdGVkQXRdPXVzZVN0YXRlKDApO1xyXG4gIGNvbnN0IFthdmFpbGFiaWxpdHlOb3csc2V0QXZhaWxhYmlsaXR5Tm93XT11c2VTdGF0ZShEYXRlLm5vdygpKTtcclxuICBjb25zdCBbYXZhaWxhYmlsaXR5Q29sdW1ucyxzZXRBdmFpbGFiaWxpdHlDb2x1bW5zXT11c2VTdGF0ZSgwKTtcclxuICBjb25zdCBbdmVyc2lvblNlYXRzLHNldFZlcnNpb25TZWF0c109dXNlU3RhdGU8YW55W118bnVsbD4obnVsbCk7XHJcbiAgY29uc3QgW2F2YWlsYWJpbGl0eVNjcmVlbixzZXRBdmFpbGFiaWxpdHlTY3JlZW5dPXVzZVN0YXRlPGFueXxudWxsPihudWxsKTtcclxuICBjb25zdCBbYmFja2VuZEJvb2tlZCxzZXRCYWNrZW5kQm9va2VkXT11c2VTdGF0ZTxzdHJpbmdbXT4oW10pO1xyXG4gIGNvbnN0IFtob2xkRXhwaXJlc0F0LHNldEhvbGRFeHBpcmVzQXRdPXVzZVN0YXRlPG51bWJlcnxudWxsPihudWxsKTtcclxuICBjb25zdCBbaG9sZFJlbWFpbmluZyxzZXRIb2xkUmVtYWluaW5nXT11c2VTdGF0ZSgwKTtcclxuICBjb25zdCBhY3RpdmVIb2xkUmVmPXVzZVJlZjx7c2hvd0lkOnN0cmluZztzZWF0SWRzOnN0cmluZ1tdO29mZmVySWQ/OnN0cmluZ318bnVsbD4obnVsbCk7XHJcbiAgY29uc3QgW3dhaXRDb3VudCxzZXRXYWl0Q291bnRdPXVzZVN0YXRlKDEpO1xyXG4gIGNvbnN0IFt3YWl0QnVzeSxzZXRXYWl0QnVzeV09dXNlU3RhdGUoZmFsc2UpO1xyXG4gIGNvbnN0IFt3YWl0RW50cnksc2V0V2FpdEVudHJ5XT11c2VTdGF0ZTxhbnl8bnVsbD4obnVsbCk7XHJcbiAgY29uc3QgW3dhaXRsaXN0T2ZmZXIsc2V0V2FpdGxpc3RPZmZlcl09dXNlU3RhdGU8YW55fG51bGw+KG51bGwpO1xyXG4gIGNvbnN0IFtvZmZlck5vdyxzZXRPZmZlck5vd109dXNlU3RhdGUoRGF0ZS5ub3coKSk7XHJcbiAgY29uc3QgW2JhY2tlbmRPZmZlcmVkU2VhdHMsc2V0QmFja2VuZE9mZmVyZWRTZWF0c109dXNlU3RhdGU8c3RyaW5nW10+KFtdKTtcclxuICBjb25zdCBbbG9jYXRpb25FbmFibGVkLHNldExvY2F0aW9uRW5hYmxlZF09dXNlU3RhdGUoKCk9PnNlc3Npb25TdG9yYWdlLmdldEl0ZW0oJ2F2X2xvY2F0aW9uX2VuYWJsZWQnKT09PSd0cnVlJyk7XHJcbiAgY29uc3QgW2xvY2F0aW9uTWVzc2FnZSxzZXRMb2NhdGlvbk1lc3NhZ2VdPXVzZVN0YXRlKCcnKTtcclxuICBjb25zdCBbdHlwZWRUZXJtVGV4dCxzZXRUeXBlZFRlcm1UZXh0XT11c2VTdGF0ZSgnJyk7XHJcbiAgY29uc3QgW2NvbXBsZXRlZFRlcm1zLHNldENvbXBsZXRlZFRlcm1zXT11c2VTdGF0ZTxzdHJpbmdbXT4oW10pO1xyXG5cclxuICBjb25zdCBzaG93cz11c2VNZW1vKCgpPT5kYXRhLnNob3dzLmZpbHRlcihzaG93PT5zaG93Lm1vdmllSWQ9PT1tb3ZpZT8uaWQmJnNob3cuc3RhdHVzPT09J09QRU4nJiZuZXcgRGF0ZShgJHtzaG93LmRhdGV9VCR7c2hvdy5zdGFydFRpbWV9YCk+bmV3IERhdGUoKSYmZGF0YS50aGVhdHJlcy5zb21lKHRoZWF0cmU9PnRoZWF0cmUuaWQ9PT1zaG93LnRoZWF0cmVJZCYmdGhlYXRyZS5zdGF0dXM9PT0nQUNUSVZFJykpLFtkYXRhLnNob3dzLGRhdGEudGhlYXRyZXMsbW92aWU/LmlkXSk7XHJcbiAgY29uc3QgY2l0aWVzPXVzZU1lbW8oKCk9PlsuLi5uZXcgU2V0KHNob3dzLm1hcChzaG93PT5kYXRhLnRoZWF0cmVzLmZpbmQodGhlYXRyZT0+dGhlYXRyZS5pZD09PXNob3cudGhlYXRyZUlkKT8uY2l0eSkuZmlsdGVyKEJvb2xlYW4pIGFzIHN0cmluZ1tdKV0sW3Nob3dzLGRhdGEudGhlYXRyZXNdKTtcclxuICBjb25zdCBhY3RpdmVDaXR5PWNpdHl8fGNpdGllc1swXXx8Jyc7XHJcbiAgY29uc3QgY2l0eVNob3dzPXNob3dzLmZpbHRlcihzaG93PT5kYXRhLnRoZWF0cmVzLmZpbmQodGhlYXRyZT0+dGhlYXRyZS5pZD09PXNob3cudGhlYXRyZUlkKT8uY2l0eT09PWFjdGl2ZUNpdHkpO1xyXG4gIGNvbnN0IGRhdGVzPVsuLi5uZXcgU2V0KGNpdHlTaG93cy5tYXAoc2hvdz0+c2hvdy5kYXRlKSldLnNvcnQoKTtcclxuICBjb25zdCBhY3RpdmVEYXk9ZGF0ZXMuaW5jbHVkZXMoZGF5KT9kYXk6ZGF0ZXNbMF18fCcnO1xyXG4gIGNvbnN0IGRhdGVkU2hvd3M9Y2l0eVNob3dzLmZpbHRlcihzaG93PT5zaG93LmRhdGU9PT1hY3RpdmVEYXkpO1xyXG4gIGNvbnN0IHNob3c9c2hvd3MuZmluZChpdGVtPT5pdGVtLmlkPT09c2hvd0lkKTtcclxuICBjb25zdCBzY3JlZW49ZGF0YS5zY3JlZW5zLmZpbmQoaXRlbT0+aXRlbS5pZD09PXNob3c/LnNjcmVlbklkKTtcclxuXHJcbiAgdXNlRWZmZWN0KCgpPT57aWYoY2l0aWVzLmxlbmd0aCYmIWNpdHkpc2V0Q2l0eShjaXRpZXMuaW5jbHVkZXMoJ0h5ZGVyYWJhZCcpPydIeWRlcmFiYWQnOmNpdGllc1swXSk7fSxbY2l0aWVzLGNpdHldKTtcclxuICB1c2VFZmZlY3QoKCk9PntpZihkYXRlcy5sZW5ndGgmJiFkYXRlcy5pbmNsdWRlcyhkYXkpKXNldERheShkYXRlc1swXSk7fSxbZGF0ZXMsZGF5XSk7XHJcbiAgdXNlRWZmZWN0KCgpPT57Y29uc3QgdGltZXI9d2luZG93LnNldEludGVydmFsKCgpPT5zZXRBdmFpbGFiaWxpdHlOb3coRGF0ZS5ub3coKSksMTAwMCk7cmV0dXJuKCk9PndpbmRvdy5jbGVhckludGVydmFsKHRpbWVyKTt9LFtdKTtcclxuICB1c2VFZmZlY3QoKCk9PntpZighc2hvd0lkKXtzZXRWZXJzaW9uU2VhdHMobnVsbCk7c2V0QXZhaWxhYmlsaXR5U2NyZWVuKG51bGwpO3NldEJhY2tlbmRCb29rZWQoW10pO3NldEJhY2tlbmRPZmZlcmVkU2VhdHMoW10pO3NldEF2YWlsYWJpbGl0eUVycm9yKCcnKTtzZXRBdmFpbGFiaWxpdHlDb2x1bW5zKDApO3NldEF2YWlsYWJpbGl0eVVwZGF0ZWRBdCgwKTtzZXRXYWl0bGlzdE9mZmVyKG51bGwpO3JldHVybjt9bGV0IGFjdGl2ZT10cnVlO2NvbnN0IHJlZnJlc2g9KCk9PntnZXRTaG93QXZhaWxhYmlsaXR5KHNob3dJZCkudGhlbihyZXN1bHQ9PntpZihhY3RpdmUpe2NvbnN0IGxheW91dD1yZXN1bHQubGF5b3V0fHx7fTtzZXRBdmFpbGFiaWxpdHlTY3JlZW4ocmVzdWx0LnNjcmVlbnx8bnVsbCk7c2V0QmFja2VuZEJvb2tlZChbLi4uKHJlc3VsdC5ib29rZWRTZWF0SWRzfHxbXSksLi4uKHJlc3VsdC5yZXNlcnZlZFNlYXRJZHN8fFtdKSwuLi4ocmVzdWx0LmhlbGRTZWF0SWRzfHxbXSldKTtzZXRCYWNrZW5kT2ZmZXJlZFNlYXRzKHJlc3VsdC53YWl0bGlzdE9mZmVyZWRTZWF0SWRzfHxbXSk7Y29uc3QgY29sdW1ucz1OdW1iZXIocmVzdWx0LnNjcmVlbj8uc2VhdHNQZXJSb3d8fGxheW91dC52ZXJzaW9uPy5zZWF0c1BlclJvdyl8fDA7c2V0QXZhaWxhYmlsaXR5Q29sdW1ucyhjb2x1bW5zKTtjb25zdCBsYXlvdXRTZWF0cz1BcnJheS5pc0FycmF5KGxheW91dC5zZWF0cyk/bGF5b3V0LnNlYXRzOltdO3NldFZlcnNpb25TZWF0cyhub3JtYWxpemVTZWF0TGF5b3V0KGxheW91dFNlYXRzLGNvbHVtbnN8fDEyKSk7c2V0QXZhaWxhYmlsaXR5VXBkYXRlZEF0KERhdGUubm93KCkpO3NldEF2YWlsYWJpbGl0eUVycm9yKCcnKTt9fSkuY2F0Y2gocmVhc29uPT57aWYoYWN0aXZlKXtzZXRWZXJzaW9uU2VhdHMobnVsbCk7c2V0QmFja2VuZEJvb2tlZChbXSk7c2V0QmFja2VuZE9mZmVyZWRTZWF0cyhbXSk7c2V0QXZhaWxhYmlsaXR5VXBkYXRlZEF0KDApO3NldEF2YWlsYWJpbGl0eUVycm9yKChyZWFzb24gYXMgRXJyb3IpLm1lc3NhZ2UpO319KTt9O2NvbnN0IHJlZnJlc2hPZmZlcj0oKT0+Z2V0TXlTaG93V2FpdGxpc3RPZmZlcihzaG93SWQpLnRoZW4odmFsdWU9PntpZihhY3RpdmUpc2V0V2FpdGxpc3RPZmZlcih2YWx1ZT8uc3RhdHVzPT09J0FDVElWRScmJm5ldyBEYXRlKHZhbHVlLmV4cGlyZXNBdCkuZ2V0VGltZSgpPkRhdGUubm93KCk/dmFsdWU6dmFsdWU/LnN0YXR1cz09PSdDT01QTEVURUQnP3ZhbHVlOm51bGwpO30pLmNhdGNoKCgpPT57aWYoYWN0aXZlKXNldFdhaXRsaXN0T2ZmZXIobnVsbCk7fSk7c2V0VmVyc2lvblNlYXRzKG51bGwpO3NldEF2YWlsYWJpbGl0eVNjcmVlbihudWxsKTtzZXRCYWNrZW5kQm9va2VkKFtdKTtzZXRCYWNrZW5kT2ZmZXJlZFNlYXRzKFtdKTtzZXRBdmFpbGFiaWxpdHlFcnJvcignJyk7c2V0QXZhaWxhYmlsaXR5Q29sdW1ucygwKTtzZXRBdmFpbGFiaWxpdHlVcGRhdGVkQXQoMCk7c2V0V2FpdGxpc3RPZmZlcihudWxsKTtyZWZyZXNoKCk7dm9pZCByZWZyZXNoT2ZmZXIoKTtjb25zdCB0aW1lcj13aW5kb3cuc2V0SW50ZXJ2YWwoKCk9PntyZWZyZXNoKCk7dm9pZCByZWZyZXNoT2ZmZXIoKTtzZXRPZmZlck5vdyhEYXRlLm5vdygpKTt9LDUwMDApO3JldHVybigpPT57YWN0aXZlPWZhbHNlO3dpbmRvdy5jbGVhckludGVydmFsKHRpbWVyKTt9O30sW3Nob3dJZF0pO1xyXG4gIHVzZUVmZmVjdCgoKT0+e2lmKCFzaG93SWR8fCF1c2VyKXJldHVybjtsZXQgYWN0aXZlPXRydWU7Z2V0V2FpdGluZ0xpc3QoKS50aGVuKGVudHJpZXM9PntpZihhY3RpdmUpc2V0V2FpdEVudHJ5KChyZXF1ZXN0ZWRXYWl0bGlzdEVudHJ5SWQ/ZW50cmllcy5maW5kKChlbnRyeTphbnkpPT5lbnRyeS5pZD09PXJlcXVlc3RlZFdhaXRsaXN0RW50cnlJZCYmZW50cnkuc2hvd0lkPT09c2hvd0lkJiZbJ1dBSVRJTkcnLCdPRkZFUkVEJ10uaW5jbHVkZXMoU3RyaW5nKGVudHJ5LnN0YXR1cykudG9VcHBlckNhc2UoKSkpOm51bGwpfHxlbnRyaWVzLmZpbmQoKGVudHJ5OmFueSk9PmVudHJ5LnNob3dJZD09PXNob3dJZCYmWydXQUlUSU5HJywnT0ZGRVJFRCddLmluY2x1ZGVzKFN0cmluZyhlbnRyeS5zdGF0dXMpLnRvVXBwZXJDYXNlKCkpKXx8bnVsbCk7fSkuY2F0Y2goKCk9Pnt9KTtyZXR1cm4oKT0+e2FjdGl2ZT1mYWxzZTt9O30sW3Nob3dJZCx1c2VyPy5pZCxyZXF1ZXN0ZWRXYWl0bGlzdEVudHJ5SWRdKTtcclxuICB1c2VFZmZlY3QoKCk9PntpZighaG9sZEV4cGlyZXNBdCl7c2V0SG9sZFJlbWFpbmluZygwKTtyZXR1cm47fWNvbnN0IHRpY2s9KCk9PnNldEhvbGRSZW1haW5pbmcoTWF0aC5tYXgoMCxob2xkRXhwaXJlc0F0LURhdGUubm93KCkpKTt0aWNrKCk7Y29uc3QgdGltZXI9d2luZG93LnNldEludGVydmFsKHRpY2ssMTAwMCk7cmV0dXJuKCk9PndpbmRvdy5jbGVhckludGVydmFsKHRpbWVyKTt9LFtob2xkRXhwaXJlc0F0XSk7XHJcbiAgdXNlRWZmZWN0KCgpPT57aWYoIWNvbmZpcm1pbmd8fCFob2xkRXhwaXJlc0F0fHxEYXRlLm5vdygpPGhvbGRFeHBpcmVzQXQpcmV0dXJuO2NvbnN0IGhvbGQ9YWN0aXZlSG9sZFJlZi5jdXJyZW50O2FjdGl2ZUhvbGRSZWYuY3VycmVudD1udWxsO2lmKGhvbGQpe2lmKGhvbGQub2ZmZXJJZCl2b2lkIHJlbGVhc2VXYWl0bGlzdE9mZmVySG9sZChob2xkLnNob3dJZCxob2xkLm9mZmVySWQsaG9sZC5zZWF0SWRzKTtlbHNlIHZvaWQgcmVsZWFzZVNlYXRIb2xkKGhvbGQuc2hvd0lkLGhvbGQuc2VhdElkcyk7fXNldEhvbGRFeHBpcmVzQXQobnVsbCk7c2V0U2VsZWN0ZWRTZWF0cyhbXSk7c2V0QWNjZXB0ZWRUZXJtcyhbXSk7c2V0Q29uZmlybWluZyhmYWxzZSk7c2V0RXJyb3IoJ1lvdXIgc2VhdCBob2xkIGV4cGlyZWQuIFBsZWFzZSBzZWxlY3Qgc2VhdHMgYWdhaW4uJyk7fSxbY29uZmlybWluZyxob2xkRXhwaXJlc0F0LGhvbGRSZW1haW5pbmddKTtcclxuICB1c2VFZmZlY3QoKCk9PigpPT57Y29uc3QgaG9sZD1hY3RpdmVIb2xkUmVmLmN1cnJlbnQ7aWYoaG9sZCl7aWYoaG9sZC5vZmZlcklkKXZvaWQgcmVsZWFzZVdhaXRsaXN0T2ZmZXJIb2xkKGhvbGQuc2hvd0lkLGhvbGQub2ZmZXJJZCxob2xkLnNlYXRJZHMpO2Vsc2Ugdm9pZCByZWxlYXNlU2VhdEhvbGQoaG9sZC5zaG93SWQsaG9sZC5zZWF0SWRzKTt9fSxbXSk7XHJcblxyXG4gIGNvbnN0IHBvc2l0aW9uZWRTZWF0cz0odmVyc2lvblNlYXRzfHxbXSkubWFwKHNlYXQ9Pih7Li4uc2VhdCxyb3c6c2VhdC5yb3dOdW1iZXIsY29sdW1uOnNlYXQuY29sdW1uTnVtYmVyfSkpO1xyXG4gIGNvbnN0IHNlYXRDb2x1bW5zPU1hdGgubWF4KDEsYXZhaWxhYmlsaXR5Q29sdW1ucywuLi5wb3NpdGlvbmVkU2VhdHMubWFwKHNlYXQ9Pk51bWJlcihzZWF0LmNvbHVtbil8fDApKTtcclxuICBjb25zdCBib29rZWQ9ZGF0YS5ib29raW5ncy5maWx0ZXIoYm9va2luZz0+Ym9va2luZy5zaG93SWQ9PT1zaG93SWQmJmJvb2tpbmcuc3RhdHVzIT09J0NBTkNFTExFRCcpO1xyXG4gIGNvbnN0IHVuYXZhaWxhYmxlSWRzPW5ldyBTZXQoWy4uLmJhY2tlbmRCb29rZWQsLi4uYm9va2VkLmZsYXRNYXAoYm9va2luZz0+Ym9va2luZy5zZWF0SWRzKV0pO1xyXG4gIGNvbnN0IG9mZmVyU2VhdElkcz1uZXcgU2V0PHN0cmluZz4oKHdhaXRsaXN0T2ZmZXI/LnJlbWFpbmluZ1NlYXRJZHN8fHdhaXRsaXN0T2ZmZXI/LnNlYXRJZHN8fHdhaXRsaXN0T2ZmZXI/Lm9mZmVyZWRTZWF0SWRzfHxbXSkubWFwKFN0cmluZykpO1xyXG4gIGNvbnN0IHZpc2libGVPZmZlclNlYXRJZHM9bmV3IFNldChbLi4ub2ZmZXJTZWF0SWRzXS5maWx0ZXIoaWQ9PmJhY2tlbmRPZmZlcmVkU2VhdHMuaW5jbHVkZXMoaWQpJiYhdW5hdmFpbGFibGVJZHMuaGFzKGlkKSkpO1xyXG4gIGNvbnN0IGF2YWlsYWJsZVNlYXRzPXBvc2l0aW9uZWRTZWF0cy5maWx0ZXIoc2VhdD0+IXNlYXQuZGlzYWJsZWQmJiF1bmF2YWlsYWJsZUlkcy5oYXMoc2VhdC5pZCkmJihzZWF0LmNsaWNrYWJsZT09PXRydWV8fHZpc2libGVPZmZlclNlYXRJZHMuaGFzKHNlYXQuaWQpKSYmKCFiYWNrZW5kT2ZmZXJlZFNlYXRzLmluY2x1ZGVzKHNlYXQuaWQpfHx2aXNpYmxlT2ZmZXJTZWF0SWRzLmhhcyhzZWF0LmlkKSkpO1xyXG4gIGNvbnN0IGF2YWlsYWJpbGl0eVJlYWR5PUJvb2xlYW4odmVyc2lvblNlYXRzJiZwb3NpdGlvbmVkU2VhdHMubGVuZ3RoPjAmJiFhdmFpbGFiaWxpdHlFcnJvciYmYXZhaWxhYmlsaXR5VXBkYXRlZEF0PjAmJmF2YWlsYWJpbGl0eU5vdy1hdmFpbGFiaWxpdHlVcGRhdGVkQXQ8MTAwMDApO1xyXG4gIGNvbnN0IHNvbGRPdXQ9Qm9vbGVhbihhdmFpbGFiaWxpdHlSZWFkeSYmc2hvdyYmYXZhaWxhYmxlU2VhdHMubGVuZ3RoPT09MCk7XHJcbiAgY29uc3QgdXNlZD1ib29rZWQuZmlsdGVyKGJvb2tpbmc9PmJvb2tpbmcuc25hcHNob3QubW9iaWxlPT09dXNlcj8ubW9iaWxlKS5yZWR1Y2UoKHRvdGFsLGJvb2tpbmcpPT50b3RhbCtib29raW5nLnRpY2tldENvdW50LDApO1xyXG4gIGNvbnN0IGFtb3VudD1zaG93Py50aWNrZXRUeXBlPT09J1BBSUQnP3NlbGVjdGVkU2VhdHMucmVkdWNlKChzdW0saWQpPT57Y29uc3Qgc2VhdD1wb3NpdGlvbmVkU2VhdHMuZmluZChpdGVtPT5pdGVtLmlkPT09aWQpO3JldHVybiBzdW0rKHNob3cuc2VhdFByaWNlcz8uW3NlYXQ/LmNhdGVnb3J5fHwnJ10/P3Nob3cudGlja2V0UHJpY2UpO30sMCk6MDtcclxuICBjb25zdCBzZWxlY3RlZFNlYXRMYWJlbHM9c2VsZWN0ZWRTZWF0cy5tYXAoaWQ9PnBvc2l0aW9uZWRTZWF0cy5maW5kKHNlYXQ9PnNlYXQuaWQ9PT1pZCk/LmxhYmVsfHwnU2VhdCBsYWJlbCB1bmF2YWlsYWJsZScpO1xyXG4gIGNvbnN0IGhvbGRTZWNvbmRzPU1hdGguY2VpbChob2xkUmVtYWluaW5nLzEwMDApO1xyXG4gIGNvbnN0IGhvbGRDbG9jaz1gJHtNYXRoLmZsb29yKGhvbGRTZWNvbmRzLzYwKX06JHtTdHJpbmcoaG9sZFNlY29uZHMlNjApLnBhZFN0YXJ0KDIsJzAnKX1gO1xyXG4gIGNvbnN0IG9mZmVyU2Vjb25kcz1NYXRoLm1heCgwLE1hdGguY2VpbCgobmV3IERhdGUod2FpdGxpc3RPZmZlcj8uZXhwaXJlc0F0fHwwKS5nZXRUaW1lKCktb2ZmZXJOb3cpLzEwMDApKTtcclxuICBjb25zdCBvZmZlckNsb2NrPWAke01hdGguZmxvb3Iob2ZmZXJTZWNvbmRzLzYwKX06JHtTdHJpbmcob2ZmZXJTZWNvbmRzJTYwKS5wYWRTdGFydCgyLCcwJyl9YDtcclxuICBjb25zdCBob2xkRHVyYXRpb25NaW51dGVzPU1hdGgubWF4KDEsTnVtYmVyKHNob3c/LmhvbGRNaW51dGVzKXx8NSk7XHJcbiAgY29uc3QgZnJpZW5kbHlCb29raW5nRXJyb3I9KG1lc3NhZ2U6c3RyaW5nKT0+L1dBSVRMSVNUX1NFQVRfQ0xBSU1FRHxPRkZFUl9TRUFUX1VOQVZBSUxBQkxFfGNsYWltZWQgYnkgYW5vdGhlciB3YWl0bGlzdCBtZW1iZXIvaS50ZXN0KG1lc3NhZ2UpPydTb3JyeSwgdGhpcyBzZWF0IGhhcyBiZWVuIGJvb2tlZCBieSBhbm90aGVyIHdhaXRsaXN0IG1lbWJlci4gUGxlYXNlIGNob29zZSBhbm90aGVyIG9mZmVyZWQgc2VhdC4nOi9XQUlUTElTVF9PRkZFUl9FWFBJUkVEfE9GRkVSX0VYUElSRUQvaS50ZXN0KG1lc3NhZ2UpPydUaGlzIHdhaXRsaXN0IG9mZmVyIGhhcyBleHBpcmVkLiBQbGVhc2UgcmVmcmVzaCBhdmFpbGFiaWxpdHkgYW5kIGNob29zZSBhIHJlZ3VsYXIgYXZhaWxhYmxlIHNlYXQuJzovU0VBVF9IRUxEfFNFQVRfVU5BVkFJTEFCTEV8aGVsZCBieSBhbm90aGVyfGN1cnJlbnRseSB1bmF2YWlsYWJsZS9pLnRlc3QobWVzc2FnZSk/YFRoYXQgc2VhdCBpcyBjdXJyZW50bHkgc2VsZWN0ZWQgYnkgYW5vdGhlciBhdWRpZW5jZSBtZW1iZXIuIFBsZWFzZSBjaG9vc2UgYW5vdGhlciBzZWF0LCBvciB3YWl0IHVwIHRvICR7aG9sZER1cmF0aW9uTWludXRlc30gbWludXRlcy4gSWYgdGhleSBkbyBub3QgY29tcGxldGUgdGhlaXIgYm9va2luZyB3aXRoaW4gdGhhdCB0aW1lLCB0aGUgc2VhdCB3aWxsIGJlIHJlbGVhc2VkLmA6bWVzc2FnZTtcclxuICBjb25zdCBib29raW5nU2NyZWVuPWF2YWlsYWJpbGl0eVNjcmVlbnx8c2NyZWVuO1xyXG4gIGNvbnN0IHRoZWF0cmU9c2hvdz9kYXRhLnRoZWF0cmVzLmZpbmQoaXRlbT0+aXRlbS5pZD09PXNob3cudGhlYXRyZUlkKTp1bmRlZmluZWQ7XHJcblxyXG4gIGNvbnN0IHJlZnJlc2hBdmFpbGFiaWxpdHk9YXN5bmModGFyZ2V0U2hvd0lkOnN0cmluZyk9Pnt0cnl7Y29uc3QgcmVzdWx0PWF3YWl0IGdldFNob3dBdmFpbGFiaWxpdHkodGFyZ2V0U2hvd0lkKTtzZXRCYWNrZW5kQm9va2VkKFsuLi4ocmVzdWx0LmJvb2tlZFNlYXRJZHN8fFtdKSwuLi4ocmVzdWx0LnJlc2VydmVkU2VhdElkc3x8W10pLC4uLihyZXN1bHQuaGVsZFNlYXRJZHN8fFtdKV0pO3NldEJhY2tlbmRPZmZlcmVkU2VhdHMocmVzdWx0LndhaXRsaXN0T2ZmZXJlZFNlYXRJZHN8fFtdKTtzZXRBdmFpbGFiaWxpdHlVcGRhdGVkQXQoRGF0ZS5ub3coKSk7fWNhdGNoe3NldEF2YWlsYWJpbGl0eVVwZGF0ZWRBdCgwKTtzZXRWZXJzaW9uU2VhdHMobnVsbCk7fX07XHJcbiAgY29uc3QgcmVsZWFzZUN1cnJlbnRIb2xkPWFzeW5jKCk9Pntjb25zdCBob2xkPWFjdGl2ZUhvbGRSZWYuY3VycmVudDtpZighaG9sZCl7c2V0SG9sZEV4cGlyZXNBdChudWxsKTtyZXR1cm4gdHJ1ZTt9dHJ5e2lmKGhvbGQub2ZmZXJJZClhd2FpdCByZWxlYXNlV2FpdGxpc3RPZmZlckhvbGQoaG9sZC5zaG93SWQsaG9sZC5vZmZlcklkLGhvbGQuc2VhdElkcyk7ZWxzZSBhd2FpdCByZWxlYXNlU2VhdEhvbGQoaG9sZC5zaG93SWQsaG9sZC5zZWF0SWRzKTtpZihhY3RpdmVIb2xkUmVmLmN1cnJlbnQ9PT1ob2xkKWFjdGl2ZUhvbGRSZWYuY3VycmVudD1udWxsO3NldEhvbGRFeHBpcmVzQXQobnVsbCk7YXdhaXQgcmVmcmVzaEF2YWlsYWJpbGl0eShob2xkLnNob3dJZCk7cmV0dXJuIHRydWU7fWNhdGNoe3NldEVycm9yKCdDb3VsZCBub3QgcmVsZWFzZSB0aGUgc2VhdCBob2xkIGp1c3QgeWV0LiBQbGVhc2UgdHJ5IGFnYWluLicpO3JldHVybiBmYWxzZTt9fTtcclxuICBjb25zdCBjaG9vc2VTaG93PShuZXh0U2hvdzp0eXBlb2Ygc2hvd3NbbnVtYmVyXSk9Pnt2b2lkIHJlbGVhc2VDdXJyZW50SG9sZCgpO3NldFdhaXRFbnRyeShudWxsKTtzZXRXYWl0Q291bnQoMSk7c2V0U2hvd0lkKG5leHRTaG93LmlkKTtzZXRTZWxlY3RlZFNlYXRzKFtdKTtzZXRWZXJzaW9uU2VhdHMobnVsbCk7c2V0QXZhaWxhYmlsaXR5U2NyZWVuKG51bGwpO3NldEJhY2tlbmRCb29rZWQoW10pO3NldEF2YWlsYWJpbGl0eUNvbHVtbnMoMCk7c2V0QXZhaWxhYmlsaXR5RXJyb3IoJycpO3NldEhvbGRFeHBpcmVzQXQobnVsbCk7c2V0QWNjZXB0ZWRUZXJtcyhbXSk7c2V0Q29tcGxldGVkVGVybXMoW10pO3NldFR5cGVkVGVybVRleHQoJycpO3NldEFjdGl2ZVRlcm0oMCk7c2V0Q29uZmlybWluZyhmYWxzZSk7c2V0U2VhdE1hcE9wZW4odHJ1ZSk7c2V0RXJyb3IoJycpO307XHJcbiAgY29uc3QgZW5hYmxlTG9jYXRpb249KCk9PntzZXRMb2NhdGlvbk1lc3NhZ2UoJycpO2NvbnN0IGNhY2hlZD1zZXNzaW9uU3RvcmFnZS5nZXRJdGVtKCdhdl9sb2NhdGlvbl9lbmFibGVkJyk7aWYoY2FjaGVkPT09J3RydWUnKXtzZXRMb2NhdGlvbkVuYWJsZWQodHJ1ZSk7c2V0TG9jYXRpb25NZXNzYWdlKCdMb2NhdGlvbiBhY2Nlc3MgaXMgb24uIFlvdSBjYW4gY29udGludWUgYm9va2luZy4nKTt9ZWxzZSBzZXRMb2NhdGlvbk1lc3NhZ2UoJ1R1cm4gb24gbG9jYXRpb24gYWNjZXNzIGluIHlvdXIgYnJvd3NlciBvciBkZXZpY2Ugc2V0dGluZ3MsIHRoZW4gcmVvcGVuIHRoZSBhcHAuJyk7fTtcclxuICBjb25zdCB0b2dnbGVTZWF0PShzZWF0SWQ6c3RyaW5nKT0+e2lmKCFzaG93KXJldHVybjtzZXRFcnJvcignJyk7aWYoc2VsZWN0ZWRTZWF0cy5pbmNsdWRlcyhzZWF0SWQpKXtzZXRBY2NlcHRlZFRlcm1zKFtdKTtzZXRTZWxlY3RlZFNlYXRzKHNlbGVjdGVkU2VhdHMuZmlsdGVyKGlkPT5pZCE9PXNlYXRJZCkpO3JldHVybjt9Y29uc3Qgc2VhdD1wb3NpdGlvbmVkU2VhdHMuZmluZChpdGVtPT5pdGVtLmlkPT09c2VhdElkKTtpZihzZWF0Py5jbGlja2FibGUhPT10cnVlJiYhdmlzaWJsZU9mZmVyU2VhdElkcy5oYXMoc2VhdElkKSlyZXR1cm47aWYoc2VsZWN0ZWRTZWF0cy5sZW5ndGgrdXNlZD49c2hvdy5tYXhUaWNrZXRzUGVyTW9iaWxlKXJldHVybiBzZXRFcnJvcihgWW91IGNhbiBib29rIGEgbWF4aW11bSBvZiAke3Nob3cubWF4VGlja2V0c1Blck1vYmlsZX0gdGlja2V0cyBmb3IgdGhpcyBzY3JlZW5pbmcgdXNpbmcgdGhlIHNhbWUgbW9iaWxlIG51bWJlci5gKTtpZih2aXNpYmxlT2ZmZXJTZWF0SWRzLmhhcyhzZWF0SWQpJiZzZWxlY3RlZFNlYXRzLnNvbWUoaWQ9PiF2aXNpYmxlT2ZmZXJTZWF0SWRzLmhhcyhpZCkpKXJldHVybiBzZXRFcnJvcignQm9vayB3YWl0bGlzdCBvZmZlcmVkIHNlYXRzIHNlcGFyYXRlbHkgZnJvbSByZWd1bGFyIGF2YWlsYWJsZSBzZWF0cy4nKTtpZighdmlzaWJsZU9mZmVyU2VhdElkcy5oYXMoc2VhdElkKSYmc2VsZWN0ZWRTZWF0cy5zb21lKGlkPT52aXNpYmxlT2ZmZXJTZWF0SWRzLmhhcyhpZCkpKXJldHVybiBzZXRFcnJvcignQm9vayB3YWl0bGlzdCBvZmZlcmVkIHNlYXRzIHNlcGFyYXRlbHkgZnJvbSByZWd1bGFyIGF2YWlsYWJsZSBzZWF0cy4nKTtzZXRTZWxlY3RlZFNlYXRzKFsuLi5zZWxlY3RlZFNlYXRzLHNlYXRJZF0pO3NldEFjY2VwdGVkVGVybXMoW10pO307XHJcbiAgY29uc3QgcHJvY2VlZFRvQ29uZmlybT1hc3luYygpPT57aWYoIXNob3d8fCFzZWxlY3RlZFNlYXRzLmxlbmd0aClyZXR1cm47c2V0QnVzeSh0cnVlKTtzZXRFcnJvcignJyk7dHJ5e2NvbnN0IHNlbGVjdGVkT2ZmZXJTZWF0cz1zZWxlY3RlZFNlYXRzLmZpbHRlcihpZD0+dmlzaWJsZU9mZmVyU2VhdElkcy5oYXMoaWQpKTtpZihzZWxlY3RlZE9mZmVyU2VhdHMubGVuZ3RoKXtpZihzZWxlY3RlZE9mZmVyU2VhdHMubGVuZ3RoIT09c2VsZWN0ZWRTZWF0cy5sZW5ndGgpdGhyb3cgbmV3IEVycm9yKCdQbGVhc2UgYm9vayBvZmZlcmVkIHNlYXRzIHNlcGFyYXRlbHkgZnJvbSByZWd1bGFyIHNlYXRzLicpO2lmKCF3YWl0bGlzdE9mZmVyPy5pZCl0aHJvdyBuZXcgRXJyb3IoJ1lvdXIgd2FpdGxpc3Qgb2ZmZXIgaXMgbm8gbG9uZ2VyIGFjdGl2ZS4gUmVmcmVzaCB0aGUgc2VhdCBsYXlvdXQuJyk7Y29uc3QgaG9sZHM9YXdhaXQgY3JlYXRlV2FpdGxpc3RPZmZlckhvbGQoc2hvdy5pZCxTdHJpbmcod2FpdGxpc3RPZmZlci5pZCksc2VsZWN0ZWRTZWF0cyk7Y29uc3QgZXhwaXJlc0F0PU1hdGgubWluKC4uLmhvbGRzLm1hcCgoaG9sZDphbnkpPT5uZXcgRGF0ZShob2xkLmV4cGlyZXNBdCkuZ2V0VGltZSgpKS5maWx0ZXIoTnVtYmVyLmlzRmluaXRlKSk7aWYoIU51bWJlci5pc0Zpbml0ZShleHBpcmVzQXQpKXRocm93IG5ldyBFcnJvcignVGhlIHNlcnZlciBkaWQgbm90IHByb3ZpZGUgYSBzZWF0IHJlc2VydmF0aW9uIGV4cGlyeS4gUGxlYXNlIHRyeSBhZ2Fpbi4nKTthY3RpdmVIb2xkUmVmLmN1cnJlbnQ9e3Nob3dJZDpzaG93LmlkLHNlYXRJZHM6Wy4uLnNlbGVjdGVkU2VhdHNdLG9mZmVySWQ6U3RyaW5nKHdhaXRsaXN0T2ZmZXIuaWQpfTtzZXRIb2xkRXhwaXJlc0F0KGV4cGlyZXNBdCk7fWVsc2V7Y29uc3QgaG9sZHM9YXdhaXQgY3JlYXRlU2VhdEhvbGQoc2hvdy5pZCxzZWxlY3RlZFNlYXRzLHdhaXRFbnRyeT8uaWR8fHJlcXVlc3RlZFdhaXRsaXN0RW50cnlJZHx8dW5kZWZpbmVkKTtjb25zdCBleHBpcmVzQXQ9TWF0aC5taW4oLi4uaG9sZHMubWFwKChob2xkOmFueSk9Pm5ldyBEYXRlKGhvbGQuZXhwaXJlc0F0KS5nZXRUaW1lKCkpLmZpbHRlcihOdW1iZXIuaXNGaW5pdGUpKTtpZighTnVtYmVyLmlzRmluaXRlKGV4cGlyZXNBdCkpdGhyb3cgbmV3IEVycm9yKCdDb3VsZCBub3Qgc3RhcnQgdGhlIHNlYXQgaG9sZC4gUGxlYXNlIHRyeSBhZ2Fpbi4nKTthY3RpdmVIb2xkUmVmLmN1cnJlbnQ9e3Nob3dJZDpzaG93LmlkLHNlYXRJZHM6Wy4uLnNlbGVjdGVkU2VhdHNdfTtzZXRIb2xkRXhwaXJlc0F0KGV4cGlyZXNBdCk7fXNldEFjY2VwdGVkVGVybXMoW10pO3NldENvbmZpcm1pbmcodHJ1ZSk7fWNhdGNoKHJlYXNvbil7c2V0RXJyb3IoZnJpZW5kbHlCb29raW5nRXJyb3IoKHJlYXNvbiBhcyBFcnJvcikubWVzc2FnZSkpO31maW5hbGx5e3NldEJ1c3koZmFsc2UpO319O1xyXG4gIGNvbnN0IGpvaW5XYWl0bGlzdD1hc3luYygpPT57aWYoIXNob3cpcmV0dXJuO3NldFdhaXRCdXN5KHRydWUpO3NldEVycm9yKCcnKTt0cnl7Y29uc3QgZW50cnk9YXdhaXQgam9pbldhaXRpbmdMaXN0KHNob3cuaWQsd2FpdENvdW50KTtzZXRXYWl0RW50cnkoZW50cnkpO31jYXRjaChyZWFzb24pe3NldEVycm9yKChyZWFzb24gYXMgRXJyb3IpLm1lc3NhZ2UpO31maW5hbGx5e3NldFdhaXRCdXN5KGZhbHNlKTt9fTtcclxuICBjb25zdCB0ZXJtcz1bXHJcbiAgICB7aWQ6J2NvbmZpcm1hdGlvbicsdGl0bGU6PD5TdGF5IGNvbm5lY3RlZDxici8+Zm9yIDxlbT5jb25maXJtYXRpb248L2VtPjwvPix0ZXh0OidXZeKAmWxsIGNvbnRhY3QgeW91IGJ5IGNhbGwgb3IgZW1haWwgaWYgeW91ciBib29raW5nIG5lZWRzIGNvbmZpcm1hdGlvbi4gS2VlcCB5b3VyIGNvbnRhY3QgZGV0YWlscyBhdmFpbGFibGUuJ30sXHJcbiAgICB7aWQ6J3NjcmVlbmluZycsdGl0bGU6PD5DaGVjayB5b3VyIHNob3c8YnIvPmJlZm9yZSB5b3UgPGVtPmNvbmZpcm08L2VtPjwvPix0ZXh0OidSZXZpZXcgdGhlIG1vdmllLCBjaW5lbWEsIHNjcmVlbmluZyB0aW1lLCBhbmQgc2VsZWN0ZWQgc2VhdHMgc2hvd24gYWJvdmUuIFlvdXIgdGlja2V0IGlzIHZhbGlkIGZvciB0aGVzZSBkZXRhaWxzLid9LFxyXG4gICAge2lkOidjYW5jZWxsYXRpb24nLHRpdGxlOjw+Q2FuY2VsbGF0aW9uPGJyLz53aXRoIDxlbT5jbGVhciB0aW1pbmc8L2VtPjwvPix0ZXh0OidZb3UgbWF5IGNhbmNlbCB1cCB0byBvbmUgaG91ciBiZWZvcmUgc2hvd3RpbWUuIEFueSByZWZ1bmQgZm9sbG93cyB0aGUgdGVybXMgZGlzcGxheWVkIGZvciB5b3VyIGJvb2tpbmcuJ30sXHJcbiAgICB7aWQ6J3ZlbnVlJyx0aXRsZTo8PkZvbGxvdyB5b3VyPGJyLz48ZW0+Y2luZW1h4oCZcyBydWxlczwvZW0+PC8+LHRleHQ6J0VudHJ5LCBhZ2UgcmVzdHJpY3Rpb25zLCBhbmQgdmVudWUgcG9saWNpZXMgYXJlIHNldCBieSB0aGUgY2luZW1hLiBQbGVhc2UgZm9sbG93IHN0YWZmIGluc3RydWN0aW9ucy4nfSxcclxuICBdO1xyXG4gIGNvbnN0IGNvbmZpcm09YXN5bmMoKT0+e2lmKGFjY2VwdGVkVGVybXMubGVuZ3RoIT09dGVybXMubGVuZ3RoKXtzZXRFcnJvcignUGxlYXNlIGFncmVlIHRvIGFsbCBmb3VyIGNvbmRpdGlvbnMgYmVmb3JlIGNvbmZpcm1pbmcuJyk7cmV0dXJuO31pZighc2hvd3x8IXVzZXIpe25hdmlnYXRlKGAvbG9naW4/bmV4dD0ke2VuY29kZVVSSUNvbXBvbmVudCh3aW5kb3cubG9jYXRpb24ucGF0aG5hbWUpfWApO3JldHVybjt9c2V0QnVzeSh0cnVlKTt0cnl7Y29uc3QgY2xhaW1PZmZlcklkPWFjdGl2ZUhvbGRSZWYuY3VycmVudD8ub2ZmZXJJZDtjb25zdCBjdXJyZW50RW50cmllcz1hd2FpdCBnZXRXYWl0aW5nTGlzdCgpLmNhdGNoKCgpPT5bXSk7Y29uc3QgbWF0Y2hpbmdFbnRyeT0od2FpdEVudHJ5JiZ3YWl0RW50cnkuc2hvd0lkPT09c2hvdy5pZD93YWl0RW50cnk6bnVsbCl8fGN1cnJlbnRFbnRyaWVzLmZpbmQoKGVudHJ5OmFueSk9PmVudHJ5LmlkPT09cmVxdWVzdGVkV2FpdGxpc3RFbnRyeUlkJiZlbnRyeS5zaG93SWQ9PT1zaG93LmlkJiZbJ1dBSVRJTkcnLCdPRkZFUkVEJ10uaW5jbHVkZXMoU3RyaW5nKGVudHJ5LnN0YXR1cykudG9VcHBlckNhc2UoKSkpfHxjdXJyZW50RW50cmllcy5maW5kKChlbnRyeTphbnkpPT5lbnRyeS5zaG93SWQ9PT1zaG93LmlkJiZbJ1dBSVRJTkcnLCdPRkZFUkVEJ10uaW5jbHVkZXMoU3RyaW5nKGVudHJ5LnN0YXR1cykudG9VcHBlckNhc2UoKSkpO2NvbnN0IGJvb2tpbmc9YXdhaXQgY3JlYXRlQm9va2luZyh1c2VyLHNob3cuaWQsc2VsZWN0ZWRTZWF0cyxhbHRlcm5hdGl2ZU1vYmlsZSx0cnVlLG1hdGNoaW5nRW50cnk/LmlkLGNsYWltT2ZmZXJJZCk7YWN0aXZlSG9sZFJlZi5jdXJyZW50PW51bGw7bmF2aWdhdGUoYC9ib29raW5nLyR7Ym9va2luZy5pZH1gKTt9Y2F0Y2gocmVhc29uKXtjb25zdCBtZXNzYWdlPShyZWFzb24gYXMgRXJyb3IpLm1lc3NhZ2U7aWYobWVzc2FnZS5pbmNsdWRlcygnQXV0aGVudGljYXRpb24gcmVxdWlyZWQnKXx8bWVzc2FnZS5pbmNsdWRlcygnQmFja2VuZCByZXF1ZXN0IGZhaWxlZCAoNDAxKScpKXt2b2lkIHJlbGVhc2VDdXJyZW50SG9sZCgpO25hdmlnYXRlKGAvbG9naW4/bmV4dD0ke2VuY29kZVVSSUNvbXBvbmVudCh3aW5kb3cubG9jYXRpb24ucGF0aG5hbWUpfWApO3JldHVybjt9c2V0RXJyb3IoZnJpZW5kbHlCb29raW5nRXJyb3IobWVzc2FnZSkpO2F3YWl0IHJlbGVhc2VDdXJyZW50SG9sZCgpO3NldENvbmZpcm1pbmcoZmFsc2UpO31maW5hbGx5e3NldEJ1c3koZmFsc2UpO319O1xyXG5cclxuICBjb25zdCBzdGVwTnVtYmVyPWNvbmZpcm1pbmc/MzpzZWF0TWFwT3Blbj8yOjE7XHJcbiAgY29uc3Qgc3RlcExhYmVsPShudW1iZXI6bnVtYmVyLGxhYmVsOnN0cmluZyk9PjxzcGFuIGNsYXNzTmFtZT17c3RlcE51bWJlcj09PW51bWJlcj8nYWN0aXZlJzonJ30+PGk+e3N0ZXBOdW1iZXI+bnVtYmVyPzxDaGVjayBzaXplPXsxNH0vPjpudW1iZXJ9PC9pPntsYWJlbH08L3NwYW4+O1xyXG4gIGNvbnN0IGRheUxhYmVsPSh2YWx1ZTpzdHJpbmcpPT57Y29uc3QgcGFyc2VkPW5ldyBEYXRlKGAke3ZhbHVlfVQxMjowMDowMGApO3JldHVybiB7d2Vla2RheTpuZXcgSW50bC5EYXRlVGltZUZvcm1hdCgnZW4nLHt3ZWVrZGF5OidzaG9ydCd9KS5mb3JtYXQocGFyc2VkKSxkYXk6bmV3IEludGwuRGF0ZVRpbWVGb3JtYXQoJ2VuJyx7ZGF5OicyLWRpZ2l0J30pLmZvcm1hdChwYXJzZWQpLG1vbnRoOm5ldyBJbnRsLkRhdGVUaW1lRm9ybWF0KCdlbicse21vbnRoOidzaG9ydCd9KS5mb3JtYXQocGFyc2VkKX07fTtcclxuXHJcbiAgY29uc3QgYWN0aXZlVGVybUluZGV4PShkaXJlY3Rpb246bnVtYmVyKT0+e2NvbnN0IG5leHQ9TWF0aC5tYXgoMCxNYXRoLm1pbih0ZXJtcy5sZW5ndGgtMSxhY3RpdmVUZXJtK2RpcmVjdGlvbikpO3NldEFjdGl2ZVRlcm0obmV4dCk7dGVybXNUcmFja1JlZi5jdXJyZW50Py5jaGlsZHJlbltuZXh0XT8uc2Nyb2xsSW50b1ZpZXcoe2JlaGF2aW9yOidzbW9vdGgnLGJsb2NrOiduZWFyZXN0JyxpbmxpbmU6J25lYXJlc3QnfSk7fTtcclxuICBjb25zdCB0b2dnbGVUZXJtPShpZDpzdHJpbmcpPT57aWYoIWNvbXBsZXRlZFRlcm1zLmluY2x1ZGVzKGlkKSlyZXR1cm47c2V0QWNjZXB0ZWRUZXJtcyhjdXJyZW50PT5jdXJyZW50LmluY2x1ZGVzKGlkKT9jdXJyZW50LmZpbHRlcihpdGVtPT5pdGVtIT09aWQpOmN1cnJlbnQuY29uY2F0KGlkKSk7fTtcclxuICB1c2VFZmZlY3QoKCk9PntpZighY29uZmlybWluZylyZXR1cm47Y29uc3QgdGVybT10ZXJtc1thY3RpdmVUZXJtXTtpZighdGVybSlyZXR1cm47aWYoY29tcGxldGVkVGVybXMuaW5jbHVkZXModGVybS5pZCkpe3NldFR5cGVkVGVybVRleHQodGVybS50ZXh0KTtyZXR1cm47fXNldFR5cGVkVGVybVRleHQoJycpO2xldCBpbmRleD0wO2NvbnN0IHRpbWVyPXdpbmRvdy5zZXRJbnRlcnZhbCgoKT0+e2luZGV4PU1hdGgubWluKHRlcm0udGV4dC5sZW5ndGgsaW5kZXgrMik7c2V0VHlwZWRUZXJtVGV4dCh0ZXJtLnRleHQuc2xpY2UoMCxpbmRleCkpO2lmKGluZGV4Pj10ZXJtLnRleHQubGVuZ3RoKXtzZXRDb21wbGV0ZWRUZXJtcyhjdXJyZW50PT5jdXJyZW50LmluY2x1ZGVzKHRlcm0uaWQpP2N1cnJlbnQ6Wy4uLmN1cnJlbnQsdGVybS5pZF0pO3dpbmRvdy5jbGVhckludGVydmFsKHRpbWVyKTt9fSwxNik7cmV0dXJuKCk9PndpbmRvdy5jbGVhckludGVydmFsKHRpbWVyKTt9LFtjb25maXJtaW5nLGFjdGl2ZVRlcm0sY29tcGxldGVkVGVybXNdKTtcclxuXHJcbiAgaWYoIW1vdmllfHwhdXNlcilyZXR1cm4gPEVtcHR5IHRpdGxlPVwiTW92aWUgbm90IGZvdW5kXCIvPjtcclxuXHJcbiAgcmV0dXJuIDxtYWluIGNsYXNzTmFtZT1cImJvb2tpbmctcGFnZVwiPlxyXG4gICAgPHNlY3Rpb24gY2xhc3NOYW1lPXtgYm9va2luZy1oZXJvJHtjb25maXJtaW5nPycgYm9va2luZy1oZXJvLXRlcm1zJzonJ31gfSBzdHlsZT17Y29uZmlybWluZz97YmFja2dyb3VuZEltYWdlOmBsaW5lYXItZ3JhZGllbnQoOTBkZWcscmdiYSg3LDEwLDEyLC45NikgMCUscmdiYSg5LDEwLDE0LC44NCkgNDIlLHJnYmEoOSwxMCwxNCwuMTQpIDEwMCUpLGxpbmVhci1ncmFkaWVudCgwZGVnLHJnYmEoNiw4LDEwLC40NiksdHJhbnNwYXJlbnQgNjUlKSx1cmwoXCIke3Rlcm1zSGVyb0ltYWdlfVwiKWB9OnVuZGVmaW5lZH0gYXJpYS1sYWJlbD1cIkNpbmVtYSBhdWRpZW5jZSBlbmpveWluZyBhIG1vdmllXCI+XHJcbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYm9va2luZy1oZXJvLXNoYWRlXCIvPlxyXG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImJvb2tpbmctaGVyby1jb3B5XCI+XHJcbiAgICAgICAge2NvbmZpcm1pbmc/PGJ1dHRvbiB0eXBlPVwiYnV0dG9uXCIgY2xhc3NOYW1lPVwiYm9va2luZy1iYWNrXCIgZGlzYWJsZWQ9e2J1c3l9IG9uQ2xpY2s9e2FzeW5jKCk9PntzZXRCdXN5KHRydWUpO2NvbnN0IHJlbGVhc2VkPWF3YWl0IHJlbGVhc2VDdXJyZW50SG9sZCgpO2lmKHJlbGVhc2VkKXtzZXRDb25maXJtaW5nKGZhbHNlKTtzZXRTZWxlY3RlZFNlYXRzKFtdKTtzZXRBY2NlcHRlZFRlcm1zKFtdKTtzZXRFcnJvcignJyk7fXNldEJ1c3koZmFsc2UpO319PjxBcnJvd0xlZnQgc2l6ZT17MTV9Lz4gQmFjayB0byBib29raW5nPC9idXR0b24+OjxMaW5rIGNsYXNzTmFtZT1cImJvb2tpbmctYmFja1wiIHRvPXtgL21vdmllLyR7bW92aWUuaWR9YH0+PEFycm93TGVmdCBzaXplPXsxNX0vPiBCYWNrIHRvIHttb3ZpZS50aXRsZX08L0xpbms+fVxyXG4gICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cImV5ZWJyb3dcIj57Y29uZmlybWluZz8nSU1QT1JUQU5UIEJFRk9SRSBZT1UgQ09ORklSTSc6J0JPT0sgWU9VUiBFWFBFUklFTkNFJ308L3NwYW4+XHJcbiAgICAgICAgPGgxPntjb25maXJtaW5nPzw+VGVybXMgJmFtcDsgPGVtPkNvbmRpdGlvbnM8L2VtPjwvPjo8PkNob29zZSBhIGNpbmVtYSw8YnIvPnRoZW4gY2hvb3NlIDxlbT55b3VyIHNlYXQuPC9lbT48Lz59PC9oMT5cclxuICAgICAgICA8cD57Y29uZmlybWluZz8nUGxlYXNlIHJldmlldyB5b3VyIGJvb2tpbmcgZGV0YWlscyBhbmQgYWdyZWUgdG8gdGhlIGNvbmRpdGlvbnMgYmVsb3cgZm9yIGEgc21vb3RoIG1vdmllIGV4cGVyaWVuY2UuJzonR3JlYXQgc3RvcmllcyBkZXNlcnZlIHRoZSBiaWcgc2NyZWVuLiBGaW5kIHRoZSBiZXN0IHNob3d0aW1lcyBuZWFyIHlvdSBhbmQgYm9vayB5b3VyIHNlYXRzIGluIGEgZmV3IGNsaWNrcy4nfTwvcD5cclxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImJvb2tpbmctcHJvZ3Jlc3NcIj57c3RlcExhYmVsKDEsJ1RoZWF0cmUgJiBTaG93Jyl9PGkvPntzdGVwTGFiZWwoMiwnU2VhdHMnKX08aS8+e3N0ZXBMYWJlbCgzLCdDb25maXJtJyl9PC9kaXY+XHJcbiAgICAgIDwvZGl2PlxyXG4gICAgPC9zZWN0aW9uPlxyXG5cclxuICAgIDxkaXYgY2xhc3NOYW1lPVwiYm9va2luZy1jb250ZW50XCI+XHJcbiAgICAgIHshc2hvd3MubGVuZ3RoPzxFbXB0eSB0aXRsZT1cIk5vIHNob3dzIGFyZSBjdXJyZW50bHkgYXZhaWxhYmxlIGZvciB0aGlzIG1vdmllLlwiLz46PGRpdiBjbGFzc05hbWU9e2Bib29raW5nLWxheW91dCR7Y29uZmlybWluZz8nIGJvb2tpbmctbGF5b3V0LWNvbmZpcm1pbmcnOicnfWB9PlxyXG4gICAgICAgIDxzZWN0aW9uIGNsYXNzTmFtZT1cImJvb2tpbmctbWFpbi1wYW5lbFwiPlxyXG4gICAgICAgICAgeyFzZWF0TWFwT3BlbiYmIWNvbmZpcm1pbmcmJjw+XHJcbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYm9va2luZy1jb250cm9sc1wiPlxyXG4gICAgICAgICAgICAgIDxsYWJlbCBjbGFzc05hbWU9XCJib29raW5nLWNpdHlcIj48TWFwUGluIHNpemU9ezE4fS8+PHNlbGVjdCBhcmlhLWxhYmVsPVwiQ2hvb3NlIGEgY2l0eVwiIHZhbHVlPXthY3RpdmVDaXR5fSBvbkNoYW5nZT17ZXZlbnQ9PntzZXRDaXR5KGV2ZW50LnRhcmdldC52YWx1ZSk7c2V0RGF5KCcnKTtzZXRTaG93SWQoJycpO3NldFNlbGVjdGVkU2VhdHMoW10pO319PntjaXRpZXMubWFwKHZhbHVlPT48b3B0aW9uIGtleT17dmFsdWV9IHZhbHVlPXt2YWx1ZX0+e3ZhbHVlfSwgVGVsYW5nYW5hPC9vcHRpb24+KX08L3NlbGVjdD48L2xhYmVsPlxyXG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYm9va2luZy1kYXRlLWxpc3RcIiBhcmlhLWxhYmVsPVwiQ2hvb3NlIGEgZGF0ZVwiPntkYXRlcy5tYXAodmFsdWU9Pntjb25zdCBsYWJlbD1kYXlMYWJlbCh2YWx1ZSk7cmV0dXJuIDxidXR0b24gdHlwZT1cImJ1dHRvblwiIGtleT17dmFsdWV9IGNsYXNzTmFtZT17YWN0aXZlRGF5PT09dmFsdWU/J3NlbGVjdGVkJzonJ30gb25DbGljaz17KCk9PntzZXREYXkodmFsdWUpO3NldFNob3dJZCgnJyk7c2V0U2VsZWN0ZWRTZWF0cyhbXSk7fX0+PHNwYW4+e2xhYmVsLndlZWtkYXl9PC9zcGFuPjxzdHJvbmc+e2xhYmVsLmRheX0ge2xhYmVsLm1vbnRofTwvc3Ryb25nPjwvYnV0dG9uPjt9KX08L2Rpdj5cclxuICAgICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYm9va2luZy10aGVhdHJlLWxpc3RcIj57ZGF0YS50aGVhdHJlcy5maWx0ZXIoaXRlbT0+aXRlbS5zdGF0dXM9PT0nQUNUSVZFJyYmaXRlbS5jaXR5PT09YWN0aXZlQ2l0eSYmZGF0ZWRTaG93cy5zb21lKHNob3dpbmc9PnNob3dpbmcudGhlYXRyZUlkPT09aXRlbS5pZCkpLm1hcChpdGVtPT57XHJcbiAgICAgICAgICAgICAgY29uc3QgaXRlbVNob3dzPWRhdGVkU2hvd3MuZmlsdGVyKHNob3dpbmc9PnNob3dpbmcudGhlYXRyZUlkPT09aXRlbS5pZCk7XHJcbiAgICAgICAgICAgICAgcmV0dXJuIDxhcnRpY2xlIGNsYXNzTmFtZT1cImJvb2tpbmctdGhlYXRyZVwiIGtleT17aXRlbS5pZH0+XHJcbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImJvb2tpbmctdGhlYXRyZS1kZXRhaWxzXCI+PGgyPntpdGVtLm5hbWV9PC9oMj48cD48TWFwUGluIHNpemU9ezEzfS8+e2l0ZW0uYWRkcmVzc30sIHtpdGVtLmNpdHl9PC9wPjxkaXYgY2xhc3NOYW1lPVwiYm9va2luZy1wZXJrc1wiPjxzcGFuPjxNb25pdG9yIHNpemU9ezEyfS8+RG9sYnkgQXRtb3M8L3NwYW4+PGkvPiA8c3Bhbj5SZWNsaW5lcnM8L3NwYW4+PGkvPiA8c3Bhbj5Gb29kICYgYmV2ZXJhZ2VzPC9zcGFuPjxpLz4gPHNwYW4+UGFya2luZzwvc3Bhbj48L2Rpdj48L2Rpdj5cclxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYm9va2luZy10aW1lc1wiPntpdGVtU2hvd3MubWFwKGl0ZW1TaG93PT48YnV0dG9uIGtleT17aXRlbVNob3cuaWR9IHR5cGU9XCJidXR0b25cIiBjbGFzc05hbWU9e3Nob3dJZD09PWl0ZW1TaG93LmlkPydjaG9zZW4nOicnfSBvbkNsaWNrPXsoKT0+e2NvbnN0IGVuYWJsZWQ9c2Vzc2lvblN0b3JhZ2UuZ2V0SXRlbSgnYXZfbG9jYXRpb25fZW5hYmxlZCcpPT09J3RydWUnO3NldExvY2F0aW9uRW5hYmxlZChlbmFibGVkKTtpZighZW5hYmxlZCl7c2V0TG9jYXRpb25NZXNzYWdlKCdUdXJuIG9uIGxvY2F0aW9uIHRvIGJvb2sgeW91ciB0aWNrZXQuJyk7cmV0dXJuO31jaG9vc2VTaG93KGl0ZW1TaG93KTt9fT48c3Ryb25nPntpdGVtU2hvdy5zdGFydFRpbWV9PC9zdHJvbmc+PHNtYWxsPntpdGVtU2hvdy50aWNrZXRUeXBlPT09J0ZSRUUnPydGUkVFJzptb25leShpdGVtU2hvdy50aWNrZXRQcmljZSl9PC9zbWFsbD48L2J1dHRvbj4pfTwvZGl2PlxyXG4gICAgICAgICAgICAgIDwvYXJ0aWNsZT47XHJcbiAgICAgICAgICAgIH0pfXshZGF0ZWRTaG93cy5sZW5ndGgmJjxkaXYgY2xhc3NOYW1lPVwiYm9va2luZy1uby1zaG93c1wiPk5vIHNob3d0aW1lcyBhcmUgYXZhaWxhYmxlIG9uIHRoaXMgZGF0ZS4gQ2hvb3NlIGFub3RoZXIgZGF5LjwvZGl2Pn08L2Rpdj5cclxuICAgICAgICAgICAgeyEhbG9jYXRpb25NZXNzYWdlJiY8ZGl2IGNsYXNzTmFtZT1cImJvb2tpbmctbG9jYXRpb24tcHJvbXB0XCIgcm9sZT1cInN0YXR1c1wiPjxNYXBQaW4gc2l6ZT17MjB9Lz48ZGl2PjxzdHJvbmc+TG9jYXRpb24gaXMgdHVybmVkIG9mZjwvc3Ryb25nPjxwPntsb2NhdGlvbk1lc3NhZ2V9PC9wPjwvZGl2PjxidXR0b24gdHlwZT1cImJ1dHRvblwiIGNsYXNzTmFtZT1cImJ1dHRvbiBzbWFsbFwiIG9uQ2xpY2s9e2VuYWJsZUxvY2F0aW9ufT5UdXJuIG9uIGxvY2F0aW9uPC9idXR0b24+PC9kaXY+fVxyXG4gICAgICAgICAgPC8+fVxyXG5cclxuICAgICAgICAgIHtzZWF0TWFwT3BlbiYmc2hvdyYmIWNvbmZpcm1pbmcmJjxkaXYgY2xhc3NOYW1lPVwiYm9va2luZy1zZWF0LXN0ZXBcIj5cclxuICAgICAgICAgICAgPGJ1dHRvbiB0eXBlPVwiYnV0dG9uXCIgY2xhc3NOYW1lPVwiYm9va2luZy1zdGVwLWJhY2tcIiBvbkNsaWNrPXsoKT0+e3NldFNlYXRNYXBPcGVuKGZhbHNlKTtzZXRTaG93SWQoJycpO3NldFNlbGVjdGVkU2VhdHMoW10pO3NldEVycm9yKCcnKTt9fT48QXJyb3dMZWZ0IHNpemU9ezE2fS8+IEJhY2sgdG8gY2luZW1hczwvYnV0dG9uPlxyXG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImJvb2tpbmctc2VhdC1oZWFkaW5nXCI+PGRpdj48c3BhbiBjbGFzc05hbWU9XCJleWVicm93XCI+U0VMRUNUIFlPVVIgU0VBVFM8L3NwYW4+PGgyPnt0aGVhdHJlPy5uYW1lfTwvaDI+PHA+PENhbGVuZGFyRGF5cyBzaXplPXsxNH0vPntkYXRlKHNob3cuZGF0ZSl9IDxzcGFuPsK3PC9zcGFuPjxDbG9jazMgc2l6ZT17MTR9Lz57c2hvdy5zdGFydFRpbWV9IDxzcGFuPsK3PC9zcGFuPntib29raW5nU2NyZWVuPy5uYW1lfHwnU2NyZWVuJ308L3A+PC9kaXY+PHNwYW4gY2xhc3NOYW1lPVwiYm9va2luZy1zZWF0LWNvdW50XCI+e3NlbGVjdGVkU2VhdHMubGVuZ3RofSBzZWxlY3RlZDwvc3Bhbj48L2Rpdj5cclxuICAgICAgICAgICAge3dhaXRsaXN0T2ZmZXImJih3YWl0bGlzdE9mZmVyLnN0YXR1cz09PSdDT01QTEVURUQnfHxvZmZlclNlY29uZHM+MCkmJjxkaXYgY2xhc3NOYW1lPVwid2FpdGxpc3Qtb2ZmZXItcGFuZWxcIiByb2xlPVwic3RhdHVzXCI+PHNwYW4gY2xhc3NOYW1lPVwiZXllYnJvd1wiPldBSVRMSVNUIE9GRkVSPC9zcGFuPnt3YWl0bGlzdE9mZmVyLnN0YXR1cz09PSdDT01QTEVURUQnPzxzdHJvbmc+QWxsIG9mZmVyZWQgc2VhdHMgaGF2ZSBiZWVuIGJvb2tlZCBieSBvdGhlciB3YWl0bGlzdCBtZW1iZXJzLjwvc3Ryb25nPjo8c3Ryb25nPnt2aXNpYmxlT2ZmZXJTZWF0SWRzLnNpemV9IHt2aXNpYmxlT2ZmZXJTZWF0SWRzLnNpemU9PT0xPydzZWF0Jzonc2VhdHMnfSByZW1haW5pbmcgfCBvZmZlciBlbmRzIGluIDxiPntvZmZlckNsb2NrfTwvYj48L3N0cm9uZz59e3dhaXRsaXN0T2ZmZXIuc3RhdHVzIT09J0NPTVBMRVRFRCcmJjxwPkNob29zZSBhbnkgcmVtYWluaW5nIG9mZmVyZWQgc2VhdC4gWW91IGNhbiBhbHNvIHNlbGVjdCByZWd1bGFyIHNlYXRzIG91dHNpZGUgdGhpcyBvZmZlci48L3A+fXt2aXNpYmxlT2ZmZXJTZWF0SWRzLnNpemU+MCYmPGJ1dHRvbiB0eXBlPVwiYnV0dG9uXCIgY2xhc3NOYW1lPVwiYnV0dG9uIHNtYWxsXCIgZGlzYWJsZWQ9eyFzZWxlY3RlZFNlYXRzLmxlbmd0aHx8c2VsZWN0ZWRTZWF0cy5zb21lKGlkPT4hdmlzaWJsZU9mZmVyU2VhdElkcy5oYXMoaWQpKXx8YnVzeX0gb25DbGljaz17KCk9PnZvaWQgcHJvY2VlZFRvQ29uZmlybSgpfT5Db252ZXJ0IGFuZCBzZWxlY3Qgc2VhdHMgPEFycm93UmlnaHQgc2l6ZT17MTV9Lz48L2J1dHRvbj59e3dhaXRsaXN0T2ZmZXIuc3RhdHVzIT09J0NPTVBMRVRFRCcmJnZpc2libGVPZmZlclNlYXRJZHMuc2l6ZT09PTAmJjxwIGNsYXNzTmFtZT1cIndhaXRsaXN0LW9mZmVyLWVtcHR5XCI+Tm8gb2ZmZXJlZCBzZWF0cyByZW1haW4uIENoZWNrIHRoZSBsYXRlc3QgYXZhaWxhYmlsaXR5LjwvcD59PC9kaXY+fVxyXG4gICAgICAgICAgICAgIHtzb2xkT3V0PzxkaXYgY2xhc3NOYW1lPVwiYm9va2luZy1zb2xkb3V0XCI+PHNwYW4gY2xhc3NOYW1lPVwiZXllYnJvd1wiPlRISVMgU0hPVyBJUyBGVUxMPC9zcGFuPjxoMz5Kb2luIHRoZSB3YWl0aW5nIGxpc3Q8L2gzPjxwPklmIHNlYXRzIGJlY29tZSBhdmFpbGFibGUsIHdl4oCZbGwgZW1haWwgeW91LiBDYW5jZWxsZWQgc2VhdHMgcmV0dXJuIHRvIHRoZSByZWd1bGFyIHNlYXQgbGF5b3V0IGFuZCBhbnlvbmUgY2FuIGJvb2sgdGhlbS48L3A+PGxhYmVsPlRpY2tldHMgbmVlZGVkPHNlbGVjdCB2YWx1ZT17d2FpdENvdW50fSBvbkNoYW5nZT17ZXZlbnQ9PnNldFdhaXRDb3VudChOdW1iZXIoZXZlbnQudGFyZ2V0LnZhbHVlKSl9PntBcnJheS5mcm9tKHtsZW5ndGg6c2hvdy5tYXhUaWNrZXRzUGVyTW9iaWxlfSwoXyxpbmRleCk9PjxvcHRpb24ga2V5PXtpbmRleCsxfSB2YWx1ZT17aW5kZXgrMX0+e2luZGV4KzF9IHtpbmRleD09PTA/J3RpY2tldCc6J3RpY2tldHMnfTwvb3B0aW9uPil9PC9zZWxlY3Q+PC9sYWJlbD57d2FpdEVudHJ5PzxkaXYgY2xhc3NOYW1lPVwiYm9va2luZy13YWl0bGlzdC1zdWNjZXNzXCIgcm9sZT1cInN0YXR1c1wiPjxzcGFuIGNsYXNzTmFtZT1cImV5ZWJyb3dcIj5ZT1XigJlSRSBPTiBUSEUgV0FJVElORyBMSVNUPC9zcGFuPjxzdHJvbmc+WW91ciByZXF1ZXN0IGhhcyBiZWVuIGFkZGVkLjwvc3Ryb25nPjxwPldl4oCZbGwgZW1haWwgeW91IGlmIHNlYXRzIG9wZW4gdXAuIFlvdSBjYW4gYm9vayBhbnkgc2VhdHMgdGhhdCBhcmUgYXZhaWxhYmxlIHRocm91Z2ggdGhlIG5vcm1hbCBzZWF0IGxheW91dC48L3A+PC9kaXY+OjxidXR0b24gY2xhc3NOYW1lPVwiYnV0dG9uXCIgZGlzYWJsZWQ9e3dhaXRCdXN5fSBvbkNsaWNrPXtqb2luV2FpdGxpc3R9Pnt3YWl0QnVzeT8nSm9pbmluZ+KApic6J0pvaW4gd2FpdGluZyBsaXN0J308QXJyb3dSaWdodCBzaXplPXsxNn0vPjwvYnV0dG9uPn08L2Rpdj46PD5cclxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImJvb2tpbmctc2NyZWVuLWxhYmVsXCI+U0NSRUVOPC9kaXY+eyFhdmFpbGFiaWxpdHlSZWFkeT88cCBjbGFzc05hbWU9XCJib29raW5nLW5vLXNob3dzXCI+e2F2YWlsYWJpbGl0eUVycm9yfHwnQ2hlY2tpbmcgdGhlIGxhdGVzdCBzZWF0IGF2YWlsYWJpbGl0eeKApiBTZWF0cyB3aWxsIGFwcGVhciB3aGVuIHRoZSBzZXJ2ZXIgY29uZmlybXMgYXZhaWxhYmlsaXR5Lid9PC9wPjo8ZGl2IGNsYXNzTmFtZT1cImJvb2tpbmctc2VhdC1zY3JvbGxcIj48ZGl2IGNsYXNzTmFtZT1cInNlYXQtZ3JpZFwiIHN0eWxlPXt7Z3JpZFRlbXBsYXRlQ29sdW1uczpgcmVwZWF0KCR7c2VhdENvbHVtbnN9LCBtaW5tYXgoMjRweCwgMzJweCkpYH19Pntwb3NpdGlvbmVkU2VhdHMubWFwKHNlYXQ9Pntjb25zdCBzZWxlY3RlZD1zZWxlY3RlZFNlYXRzLmluY2x1ZGVzKHNlYXQuaWQpO2NvbnN0IGlzT2ZmZXJlZD1iYWNrZW5kT2ZmZXJlZFNlYXRzLmluY2x1ZGVzKHNlYXQuaWQpO2NvbnN0IHVuYXZhaWxhYmxlPXNlYXQuZGlzYWJsZWR8fHVuYXZhaWxhYmxlSWRzLmhhcyhzZWF0LmlkKXx8KGlzT2ZmZXJlZCYmIXZpc2libGVPZmZlclNlYXRJZHMuaGFzKHNlYXQuaWQpKXx8KHNlYXQuY2xpY2thYmxlIT09dHJ1ZSYmIXZpc2libGVPZmZlclNlYXRJZHMuaGFzKHNlYXQuaWQpKTtyZXR1cm4gPGJ1dHRvbiBrZXk9e3NlYXQuaWR9IHRpdGxlPXtpc09mZmVyZWQ/J1dhaXRsaXN0IG9mZmVyZWQgc2VhdCc6c2VhdC5sYWJlbH0gYXJpYS1sYWJlbD17YCR7c2VhdC5sYWJlbH0sICR7aXNPZmZlcmVkPyd3YWl0bGlzdCBvZmZlcmVkLCAnOicnfSR7dW5hdmFpbGFibGU/J3VuYXZhaWxhYmxlJzpzZWxlY3RlZD8nc2VsZWN0ZWQnOidhdmFpbGFibGUnfWB9IGNsYXNzTmFtZT17YHNlYXQgJHtzZWF0LmNhdGVnb3J5PT09J1BSRU1JVU0nPydwcmVtaXVtJzonJ30gJHtzZWxlY3RlZD8nc2VsZWN0ZWQnOicnfSAke3VuYXZhaWxhYmxlPydib29rZWQnOicnfWB9IHN0eWxlPXt7Z3JpZENvbHVtbjpzZWF0LmNvbHVtbixncmlkUm93OnNlYXQucm93LGJvcmRlckNvbG9yOnNlYXQuY29sb3J8fHVuZGVmaW5lZH19IGRpc2FibGVkPXshc2VsZWN0ZWQmJnVuYXZhaWxhYmxlfSBvbkNsaWNrPXsoKT0+dm9pZCB0b2dnbGVTZWF0KHNlYXQuaWQpfT57c2VhdC5sYWJlbH08L2J1dHRvbj47fSl9PC9kaXY+PC9kaXY+fVxyXG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYm9va2luZy1zZWF0LWxlZ2VuZFwiPjxzcGFuPjxpLz5BdmFpbGFibGU8L3NwYW4+PHNwYW4+PGkgY2xhc3NOYW1lPVwicHJlbWl1bVwiLz5QcmVtaXVtPC9zcGFuPjxzcGFuPjxpIGNsYXNzTmFtZT1cInNlbGVjdGVkXCIvPlNlbGVjdGVkPC9zcGFuPntiYWNrZW5kT2ZmZXJlZFNlYXRzLmxlbmd0aD4wJiY8c3Bhbj48aSBjbGFzc05hbWU9XCJvZmZlcmVkXCIvPldhaXRsaXN0IG9mZmVyPC9zcGFuPn08c3Bhbj48aSBjbGFzc05hbWU9XCJib29rZWRcIi8+VW5hdmFpbGFibGU8L3NwYW4+PC9kaXY+XHJcbiAgICAgICAgICAgIDwvPn1cclxuICAgICAgICAgIDwvZGl2Pn1cclxuXHJcbiAgICAgICAgICB7Y29uZmlybWluZyYmc2hvdyYmPGRpdiBjbGFzc05hbWU9XCJib29raW5nLWNvbmZpcm0tc3RlcCBib29raW5nLWNvbmZpcm0tdGVybXNcIj5cclxuICAgICAgICAgICAge3dhaXRsaXN0T2ZmZXImJm9mZmVyU2Vjb25kcz4wJiY8Tm90aWNlPldhaXRsaXN0IG9mZmVyIGVuZHMgaW4ge29mZmVyQ2xvY2t9LiBUaGlzIG9mZmVyIHRpbWVyIGlzIHNlcGFyYXRlIGZyb20geW91ciBib29raW5nIHNlYXQgaG9sZC48L05vdGljZT59e2hvbGRSZW1haW5pbmc+MCYmPE5vdGljZT5Zb3VyIGJvb2tpbmcgc2VhdHMgYXJlIGhlbGQgZm9yIHtob2xkQ2xvY2t9LiBDb21wbGV0ZSB5b3VyIGJvb2tpbmcgYmVmb3JlIHRoaXMgc2VhdC1ob2xkIHRpbWVyIGVuZHMuPC9Ob3RpY2U+fVxyXG4gICAgICAgICAgICA8c2VjdGlvbiBjbGFzc05hbWU9XCJ0ZXJtcy1ib29raW5nLWRldGFpbHNcIiBhcmlhLWxhYmVsbGVkYnk9XCJ0ZXJtcy1ib29raW5nLXRpdGxlXCI+PGRpdiBjbGFzc05hbWU9XCJ0ZXJtcy1kZXRhaWxzLWhlYWRpbmdcIj48aDIgaWQ9XCJ0ZXJtcy1ib29raW5nLXRpdGxlXCI+WW91ciBCb29raW5nIERldGFpbHM8L2gyPjxzcGFuPjxTaGllbGRDaGVjayBzaXplPXsxNn0vPlBsZWFzZSByZXZpZXcgeW91ciBib29raW5nIGRldGFpbHMgYW5kIGFncmVlIHRvIHRoZSB0ZXJtcyBiZWxvdy48L3NwYW4+PC9kaXY+PGRpdiBjbGFzc05hbWU9XCJ0ZXJtcy1kZXRhaWxzLWdyaWRcIj48ZGl2IGNsYXNzTmFtZT1cInRlcm1zLW1vdmllLWRldGFpbFwiPjxQb3N0ZXIgbW92aWU9e21vdmllfS8+PGRpdj48aDM+e21vdmllLnRpdGxlfTwvaDM+PHA+PEZpbG0gc2l6ZT17MTR9Lz57bW92aWUubGFuZ3VhZ2V9PHNwYW4+wrc8L3NwYW4+PENsb2NrMyBzaXplPXsxNH0vPntNYXRoLmZsb29yKG1vdmllLmR1cmF0aW9uLzYwKX1oIHttb3ZpZS5kdXJhdGlvbiU2MH1tPC9wPjxzbWFsbD57bW92aWUuZ2VucmUuam9pbignIC8gJyl9PC9zbWFsbD48L2Rpdj48L2Rpdj48ZGl2IGNsYXNzTmFtZT1cInRlcm1zLWRldGFpbC1pdGVtXCI+PE1hcFBpbi8+PGRpdj48c3Bhbj5TZWxlY3RlZCB0aGVhdHJlPC9zcGFuPjxzdHJvbmc+e3RoZWF0cmU/Lm5hbWV8fCfigJQnfTwvc3Ryb25nPjxzbWFsbD57dGhlYXRyZT8uYWRkcmVzc3x8Jyd9e3RoZWF0cmU/LmNpdHk/YCwgJHt0aGVhdHJlLmNpdHl9YDonJ317Ym9va2luZ1NjcmVlbj9gIMK3ICR7Ym9va2luZ1NjcmVlbi5uYW1lfWA6Jyd9PC9zbWFsbD48L2Rpdj48L2Rpdj48ZGl2IGNsYXNzTmFtZT1cInRlcm1zLWRldGFpbC1pdGVtXCI+PENhbGVuZGFyRGF5cy8+PGRpdj48c3Bhbj5TaG93IGRhdGUgJmFtcDsgdGltZTwvc3Bhbj48c3Ryb25nPntuZXcgSW50bC5EYXRlVGltZUZvcm1hdCgnZW4tSU4nLHt3ZWVrZGF5Oidsb25nJyxkYXk6JzItZGlnaXQnLG1vbnRoOidzaG9ydCcseWVhcjonbnVtZXJpYyd9KS5mb3JtYXQobmV3IERhdGUoYCR7c2hvdy5kYXRlfVQxMjowMDowMGApKX08L3N0cm9uZz48c21hbGw+e3Nob3cuc3RhcnRUaW1lfTwvc21hbGw+PC9kaXY+PC9kaXY+PGRpdiBjbGFzc05hbWU9XCJ0ZXJtcy1kZXRhaWwtaXRlbVwiPjxBcm1jaGFpci8+PGRpdj48c3Bhbj5TZWF0cyBzZWxlY3RlZDwvc3Bhbj48c3Ryb25nPntzZWxlY3RlZFNlYXRMYWJlbHMuam9pbignLCAnKX08L3N0cm9uZz48c21hbGw+e3NlbGVjdGVkU2VhdHMubGVuZ3RofSB7c2VsZWN0ZWRTZWF0cy5sZW5ndGg9PT0xPyd0aWNrZXQnOid0aWNrZXRzJ308L3NtYWxsPjwvZGl2PjwvZGl2PjxkaXYgY2xhc3NOYW1lPVwidGVybXMtZGV0YWlsLWl0ZW0gdGVybXMtYW1vdW50XCI+PFdhbGxldC8+PGRpdj48c3Bhbj5Ub3RhbCBhbW91bnQ8L3NwYW4+PHN0cm9uZz57bW9uZXkoYW1vdW50KX08L3N0cm9uZz48L2Rpdj48L2Rpdj48L2Rpdj48L3NlY3Rpb24+XHJcbiAgICAgICAgICAgIDxsYWJlbCBjbGFzc05hbWU9XCJ0ZXJtcy1tb2JpbGUtZmllbGRcIj5BbHRlcm5hdGl2ZSBtb2JpbGUgKG9wdGlvbmFsKTxpbnB1dCB0eXBlPVwidGVsXCIgdmFsdWU9e2FsdGVybmF0aXZlTW9iaWxlfSBvbkNoYW5nZT17ZXZlbnQ9PnNldEFsdGVybmF0aXZlTW9iaWxlKGV2ZW50LnRhcmdldC52YWx1ZS5yZXBsYWNlKC9cXEQvZywnJykpfSBtYXhMZW5ndGg9ezEwfSBwbGFjZWhvbGRlcj1cIkZvciBib29raW5nIHVwZGF0ZXNcIi8+PC9sYWJlbD5cclxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXJtcy1zZWN0aW9uLWhlYWRpbmdcIj48aDI+VGVybXMgJmFtcDsgQ29uZGl0aW9uczwvaDI+PHA+UGxlYXNlIHJlYWQgYW5kIGFncmVlIHRvIGVhY2ggY29uZGl0aW9uIHRvIGNvbnRpbnVlLjwvcD48L2Rpdj5cclxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJib29raW5nLXRlcm1zLWNhcm91c2VsXCI+PGJ1dHRvbiB0eXBlPVwiYnV0dG9uXCIgY2xhc3NOYW1lPVwidGVybXMtY2Fyb3VzZWwtYXJyb3dcIiBhcmlhLWxhYmVsPVwiUHJldmlvdXMgY29uZGl0aW9uXCIgZGlzYWJsZWQ9e2FjdGl2ZVRlcm09PT0wfSBvbkNsaWNrPXsoKT0+YWN0aXZlVGVybUluZGV4KC0xKX0+PENoZXZyb25MZWZ0IHNpemU9ezIwfS8+PC9idXR0b24+PGRpdiBjbGFzc05hbWU9XCJib29raW5nLXRlcm1zLXRyYWNrXCIgcmVmPXt0ZXJtc1RyYWNrUmVmfT57dGVybXMubWFwKCh0ZXJtLGluZGV4KT0+e2NvbnN0IGFjY2VwdGVkPWFjY2VwdGVkVGVybXMuaW5jbHVkZXModGVybS5pZCk7Y29uc3QgdHlwZWQ9Y29tcGxldGVkVGVybXMuaW5jbHVkZXModGVybS5pZCk7cmV0dXJuIDxhcnRpY2xlIGtleT17dGVybS5pZH0gY2xhc3NOYW1lPXtgYm9va2luZy10ZXJtLWNhcmQke2FjdGl2ZVRlcm09PT1pbmRleD8nIGFjdGl2ZSc6Jyd9JHthY2NlcHRlZD8nIGFjY2VwdGVkJzonJ31gfSBvbkNsaWNrPXsoKT0+c2V0QWN0aXZlVGVybShpbmRleCl9PjxzcGFuIGNsYXNzTmFtZT1cImJvb2tpbmctdGVybS1udW1iZXJcIj57U3RyaW5nKGluZGV4KzEpLnBhZFN0YXJ0KDIsJzAnKX08L3NwYW4+PGRpdiBjbGFzc05hbWU9e2Bib29raW5nLXRlcm0tYXJ0IHRlcm0tYXJ0LSR7dGVybS5pZH1gfSBzdHlsZT17e2JhY2tncm91bmRJbWFnZTpgdXJsKFwiJHt0ZXJtc0NhcmRBcnR3b3JrfVwiKWB9fSBhcmlhLWhpZGRlbj1cInRydWVcIi8+PGgzPnt0ZXJtLnRpdGxlfTwvaDM+PHA+e3R5cGVkP3Rlcm0udGV4dDphY3RpdmVUZXJtPT09aW5kZXg/dHlwZWRUZXJtVGV4dDonJ308L3A+eyF0eXBlZCYmYWN0aXZlVGVybT09PWluZGV4JiY8c21hbGwgY2xhc3NOYW1lPVwidGVybXMtdHlwaW5nLXN0YXR1c1wiPlJlYWRpbmcgY29uZGl0aW9u4oCmPC9zbWFsbD59PGxhYmVsIGNsYXNzTmFtZT1cImJvb2tpbmctdGVybS1hY2NlcHRcIiBvbkNsaWNrPXtldmVudD0+ZXZlbnQuc3RvcFByb3BhZ2F0aW9uKCl9PjxpbnB1dCB0eXBlPVwiY2hlY2tib3hcIiBjaGVja2VkPXthY2NlcHRlZH0gZGlzYWJsZWQ9eyF0eXBlZH0gb25DaGFuZ2U9eygpPT50b2dnbGVUZXJtKHRlcm0uaWQpfS8+PHNwYW4+e3R5cGVkPydJIGFncmVlIHRvIHRoaXMgY29uZGl0aW9uLic6J1JlYWQgdGhlIGZ1bGwgY29uZGl0aW9uIHRvIGNvbnRpbnVlLid9PC9zcGFuPjwvbGFiZWw+PC9hcnRpY2xlPjt9KX08L2Rpdj48YnV0dG9uIHR5cGU9XCJidXR0b25cIiBjbGFzc05hbWU9XCJ0ZXJtcy1jYXJvdXNlbC1hcnJvd1wiIGFyaWEtbGFiZWw9XCJOZXh0IGNvbmRpdGlvblwiIGRpc2FibGVkPXthY3RpdmVUZXJtPT09dGVybXMubGVuZ3RoLTF9IG9uQ2xpY2s9eygpPT5hY3RpdmVUZXJtSW5kZXgoMSl9PjxDaGV2cm9uUmlnaHQgc2l6ZT17MjB9Lz48L2J1dHRvbj48L2Rpdj5cclxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXJtcy1wYWdpbmF0aW9uXCIgYXJpYS1sYWJlbD1cIkNob29zZSBhIGNvbmRpdGlvblwiPnt0ZXJtcy5tYXAoKHRlcm0saW5kZXgpPT48YnV0dG9uIGtleT17dGVybS5pZH0gdHlwZT1cImJ1dHRvblwiIGFyaWEtbGFiZWw9e2BTaG93IGNvbmRpdGlvbiAke2luZGV4KzF9YH0gYXJpYS1jdXJyZW50PXthY3RpdmVUZXJtPT09aW5kZXg/J3N0ZXAnOnVuZGVmaW5lZH0gY2xhc3NOYW1lPXthY3RpdmVUZXJtPT09aW5kZXg/J2FjdGl2ZSc6Jyd9IG9uQ2xpY2s9eygpPT57c2V0QWN0aXZlVGVybShpbmRleCk7dGVybXNUcmFja1JlZi5jdXJyZW50Py5jaGlsZHJlbltpbmRleF0/LnNjcm9sbEludG9WaWV3KHtiZWhhdmlvcjonc21vb3RoJyxibG9jazonbmVhcmVzdCcsaW5saW5lOiduZWFyZXN0J30pO319Lz4gKX08L2Rpdj5cclxuICAgICAgICAgICAge2Vycm9yJiY8Tm90aWNlIGVycm9yPntlcnJvcn08L05vdGljZT59PGRpdiBjbGFzc05hbWU9XCJ0ZXJtcy1jb25maXJtLWFjdGlvblwiPjxidXR0b24gdHlwZT1cImJ1dHRvblwiIGNsYXNzTmFtZT1cImJ1dHRvbiBmdWxsIGJvb2tpbmctcHJvY2VlZFwiIGRpc2FibGVkPXthY2NlcHRlZFRlcm1zLmxlbmd0aCE9PXRlcm1zLmxlbmd0aHx8YnVzeX0gb25DbGljaz17KCk9PnZvaWQgY29uZmlybSgpfT57YnVzeT8nUHJlcGFyaW5nIHlvdXIgYm9va2luZ+KApic6J0NvbmZpcm0gYm9va2luZyd9IDxBcnJvd1JpZ2h0IHNpemU9ezE4fS8+PC9idXR0b24+PHA+e2FjY2VwdGVkVGVybXMubGVuZ3RoPT09dGVybXMubGVuZ3RoPydZb3VyIGJvb2tpbmcgd2lsbCBiZSBjb25maXJtZWQgdXNpbmcgdGhlIGRldGFpbHMgYWJvdmUuJzpgUGxlYXNlIGFncmVlIHRvIGFsbCAke3Rlcm1zLmxlbmd0aH0gY29uZGl0aW9ucyB0byBwcm9jZWVkLmB9PC9wPjwvZGl2PlxyXG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInRlcm1zLXBheW1lbnQtbm90ZVwiPjxDaGVjayBzaXplPXsxOH0vPntzaG93LnRpY2tldFR5cGU9PT0nRlJFRSc/J1RoaXMgaXMgYSBmcmVlIGRlbW8gc2NyZWVuaW5nLiBObyBwYXltZW50IGlzIHJlcXVpcmVkLic6J1BheW1lbnQgaXMgc2ltdWxhdGVkLiBObyBtb25leSBpcyBjaGFyZ2VkLid9PC9kaXY+XHJcbiAgICAgICAgICA8L2Rpdj59XHJcbiAgICAgICAgPC9zZWN0aW9uPlxyXG5cclxuICAgICAgICB7IWNvbmZpcm1pbmcmJjxhc2lkZSBjbGFzc05hbWU9XCJib29raW5nLXN1bW1hcnlcIj5cclxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYm9va2luZy1zdW1tYXJ5LW1vdmllXCI+PFBvc3RlciBtb3ZpZT17bW92aWV9Lz48ZGl2PjxzcGFuIGNsYXNzTmFtZT1cImV5ZWJyb3dcIj5ZT1VSIE1PVklFPC9zcGFuPjxoMj57bW92aWUudGl0bGV9PC9oMj48cD48RmlsbSBzaXplPXsxM30vPnttb3ZpZS5sYW5ndWFnZX08VXNlcnMgc2l6ZT17MTN9Lz57bW92aWUuZHVyYXRpb259IG1pbjwvcD48c21hbGw+e21vdmllLmdlbnJlLmpvaW4oJyAvICcpfTwvc21hbGw+PC9kaXY+PC9kaXY+XHJcbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImJvb2tpbmctc3VtbWFyeS1saW5lc1wiPjxkaXY+PE1hcFBpbi8+PHNwYW4+U2VsZWN0ZWQgdGhlYXRyZTwvc3Bhbj48c3Ryb25nPnt0aGVhdHJlPy5uYW1lfHwnQ2hvb3NlIGEgdGhlYXRyZSd9PC9zdHJvbmc+PC9kaXY+PGRpdj48Q2FsZW5kYXJEYXlzLz48c3Bhbj5TaG93dGltZTwvc3Bhbj48c3Ryb25nPntzaG93P2Ake2RhdGUoc2hvdy5kYXRlKX0gwrcgJHtzaG93LnN0YXJ0VGltZX1gOidDaG9vc2UgYSBzaG93dGltZSd9PC9zdHJvbmc+PC9kaXY+PGRpdj48TW9uaXRvci8+PHNwYW4+U2VhdHM8L3NwYW4+PHN0cm9uZz57c2VsZWN0ZWRTZWF0TGFiZWxzLmpvaW4oJywgJyl8fCdTZWxlY3Qgc2VhdHMnfTwvc3Ryb25nPjwvZGl2PjxkaXY+PFRpY2tldC8+PHNwYW4+VGlja2V0czwvc3Bhbj48c3Ryb25nPntzZWxlY3RlZFNlYXRzLmxlbmd0aH08L3N0cm9uZz48L2Rpdj48L2Rpdj5cclxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYm9va2luZy10b3RhbFwiPjxzcGFuPlRvdGFsIGFtb3VudDwvc3Bhbj48c3Ryb25nPnttb25leShhbW91bnQpfTwvc3Ryb25nPjwvZGl2PlxyXG4gICAgICAgICAge2hvbGRSZW1haW5pbmc+MCYmPE5vdGljZT5Zb3VyIHNlYXRzIGFyZSBoZWxkIGZvciB7TWF0aC5jZWlsKGhvbGRSZW1haW5pbmcvMTAwMCl9IHNlY29uZHMuPC9Ob3RpY2U+fXtob2xkRXhwaXJlc0F0JiZob2xkUmVtYWluaW5nPT09MCYmc2VsZWN0ZWRTZWF0cy5sZW5ndGg+MCYmPE5vdGljZSBlcnJvcj5Zb3VyIHNlYXQgaG9sZCBoYXMgZXhwaXJlZC4gUGxlYXNlIHNlbGVjdCBzZWF0cyBhZ2Fpbi48L05vdGljZT59e2Vycm9yJiY8Tm90aWNlIGVycm9yPntlcnJvcn08L05vdGljZT59XHJcbiAgICAgICAgICB7KCFzb2xkT3V0fHxjb25maXJtaW5nKSYmPGJ1dHRvbiBjbGFzc05hbWU9XCJidXR0b24gZnVsbCBib29raW5nLXByb2NlZWRcIiBkaXNhYmxlZD17IXNob3d8fCFzZWxlY3RlZFNlYXRzLmxlbmd0aHx8YnVzeX0gb25DbGljaz17KCk9PmNvbmZpcm1pbmc/dm9pZCBjb25maXJtKCk6c2VhdE1hcE9wZW4/dm9pZCBwcm9jZWVkVG9Db25maXJtKCk6c2V0U2VhdE1hcE9wZW4odHJ1ZSl9PntidXN5PydQcmVwYXJpbmcgeW91ciB0aWNrZXTigKYnOmNvbmZpcm1pbmc/J0NvbmZpcm0gYm9va2luZyc6PD48VGlja2V0IHNpemU9ezE2fS8+e3NlYXRNYXBPcGVuPyhzZWxlY3RlZFNlYXRzLnNvbWUoaWQ9PnZpc2libGVPZmZlclNlYXRJZHMuaGFzKGlkKSk/J0NvbnZlcnQgYW5kIHNlbGVjdCBzZWF0cyc6J1Byb2NlZWQgdG8gY29uZmlybScpOidQcm9jZWVkIHRvIHNlbGVjdCBzZWF0cyd9PEFycm93UmlnaHQgc2l6ZT17MTZ9Lz48Lz59PC9idXR0b24+fVxyXG4gICAgICAgICAgPHAgY2xhc3NOYW1lPVwiYm9va2luZy1kZW1vLW5vdGVcIj5Gcm9udGVuZCBwcmV2aWV3IMK3IE5vIHJlYWwgdGlja2V0cyBvciBwYXltZW50czwvcD5cclxuICAgICAgICA8L2FzaWRlPn1cclxuICAgICAgPC9kaXY+fVxyXG4gICAgICA8YXNpZGUgY2xhc3NOYW1lPVwiYm9va2luZy1jaW5lbWEtbm90ZVwiPjxUaWNrZXQgc2l6ZT17Mzd9Lz48ZGl2PjxzdHJvbmc+RW5qb3kgdGhlIGJpZyBzY3JlZW4gZXhwZXJpZW5jZSE8L3N0cm9uZz48cD5HcmVhdCBzdG9yaWVzIGFyZSBhbHdheXMgYmV0dGVyIHdpdGggYW4gYXVkaWVuY2UuPC9wPjwvZGl2PjxzcGFuIGNsYXNzTmFtZT1cImJvb2tpbmctc2VhdC1hcnRcIi8+PC9hc2lkZT5cclxuICAgIDwvZGl2PlxyXG4gIDwvbWFpbj47XHJcbn1cclxuIl0sImZpbGUiOiJFOi9BViBXZWJzaXRlL0FWLWZyb250ZW5kL3NyYy9wYWdlcy9Cb29rTXlTaG93LnRzeCJ9

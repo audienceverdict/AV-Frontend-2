@@ -1,0 +1,621 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/pages/AdminNotifications.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=a954c2dd"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+let prevRefreshReg;
+let prevRefreshSig;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=a954c2dd"; const useEffect = __vite__cjsImport3_react["useEffect"]; const useState = __vite__cjsImport3_react["useState"];
+import { Bell, Check, Mail, MessageCircle, Send, Users } from "/node_modules/.vite/deps/lucide-react.js?v=a954c2dd";
+import { useApp } from "/src/context/AppContext.tsx";
+import { sendAdminCampaign } from "/src/services/api.ts";
+import { adminUsers } from "/src/services/auth.ts";
+import { Notice } from "/src/components/Common.tsx";
+export function AdminNotifications() {
+  _s();
+  const { data } = useApp();
+  const [target, setTarget] = useState("ALL_USERS");
+  const [channel, setChannel] = useState("EMAIL");
+  const [showId, setShowId] = useState("");
+  const [movieId, setMovieId] = useState("");
+  const [status, setStatus] = useState("");
+  const [sortBy, setSortBy] = useState("name");
+  const [sortDirection, setSortDirection] = useState("asc");
+  const [subject, setSubject] = useState("A message from Audience Verdict");
+  const [message, setMessage] = useState("Hi {{name}},\n\nWe have an update for you.");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [result, setResult] = useState("");
+  const [accounts, setAccounts] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [accountsError, setAccountsError] = useState("");
+  useEffect(() => {
+    let live = true;
+    void (async () => {
+      try {
+        const first = await adminUsers.list(0);
+        let users = [...first.content];
+        for (let page = 1; page < first.totalPages; page++) users.push(...(await adminUsers.list(page)).content);
+        if (live) setAccounts(users.filter((user, index, list) => list.findIndex((other) => other.id === user.id) === index));
+      } catch (reason) {
+        if (live) setAccountsError(reason.message);
+      }
+    })();
+    return () => {
+      live = false;
+    };
+  }, []);
+  const submit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setResult("");
+    if (channel !== "EMAIL") {
+      setError("The documented backend campaign API currently sends email only. WhatsApp and Both require backend channel support; no request was sent.");
+      return;
+    }
+    if (target === "SPECIFIC_USERS") {
+      setError("The documented backend campaign API does not accept individual user IDs. Select All users, Movie bookers, or Show bookers; no request was sent.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const r = await sendAdminCampaign({ target, subject, message, showId: target === "SHOW_BOOKERS" ? showId : void 0, movieId: target === "MOVIE_BOOKERS" ? movieId : void 0, status: target === "ALL_USERS" ? void 0 : status || void 0, sortBy, sortDirection });
+      setResult(`Email sent to ${r.sent} of ${r.recipients} recipients${r.skipped ? `; ${r.skipped} skipped because they do not have an email address` : ""}.`);
+    } catch (reason) {
+      setError(reason.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return /* @__PURE__ */ jsxDEV("div", { className: "admin-content notification-page", children: [
+    /* @__PURE__ */ jsxDEV("header", { className: "notification-hero", children: [
+      /* @__PURE__ */ jsxDEV("div", { children: [
+        /* @__PURE__ */ jsxDEV("span", { className: "eyebrow", children: "AUDIENCE MESSAGING" }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+          lineNumber: 36,
+          columnNumber: 46
+        }, this),
+        /* @__PURE__ */ jsxDEV("h1", { children: "Notifications" }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+          lineNumber: 36,
+          columnNumber: 97
+        }, this),
+        /* @__PURE__ */ jsxDEV("p", { children: "Choose delivery channels and target an audience for your campaign." }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+          lineNumber: 36,
+          columnNumber: 119
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+        lineNumber: 36,
+        columnNumber: 41
+      }, this),
+      /* @__PURE__ */ jsxDEV("span", { className: "notification-hero-icon", children: /* @__PURE__ */ jsxDEV(Bell, { size: 27 }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+        lineNumber: 36,
+        columnNumber: 239
+      }, this) }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+        lineNumber: 36,
+        columnNumber: 198
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+      lineNumber: 36,
+      columnNumber: 3
+    }, this),
+    /* @__PURE__ */ jsxDEV("form", { className: "notification-composer", onSubmit: submit, children: [
+      /* @__PURE__ */ jsxDEV("section", { className: "notification-panel", children: [
+        /* @__PURE__ */ jsxDEV("div", { className: "notification-section-title", children: [
+          /* @__PURE__ */ jsxDEV("span", { className: "notification-step", children: "01" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 38,
+            columnNumber: 88
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { children: [
+            /* @__PURE__ */ jsxDEV("h2", { children: "Delivery channels" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+              lineNumber: 38,
+              columnNumber: 138
+            }, this),
+            /* @__PURE__ */ jsxDEV("p", { children: "Select how the notification should be sent." }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+              lineNumber: 38,
+              columnNumber: 164
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 38,
+            columnNumber: 133
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+          lineNumber: 38,
+          columnNumber: 44
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "channel-options", children: [{ value: "EMAIL", label: "Email", Icon: Mail, detail: "Send to registered email addresses" }, { value: "WHATSAPP", label: "WhatsApp", Icon: MessageCircle, detail: "Send to registered mobile numbers" }, { value: "BOTH", label: "Both channels", Icon: Bell, detail: "Send email and WhatsApp" }].map(({ value, label, Icon, detail }) => /* @__PURE__ */ jsxDEV("label", { className: `channel-option ${channel === value ? "selected" : ""}`, children: [
+          /* @__PURE__ */ jsxDEV("input", { type: "radio", name: "channel", value, checked: channel === value, onChange: () => setChannel(value) }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 38,
+            columnNumber: 691
+          }, this),
+          /* @__PURE__ */ jsxDEV(Icon, { size: 19 }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 38,
+            columnNumber: 805
+          }, this),
+          /* @__PURE__ */ jsxDEV("span", { children: [
+            /* @__PURE__ */ jsxDEV("strong", { children: label }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+              lineNumber: 38,
+              columnNumber: 829
+            }, this),
+            /* @__PURE__ */ jsxDEV("small", { children: detail }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+              lineNumber: 38,
+              columnNumber: 853
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 38,
+            columnNumber: 823
+          }, this)
+        ] }, value, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+          lineNumber: 38,
+          columnNumber: 604
+        }, this)) }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+          lineNumber: 38,
+          columnNumber: 226
+        }, this),
+        channel !== "EMAIL" && /* @__PURE__ */ jsxDEV("p", { className: "notification-api-note", children: [
+          /* @__PURE__ */ jsxDEV("b", { children: "Backend support required:" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 38,
+            columnNumber: 960
+          }, this),
+          " the current CampaignRequest schema has no channel field and only supports email. This selection will be blocked until the API supports it."
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+          lineNumber: 38,
+          columnNumber: 923
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+        lineNumber: 38,
+        columnNumber: 4
+      }, this),
+      /* @__PURE__ */ jsxDEV("section", { className: "notification-panel", children: [
+        /* @__PURE__ */ jsxDEV("div", { className: "notification-section-title", children: [
+          /* @__PURE__ */ jsxDEV("span", { className: "notification-step", children: "02" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 39,
+            columnNumber: 88
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { children: [
+            /* @__PURE__ */ jsxDEV("h2", { children: "Choose recipients" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+              lineNumber: 39,
+              columnNumber: 138
+            }, this),
+            /* @__PURE__ */ jsxDEV("p", { children: "Target registered accounts or audiences connected to a screening." }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+              lineNumber: 39,
+              columnNumber: 164
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 39,
+            columnNumber: 133
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+          lineNumber: 39,
+          columnNumber: 44
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "notification-fields", children: [
+          /* @__PURE__ */ jsxDEV("label", { children: [
+            "Audience",
+            /* @__PURE__ */ jsxDEV("select", { value: target, onChange: (e) => setTarget(e.target.value), children: [
+              /* @__PURE__ */ jsxDEV("option", { value: "ALL_USERS", children: "All registered users" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+                lineNumber: 39,
+                columnNumber: 377
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "SHOW_BOOKERS", children: "Users booked to a show" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+                lineNumber: 39,
+                columnNumber: 432
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "MOVIE_BOOKERS", children: "Users booked to a movie" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+                lineNumber: 39,
+                columnNumber: 492
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "SPECIFIC_USERS", children: "Specific user(s)" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+                lineNumber: 39,
+                columnNumber: 554
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+              lineNumber: 39,
+              columnNumber: 300
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 39,
+            columnNumber: 285
+          }, this),
+          target === "SHOW_BOOKERS" && /* @__PURE__ */ jsxDEV("label", { children: [
+            "Show",
+            /* @__PURE__ */ jsxDEV("select", { required: true, value: showId, onChange: (e) => setShowId(e.target.value), children: [
+              /* @__PURE__ */ jsxDEV("option", { value: "", children: "Choose show" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+                lineNumber: 39,
+                columnNumber: 744
+              }, this),
+              data.shows.map((show) => /* @__PURE__ */ jsxDEV("option", { value: show.id, children: [
+                data.movies.find((movie) => movie.id === show.movieId)?.title || "Movie",
+                " · ",
+                show.date,
+                " · ",
+                show.startTime
+              ] }, show.id, true, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+                lineNumber: 39,
+                columnNumber: 807
+              }, this))
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+              lineNumber: 39,
+              columnNumber: 668
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 39,
+            columnNumber: 657
+          }, this),
+          target === "MOVIE_BOOKERS" && /* @__PURE__ */ jsxDEV("label", { children: [
+            "Movie",
+            /* @__PURE__ */ jsxDEV("select", { required: true, value: movieId, onChange: (e) => setMovieId(e.target.value), children: [
+              /* @__PURE__ */ jsxDEV("option", { value: "", children: "Choose movie" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+                lineNumber: 39,
+                columnNumber: 1102
+              }, this),
+              data.movies.map((movie) => /* @__PURE__ */ jsxDEV("option", { value: movie.id, children: movie.title }, movie.id, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+                lineNumber: 39,
+                columnNumber: 1168
+              }, this))
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+              lineNumber: 39,
+              columnNumber: 1024
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 39,
+            columnNumber: 1012
+          }, this),
+          target === "SPECIFIC_USERS" && /* @__PURE__ */ jsxDEV("label", { className: "specific-users-field", children: [
+            "Select users",
+            /* @__PURE__ */ jsxDEV("select", { multiple: true, size: Math.min(7, Math.max(accounts.length, 3)), value: selectedUsers, onChange: (e) => setSelectedUsers(Array.from(e.target.selectedOptions, (option) => option.value)), children: accounts.map((account) => /* @__PURE__ */ jsxDEV("option", { value: account.id, children: [
+              account.name,
+              " · ",
+              account.email || account.mobile
+            ] }, account.id, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+              lineNumber: 39,
+              columnNumber: 1548
+            }, this)) }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+              lineNumber: 39,
+              columnNumber: 1334
+            }, this),
+            /* @__PURE__ */ jsxDEV("small", { children: accountsError || `${selectedUsers.length} user(s) selected. Individual recipients are not supported by the current campaign API.` }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+              lineNumber: 39,
+              columnNumber: 1662
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 39,
+            columnNumber: 1282
+          }, this),
+          target !== "ALL_USERS" && target !== "SPECIFIC_USERS" && /* @__PURE__ */ jsxDEV("label", { children: [
+            "Booking status",
+            /* @__PURE__ */ jsxDEV("select", { value: status, onChange: (e) => setStatus(e.target.value), children: [
+              /* @__PURE__ */ jsxDEV("option", { value: "", children: "All non-cancelled bookings" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+                lineNumber: 39,
+                columnNumber: 1963
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "PENDING", children: "Pending" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+                lineNumber: 39,
+                columnNumber: 2015
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "CONFIRMED", children: "Confirmed" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+                lineNumber: 39,
+                columnNumber: 2055
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+              lineNumber: 39,
+              columnNumber: 1896
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 39,
+            columnNumber: 1875
+          }, this),
+          /* @__PURE__ */ jsxDEV("label", { children: [
+            "Sort recipients",
+            /* @__PURE__ */ jsxDEV("select", { value: sortBy, onChange: (e) => setSortBy(e.target.value), children: [
+              /* @__PURE__ */ jsxDEV("option", { value: "name", children: "Name" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+                lineNumber: 39,
+                columnNumber: 2206
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "email", children: "Email" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+                lineNumber: 39,
+                columnNumber: 2240
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "mobile", children: "Mobile" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+                lineNumber: 39,
+                columnNumber: 2276
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "joined", children: "Registration date" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+                lineNumber: 39,
+                columnNumber: 2314
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+              lineNumber: 39,
+              columnNumber: 2139
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 39,
+            columnNumber: 2117
+          }, this),
+          /* @__PURE__ */ jsxDEV("label", { children: [
+            "Order",
+            /* @__PURE__ */ jsxDEV("select", { value: sortDirection, onChange: (e) => setSortDirection(e.target.value), children: [
+              /* @__PURE__ */ jsxDEV("option", { value: "asc", children: "Ascending" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+                lineNumber: 39,
+                columnNumber: 2473
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "desc", children: "Descending" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+                lineNumber: 39,
+                columnNumber: 2511
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+              lineNumber: 39,
+              columnNumber: 2392
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 39,
+            columnNumber: 2380
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+          lineNumber: 39,
+          columnNumber: 248
+        }, this),
+        (target === "SPECIFIC_USERS" || channel !== "EMAIL") && /* @__PURE__ */ jsxDEV("p", { className: "notification-api-note", children: [
+          /* @__PURE__ */ jsxDEV("b", { children: "Backend support required:" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 39,
+            columnNumber: 2668
+          }, this),
+          " current API accepts only ALL_USERS, SHOW_BOOKERS, and MOVIE_BOOKERS and has no userIds field. Individual-user sends are blocked."
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+          lineNumber: 39,
+          columnNumber: 2631
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+        lineNumber: 39,
+        columnNumber: 4
+      }, this),
+      /* @__PURE__ */ jsxDEV("section", { className: "notification-panel", children: [
+        /* @__PURE__ */ jsxDEV("div", { className: "notification-section-title", children: [
+          /* @__PURE__ */ jsxDEV("span", { className: "notification-step", children: "03" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 40,
+            columnNumber: 88
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { children: [
+            /* @__PURE__ */ jsxDEV("h2", { children: "Compose message" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+              lineNumber: 40,
+              columnNumber: 138
+            }, this),
+            /* @__PURE__ */ jsxDEV("p", { children: "Personalize the campaign for your selected recipients." }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+              lineNumber: 40,
+              columnNumber: 162
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 40,
+            columnNumber: 133
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+          lineNumber: 40,
+          columnNumber: 44
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "notification-fields compose-fields", children: [
+          /* @__PURE__ */ jsxDEV("label", { className: "span-two", children: [
+            "Subject",
+            /* @__PURE__ */ jsxDEV("input", { maxLength: 120, required: true, value: subject, onChange: (e) => setSubject(e.target.value) }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+              lineNumber: 40,
+              columnNumber: 322
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 40,
+            columnNumber: 287
+          }, this),
+          /* @__PURE__ */ jsxDEV("label", { className: "span-two", children: [
+            "Message",
+            /* @__PURE__ */ jsxDEV("textarea", { rows: 7, maxLength: 5e3, required: true, value: message, onChange: (e) => setMessage(e.target.value) }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+              lineNumber: 40,
+              columnNumber: 460
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 40,
+            columnNumber: 425
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+          lineNumber: 40,
+          columnNumber: 235
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "template-help", children: [
+          /* @__PURE__ */ jsxDEV("strong", { children: "Personalization options" }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 40,
+            columnNumber: 613
+          }, this),
+          /* @__PURE__ */ jsxDEV("span", { children: [
+            "{{name}}",
+            " · ",
+            "{{email}}",
+            " · ",
+            "{{mobile}}",
+            " · ",
+            "{{movie}}",
+            " · ",
+            "{{show_date}}",
+            " · ",
+            "{{show_time}}",
+            " · ",
+            "{{booking_id}}"
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 40,
+            columnNumber: 653
+          }, this),
+          /* @__PURE__ */ jsxDEV("small", { children: "For all users, show and booking details are empty when the recipient has no matching booking." }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 40,
+            columnNumber: 788
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+          lineNumber: 40,
+          columnNumber: 582
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+        lineNumber: 40,
+        columnNumber: 4
+      }, this),
+      error && /* @__PURE__ */ jsxDEV(Notice, { error: true, children: error }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+        lineNumber: 41,
+        columnNumber: 14
+      }, this),
+      result && /* @__PURE__ */ jsxDEV(Notice, { children: result }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+        lineNumber: 41,
+        columnNumber: 56
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "notification-submit", children: [
+        /* @__PURE__ */ jsxDEV("span", { children: [
+          /* @__PURE__ */ jsxDEV(Users, { size: 16 }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 42,
+            columnNumber: 47
+          }, this),
+          target === "ALL_USERS" ? "All registered users" : target === "SHOW_BOOKERS" ? "Show bookers" : target === "MOVIE_BOOKERS" ? "Movie bookers" : "Selected users",
+          " · ",
+          channel
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+          lineNumber: 42,
+          columnNumber: 41
+        }, this),
+        /* @__PURE__ */ jsxDEV("button", { className: "button", disabled: busy, children: [
+          busy ? "Sending…" : "Send notification",
+          " ",
+          busy ? /* @__PURE__ */ jsxDEV(Send, { size: 16 }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 42,
+            columnNumber: 338
+          }, this) : /* @__PURE__ */ jsxDEV(Check, { size: 16 }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+            lineNumber: 42,
+            columnNumber: 359
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+          lineNumber: 42,
+          columnNumber: 245
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+        lineNumber: 42,
+        columnNumber: 4
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+      lineNumber: 37,
+      columnNumber: 3
+    }, this)
+  ] }, void 0, true, {
+    fileName: "E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx",
+    lineNumber: 35,
+    columnNumber: 10
+  }, this);
+}
+_s(AdminNotifications, "M4tXHMMa7VHHy1sNrnen8GtZhyE=", false, function() {
+  return [useApp];
+});
+_c = AdminNotifications;
+var _c;
+$RefreshReg$(_c, "AdminNotifications");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("E:/AV Website/AV-frontend/src/pages/AdminNotifications.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,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O0FBQUEsZUFBa0w7QUFBQSxRQUFPLHVCQUFDLFlBQU8sV0FBVSxVQUFTLFVBQVVnQixNQUFPQTtBQUFBQSxpQkFBSyxhQUFXO0FBQUEsVUFBb0I7QUFBQSxVQUFFQSxPQUFLLHVCQUFDLFFBQUssTUFBTSxNQUFaO0FBQUE7QUFBQTtBQUFBO0FBQUEsaUJBQWUsSUFBRyx1QkFBQyxTQUFNLE1BQU0sTUFBYjtBQUFBO0FBQUE7QUFBQTtBQUFBLGlCQUFnQjtBQUFBLGFBQXpIO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFBNEg7QUFBQSxXQUExVjtBQUFBO0FBQUE7QUFBQTtBQUFBLGFBQW1XO0FBQUEsU0FMcFc7QUFBQTtBQUFBO0FBQUE7QUFBQSxXQU1BO0FBQUEsT0FSTTtBQUFBO0FBQUE7QUFBQTtBQUFBLFNBU1A7QUFDRDtBQUFDcEIsR0FmZUQsb0JBQWtCO0FBQUEsVUFDcEJKLE1BQU07QUFBQTtBQUFBLEtBREpJO0FBQWtCLElBQUFpRjtBQUFBLGFBQUFBLElBQUEiLCJuYW1lcyI6WyJ1c2VFZmZlY3QiLCJ1c2VTdGF0ZSIsIkJlbGwiLCJDaGVjayIsIk1haWwiLCJNZXNzYWdlQ2lyY2xlIiwiU2VuZCIsIlVzZXJzIiwidXNlQXBwIiwic2VuZEFkbWluQ2FtcGFpZ24iLCJhZG1pblVzZXJzIiwiTm90aWNlIiwiQWRtaW5Ob3RpZmljYXRpb25zIiwiX3MiLCJkYXRhIiwidGFyZ2V0Iiwic2V0VGFyZ2V0IiwiY2hhbm5lbCIsInNldENoYW5uZWwiLCJzaG93SWQiLCJzZXRTaG93SWQiLCJtb3ZpZUlkIiwic2V0TW92aWVJZCIsInN0YXR1cyIsInNldFN0YXR1cyIsInNvcnRCeSIsInNldFNvcnRCeSIsInNvcnREaXJlY3Rpb24iLCJzZXRTb3J0RGlyZWN0aW9uIiwic3ViamVjdCIsInNldFN1YmplY3QiLCJtZXNzYWdlIiwic2V0TWVzc2FnZSIsImJ1c3kiLCJzZXRCdXN5IiwiZXJyb3IiLCJzZXRFcnJvciIsInJlc3VsdCIsInNldFJlc3VsdCIsImFjY291bnRzIiwic2V0QWNjb3VudHMiLCJzZWxlY3RlZFVzZXJzIiwic2V0U2VsZWN0ZWRVc2VycyIsImFjY291bnRzRXJyb3IiLCJzZXRBY2NvdW50c0Vycm9yIiwibGl2ZSIsImZpcnN0IiwibGlzdCIsInVzZXJzIiwiY29udGVudCIsInBhZ2UiLCJ0b3RhbFBhZ2VzIiwicHVzaCIsImZpbHRlciIsInVzZXIiLCJpbmRleCIsImZpbmRJbmRleCIsIm90aGVyIiwiaWQiLCJyZWFzb24iLCJzdWJtaXQiLCJlIiwicHJldmVudERlZmF1bHQiLCJyIiwidW5kZWZpbmVkIiwic2VudCIsInJlY2lwaWVudHMiLCJza2lwcGVkIiwidmFsdWUiLCJsYWJlbCIsIkljb24iLCJkZXRhaWwiLCJtYXAiLCJzaG93cyIsInNob3ciLCJtb3ZpZXMiLCJmaW5kIiwibW92aWUiLCJ0aXRsZSIsImRhdGUiLCJzdGFydFRpbWUiLCJNYXRoIiwibWluIiwibWF4IiwibGVuZ3RoIiwiQXJyYXkiLCJmcm9tIiwic2VsZWN0ZWRPcHRpb25zIiwib3B0aW9uIiwiYWNjb3VudCIsIm5hbWUiLCJlbWFpbCIsIm1vYmlsZSIsIl9jIl0sImlnbm9yZUxpc3QiOltdLCJzb3VyY2VzIjpbIkFkbWluTm90aWZpY2F0aW9ucy50c3giXSwic291cmNlc0NvbnRlbnQiOlsi77u/aW1wb3J0IHt1c2VFZmZlY3QsdXNlU3RhdGUsdHlwZSBGb3JtRXZlbnR9IGZyb20gJ3JlYWN0JztcclxuaW1wb3J0IHtCZWxsLENoZWNrLE1haWwsTWVzc2FnZUNpcmNsZSxTZW5kLFVzZXJzfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xyXG5pbXBvcnQge3VzZUFwcH0gZnJvbSAnLi4vY29udGV4dC9BcHBDb250ZXh0JztcclxuaW1wb3J0IHtzZW5kQWRtaW5DYW1wYWlnbn0gZnJvbSAnLi4vc2VydmljZXMvYXBpJztcclxuaW1wb3J0IHthZG1pblVzZXJzfSBmcm9tICcuLi9zZXJ2aWNlcy9hdXRoJztcclxuaW1wb3J0IHtOb3RpY2UsU2VjdGlvbkhlYWRpbmd9IGZyb20gJy4uL2NvbXBvbmVudHMvQ29tbW9uJztcclxuaW1wb3J0IHR5cGUge1VzZXJ9IGZyb20gJy4uL3R5cGVzJztcclxuXHJcbnR5cGUgVGFyZ2V0PSdBTExfVVNFUlMnfCdTSE9XX0JPT0tFUlMnfCdNT1ZJRV9CT09LRVJTJ3wnU1BFQ0lGSUNfVVNFUlMnO1xyXG50eXBlIENoYW5uZWw9J0VNQUlMJ3wnV0hBVFNBUFAnfCdCT1RIJztcclxuZXhwb3J0IGZ1bmN0aW9uIEFkbWluTm90aWZpY2F0aW9ucygpe1xyXG4gY29uc3Qge2RhdGF9PXVzZUFwcCgpO1xyXG4gY29uc3QgW3RhcmdldCxzZXRUYXJnZXRdPXVzZVN0YXRlPFRhcmdldD4oJ0FMTF9VU0VSUycpO2NvbnN0IFtjaGFubmVsLHNldENoYW5uZWxdPXVzZVN0YXRlPENoYW5uZWw+KCdFTUFJTCcpO2NvbnN0IFtzaG93SWQsc2V0U2hvd0lkXT11c2VTdGF0ZSgnJyk7Y29uc3QgW21vdmllSWQsc2V0TW92aWVJZF09dXNlU3RhdGUoJycpO2NvbnN0IFtzdGF0dXMsc2V0U3RhdHVzXT11c2VTdGF0ZSgnJyk7Y29uc3QgW3NvcnRCeSxzZXRTb3J0QnldPXVzZVN0YXRlKCduYW1lJyk7Y29uc3QgW3NvcnREaXJlY3Rpb24sc2V0U29ydERpcmVjdGlvbl09dXNlU3RhdGUoJ2FzYycpO2NvbnN0IFtzdWJqZWN0LHNldFN1YmplY3RdPXVzZVN0YXRlKCdBIG1lc3NhZ2UgZnJvbSBBdWRpZW5jZSBWZXJkaWN0Jyk7Y29uc3QgW21lc3NhZ2Usc2V0TWVzc2FnZV09dXNlU3RhdGUoJ0hpIHt7bmFtZX19LFxcblxcbldlIGhhdmUgYW4gdXBkYXRlIGZvciB5b3UuJyk7Y29uc3QgW2J1c3ksc2V0QnVzeV09dXNlU3RhdGUoZmFsc2UpO2NvbnN0IFtlcnJvcixzZXRFcnJvcl09dXNlU3RhdGUoJycpO2NvbnN0IFtyZXN1bHQsc2V0UmVzdWx0XT11c2VTdGF0ZSgnJyk7Y29uc3QgW2FjY291bnRzLHNldEFjY291bnRzXT11c2VTdGF0ZTxVc2VyW10+KFtdKTtjb25zdCBbc2VsZWN0ZWRVc2VycyxzZXRTZWxlY3RlZFVzZXJzXT11c2VTdGF0ZTxzdHJpbmdbXT4oW10pO2NvbnN0IFthY2NvdW50c0Vycm9yLHNldEFjY291bnRzRXJyb3JdPXVzZVN0YXRlKCcnKTtcclxuIHVzZUVmZmVjdCgoKT0+e2xldCBsaXZlPXRydWU7dm9pZChhc3luYygpPT57dHJ5e2NvbnN0IGZpcnN0PWF3YWl0IGFkbWluVXNlcnMubGlzdCgwKTtsZXQgdXNlcnM9Wy4uLmZpcnN0LmNvbnRlbnRdO2ZvcihsZXQgcGFnZT0xO3BhZ2U8Zmlyc3QudG90YWxQYWdlcztwYWdlKyspdXNlcnMucHVzaCguLi4oYXdhaXQgYWRtaW5Vc2Vycy5saXN0KHBhZ2UpKS5jb250ZW50KTtpZihsaXZlKXNldEFjY291bnRzKHVzZXJzLmZpbHRlcigodXNlcixpbmRleCxsaXN0KT0+bGlzdC5maW5kSW5kZXgob3RoZXI9Pm90aGVyLmlkPT09dXNlci5pZCk9PT1pbmRleCkpO31jYXRjaChyZWFzb24pe2lmKGxpdmUpc2V0QWNjb3VudHNFcnJvcigocmVhc29uIGFzIEVycm9yKS5tZXNzYWdlKTt9fSkoKTtyZXR1cm4oKT0+e2xpdmU9ZmFsc2U7fTt9LFtdKTtcclxuIGNvbnN0IHN1Ym1pdD1hc3luYyhlOkZvcm1FdmVudCk9PntlLnByZXZlbnREZWZhdWx0KCk7c2V0RXJyb3IoJycpO3NldFJlc3VsdCgnJyk7aWYoY2hhbm5lbCE9PSdFTUFJTCcpe3NldEVycm9yKCdUaGUgZG9jdW1lbnRlZCBiYWNrZW5kIGNhbXBhaWduIEFQSSBjdXJyZW50bHkgc2VuZHMgZW1haWwgb25seS4gV2hhdHNBcHAgYW5kIEJvdGggcmVxdWlyZSBiYWNrZW5kIGNoYW5uZWwgc3VwcG9ydDsgbm8gcmVxdWVzdCB3YXMgc2VudC4nKTtyZXR1cm47fWlmKHRhcmdldD09PSdTUEVDSUZJQ19VU0VSUycpe3NldEVycm9yKCdUaGUgZG9jdW1lbnRlZCBiYWNrZW5kIGNhbXBhaWduIEFQSSBkb2VzIG5vdCBhY2NlcHQgaW5kaXZpZHVhbCB1c2VyIElEcy4gU2VsZWN0IEFsbCB1c2VycywgTW92aWUgYm9va2Vycywgb3IgU2hvdyBib29rZXJzOyBubyByZXF1ZXN0IHdhcyBzZW50LicpO3JldHVybjt9c2V0QnVzeSh0cnVlKTt0cnl7Y29uc3Qgcj1hd2FpdCBzZW5kQWRtaW5DYW1wYWlnbih7dGFyZ2V0LHN1YmplY3QsbWVzc2FnZSxzaG93SWQ6dGFyZ2V0PT09J1NIT1dfQk9PS0VSUyc/c2hvd0lkOnVuZGVmaW5lZCxtb3ZpZUlkOnRhcmdldD09PSdNT1ZJRV9CT09LRVJTJz9tb3ZpZUlkOnVuZGVmaW5lZCxzdGF0dXM6dGFyZ2V0PT09J0FMTF9VU0VSUyc/dW5kZWZpbmVkOnN0YXR1c3x8dW5kZWZpbmVkLHNvcnRCeSxzb3J0RGlyZWN0aW9ufSk7c2V0UmVzdWx0KGBFbWFpbCBzZW50IHRvICR7ci5zZW50fSBvZiAke3IucmVjaXBpZW50c30gcmVjaXBpZW50cyR7ci5za2lwcGVkP2A7ICR7ci5za2lwcGVkfSBza2lwcGVkIGJlY2F1c2UgdGhleSBkbyBub3QgaGF2ZSBhbiBlbWFpbCBhZGRyZXNzYDonJ30uYCk7fWNhdGNoKHJlYXNvbil7c2V0RXJyb3IoKHJlYXNvbiBhcyBFcnJvcikubWVzc2FnZSk7fWZpbmFsbHl7c2V0QnVzeShmYWxzZSk7fX07XHJcbiByZXR1cm4gPGRpdiBjbGFzc05hbWU9XCJhZG1pbi1jb250ZW50IG5vdGlmaWNhdGlvbi1wYWdlXCI+XHJcbiAgPGhlYWRlciBjbGFzc05hbWU9XCJub3RpZmljYXRpb24taGVyb1wiPjxkaXY+PHNwYW4gY2xhc3NOYW1lPVwiZXllYnJvd1wiPkFVRElFTkNFIE1FU1NBR0lORzwvc3Bhbj48aDE+Tm90aWZpY2F0aW9uczwvaDE+PHA+Q2hvb3NlIGRlbGl2ZXJ5IGNoYW5uZWxzIGFuZCB0YXJnZXQgYW4gYXVkaWVuY2UgZm9yIHlvdXIgY2FtcGFpZ24uPC9wPjwvZGl2PjxzcGFuIGNsYXNzTmFtZT1cIm5vdGlmaWNhdGlvbi1oZXJvLWljb25cIj48QmVsbCBzaXplPXsyN30vPjwvc3Bhbj48L2hlYWRlcj5cclxuICA8Zm9ybSBjbGFzc05hbWU9XCJub3RpZmljYXRpb24tY29tcG9zZXJcIiBvblN1Ym1pdD17c3VibWl0fT5cclxuICAgPHNlY3Rpb24gY2xhc3NOYW1lPVwibm90aWZpY2F0aW9uLXBhbmVsXCI+PGRpdiBjbGFzc05hbWU9XCJub3RpZmljYXRpb24tc2VjdGlvbi10aXRsZVwiPjxzcGFuIGNsYXNzTmFtZT1cIm5vdGlmaWNhdGlvbi1zdGVwXCI+MDE8L3NwYW4+PGRpdj48aDI+RGVsaXZlcnkgY2hhbm5lbHM8L2gyPjxwPlNlbGVjdCBob3cgdGhlIG5vdGlmaWNhdGlvbiBzaG91bGQgYmUgc2VudC48L3A+PC9kaXY+PC9kaXY+PGRpdiBjbGFzc05hbWU9XCJjaGFubmVsLW9wdGlvbnNcIj57KFt7dmFsdWU6J0VNQUlMJyxsYWJlbDonRW1haWwnLEljb246TWFpbCxkZXRhaWw6J1NlbmQgdG8gcmVnaXN0ZXJlZCBlbWFpbCBhZGRyZXNzZXMnfSx7dmFsdWU6J1dIQVRTQVBQJyxsYWJlbDonV2hhdHNBcHAnLEljb246TWVzc2FnZUNpcmNsZSxkZXRhaWw6J1NlbmQgdG8gcmVnaXN0ZXJlZCBtb2JpbGUgbnVtYmVycyd9LHt2YWx1ZTonQk9USCcsbGFiZWw6J0JvdGggY2hhbm5lbHMnLEljb246QmVsbCxkZXRhaWw6J1NlbmQgZW1haWwgYW5kIFdoYXRzQXBwJ31dIGFzIGNvbnN0KS5tYXAoKHt2YWx1ZSxsYWJlbCxJY29uLGRldGFpbH0pPT48bGFiZWwgY2xhc3NOYW1lPXtgY2hhbm5lbC1vcHRpb24gJHtjaGFubmVsPT09dmFsdWU/J3NlbGVjdGVkJzonJ31gfSBrZXk9e3ZhbHVlfT48aW5wdXQgdHlwZT1cInJhZGlvXCIgbmFtZT1cImNoYW5uZWxcIiB2YWx1ZT17dmFsdWV9IGNoZWNrZWQ9e2NoYW5uZWw9PT12YWx1ZX0gb25DaGFuZ2U9eygpPT5zZXRDaGFubmVsKHZhbHVlKX0vPjxJY29uIHNpemU9ezE5fS8+PHNwYW4+PHN0cm9uZz57bGFiZWx9PC9zdHJvbmc+PHNtYWxsPntkZXRhaWx9PC9zbWFsbD48L3NwYW4+PC9sYWJlbD4pfTwvZGl2PntjaGFubmVsIT09J0VNQUlMJyYmPHAgY2xhc3NOYW1lPVwibm90aWZpY2F0aW9uLWFwaS1ub3RlXCI+PGI+QmFja2VuZCBzdXBwb3J0IHJlcXVpcmVkOjwvYj4gdGhlIGN1cnJlbnQgQ2FtcGFpZ25SZXF1ZXN0IHNjaGVtYSBoYXMgbm8gY2hhbm5lbCBmaWVsZCBhbmQgb25seSBzdXBwb3J0cyBlbWFpbC4gVGhpcyBzZWxlY3Rpb24gd2lsbCBiZSBibG9ja2VkIHVudGlsIHRoZSBBUEkgc3VwcG9ydHMgaXQuPC9wPn08L3NlY3Rpb24+XHJcbiAgIDxzZWN0aW9uIGNsYXNzTmFtZT1cIm5vdGlmaWNhdGlvbi1wYW5lbFwiPjxkaXYgY2xhc3NOYW1lPVwibm90aWZpY2F0aW9uLXNlY3Rpb24tdGl0bGVcIj48c3BhbiBjbGFzc05hbWU9XCJub3RpZmljYXRpb24tc3RlcFwiPjAyPC9zcGFuPjxkaXY+PGgyPkNob29zZSByZWNpcGllbnRzPC9oMj48cD5UYXJnZXQgcmVnaXN0ZXJlZCBhY2NvdW50cyBvciBhdWRpZW5jZXMgY29ubmVjdGVkIHRvIGEgc2NyZWVuaW5nLjwvcD48L2Rpdj48L2Rpdj48ZGl2IGNsYXNzTmFtZT1cIm5vdGlmaWNhdGlvbi1maWVsZHNcIj48bGFiZWw+QXVkaWVuY2U8c2VsZWN0IHZhbHVlPXt0YXJnZXR9IG9uQ2hhbmdlPXtlPT5zZXRUYXJnZXQoZS50YXJnZXQudmFsdWUgYXMgVGFyZ2V0KX0+PG9wdGlvbiB2YWx1ZT1cIkFMTF9VU0VSU1wiPkFsbCByZWdpc3RlcmVkIHVzZXJzPC9vcHRpb24+PG9wdGlvbiB2YWx1ZT1cIlNIT1dfQk9PS0VSU1wiPlVzZXJzIGJvb2tlZCB0byBhIHNob3c8L29wdGlvbj48b3B0aW9uIHZhbHVlPVwiTU9WSUVfQk9PS0VSU1wiPlVzZXJzIGJvb2tlZCB0byBhIG1vdmllPC9vcHRpb24+PG9wdGlvbiB2YWx1ZT1cIlNQRUNJRklDX1VTRVJTXCI+U3BlY2lmaWMgdXNlcihzKTwvb3B0aW9uPjwvc2VsZWN0PjwvbGFiZWw+e3RhcmdldD09PSdTSE9XX0JPT0tFUlMnJiY8bGFiZWw+U2hvdzxzZWxlY3QgcmVxdWlyZWQgdmFsdWU9e3Nob3dJZH0gb25DaGFuZ2U9e2U9PnNldFNob3dJZChlLnRhcmdldC52YWx1ZSl9PjxvcHRpb24gdmFsdWU9XCJcIj5DaG9vc2Ugc2hvdzwvb3B0aW9uPntkYXRhLnNob3dzLm1hcChzaG93PT48b3B0aW9uIGtleT17c2hvdy5pZH0gdmFsdWU9e3Nob3cuaWR9PntkYXRhLm1vdmllcy5maW5kKG1vdmllPT5tb3ZpZS5pZD09PXNob3cubW92aWVJZCk/LnRpdGxlfHwnTW92aWUnfSDCtyB7c2hvdy5kYXRlfSDCtyB7c2hvdy5zdGFydFRpbWV9PC9vcHRpb24+KX08L3NlbGVjdD48L2xhYmVsPn17dGFyZ2V0PT09J01PVklFX0JPT0tFUlMnJiY8bGFiZWw+TW92aWU8c2VsZWN0IHJlcXVpcmVkIHZhbHVlPXttb3ZpZUlkfSBvbkNoYW5nZT17ZT0+c2V0TW92aWVJZChlLnRhcmdldC52YWx1ZSl9PjxvcHRpb24gdmFsdWU9XCJcIj5DaG9vc2UgbW92aWU8L29wdGlvbj57ZGF0YS5tb3ZpZXMubWFwKG1vdmllPT48b3B0aW9uIGtleT17bW92aWUuaWR9IHZhbHVlPXttb3ZpZS5pZH0+e21vdmllLnRpdGxlfTwvb3B0aW9uPil9PC9zZWxlY3Q+PC9sYWJlbD59e3RhcmdldD09PSdTUEVDSUZJQ19VU0VSUycmJjxsYWJlbCBjbGFzc05hbWU9XCJzcGVjaWZpYy11c2Vycy1maWVsZFwiPlNlbGVjdCB1c2VyczxzZWxlY3QgbXVsdGlwbGUgc2l6ZT17TWF0aC5taW4oNyxNYXRoLm1heChhY2NvdW50cy5sZW5ndGgsMykpfSB2YWx1ZT17c2VsZWN0ZWRVc2Vyc30gb25DaGFuZ2U9e2U9PnNldFNlbGVjdGVkVXNlcnMoQXJyYXkuZnJvbShlLnRhcmdldC5zZWxlY3RlZE9wdGlvbnMsb3B0aW9uPT5vcHRpb24udmFsdWUpKX0+e2FjY291bnRzLm1hcChhY2NvdW50PT48b3B0aW9uIGtleT17YWNjb3VudC5pZH0gdmFsdWU9e2FjY291bnQuaWR9PnthY2NvdW50Lm5hbWV9IMK3IHthY2NvdW50LmVtYWlsfHxhY2NvdW50Lm1vYmlsZX08L29wdGlvbj4pfTwvc2VsZWN0PjxzbWFsbD57YWNjb3VudHNFcnJvcnx8YCR7c2VsZWN0ZWRVc2Vycy5sZW5ndGh9IHVzZXIocykgc2VsZWN0ZWQuIEluZGl2aWR1YWwgcmVjaXBpZW50cyBhcmUgbm90IHN1cHBvcnRlZCBieSB0aGUgY3VycmVudCBjYW1wYWlnbiBBUEkuYH08L3NtYWxsPjwvbGFiZWw+fXt0YXJnZXQhPT0nQUxMX1VTRVJTJyYmdGFyZ2V0IT09J1NQRUNJRklDX1VTRVJTJyYmPGxhYmVsPkJvb2tpbmcgc3RhdHVzPHNlbGVjdCB2YWx1ZT17c3RhdHVzfSBvbkNoYW5nZT17ZT0+c2V0U3RhdHVzKGUudGFyZ2V0LnZhbHVlKX0+PG9wdGlvbiB2YWx1ZT1cIlwiPkFsbCBub24tY2FuY2VsbGVkIGJvb2tpbmdzPC9vcHRpb24+PG9wdGlvbiB2YWx1ZT1cIlBFTkRJTkdcIj5QZW5kaW5nPC9vcHRpb24+PG9wdGlvbiB2YWx1ZT1cIkNPTkZJUk1FRFwiPkNvbmZpcm1lZDwvb3B0aW9uPjwvc2VsZWN0PjwvbGFiZWw+fTxsYWJlbD5Tb3J0IHJlY2lwaWVudHM8c2VsZWN0IHZhbHVlPXtzb3J0Qnl9IG9uQ2hhbmdlPXtlPT5zZXRTb3J0QnkoZS50YXJnZXQudmFsdWUpfT48b3B0aW9uIHZhbHVlPVwibmFtZVwiPk5hbWU8L29wdGlvbj48b3B0aW9uIHZhbHVlPVwiZW1haWxcIj5FbWFpbDwvb3B0aW9uPjxvcHRpb24gdmFsdWU9XCJtb2JpbGVcIj5Nb2JpbGU8L29wdGlvbj48b3B0aW9uIHZhbHVlPVwiam9pbmVkXCI+UmVnaXN0cmF0aW9uIGRhdGU8L29wdGlvbj48L3NlbGVjdD48L2xhYmVsPjxsYWJlbD5PcmRlcjxzZWxlY3QgdmFsdWU9e3NvcnREaXJlY3Rpb259IG9uQ2hhbmdlPXtlPT5zZXRTb3J0RGlyZWN0aW9uKGUudGFyZ2V0LnZhbHVlKX0+PG9wdGlvbiB2YWx1ZT1cImFzY1wiPkFzY2VuZGluZzwvb3B0aW9uPjxvcHRpb24gdmFsdWU9XCJkZXNjXCI+RGVzY2VuZGluZzwvb3B0aW9uPjwvc2VsZWN0PjwvbGFiZWw+PC9kaXY+eyh0YXJnZXQ9PT0nU1BFQ0lGSUNfVVNFUlMnfHxjaGFubmVsIT09J0VNQUlMJykmJjxwIGNsYXNzTmFtZT1cIm5vdGlmaWNhdGlvbi1hcGktbm90ZVwiPjxiPkJhY2tlbmQgc3VwcG9ydCByZXF1aXJlZDo8L2I+IGN1cnJlbnQgQVBJIGFjY2VwdHMgb25seSBBTExfVVNFUlMsIFNIT1dfQk9PS0VSUywgYW5kIE1PVklFX0JPT0tFUlMgYW5kIGhhcyBubyB1c2VySWRzIGZpZWxkLiBJbmRpdmlkdWFsLXVzZXIgc2VuZHMgYXJlIGJsb2NrZWQuPC9wPn08L3NlY3Rpb24+XHJcbiAgIDxzZWN0aW9uIGNsYXNzTmFtZT1cIm5vdGlmaWNhdGlvbi1wYW5lbFwiPjxkaXYgY2xhc3NOYW1lPVwibm90aWZpY2F0aW9uLXNlY3Rpb24tdGl0bGVcIj48c3BhbiBjbGFzc05hbWU9XCJub3RpZmljYXRpb24tc3RlcFwiPjAzPC9zcGFuPjxkaXY+PGgyPkNvbXBvc2UgbWVzc2FnZTwvaDI+PHA+UGVyc29uYWxpemUgdGhlIGNhbXBhaWduIGZvciB5b3VyIHNlbGVjdGVkIHJlY2lwaWVudHMuPC9wPjwvZGl2PjwvZGl2PjxkaXYgY2xhc3NOYW1lPVwibm90aWZpY2F0aW9uLWZpZWxkcyBjb21wb3NlLWZpZWxkc1wiPjxsYWJlbCBjbGFzc05hbWU9XCJzcGFuLXR3b1wiPlN1YmplY3Q8aW5wdXQgbWF4TGVuZ3RoPXsxMjB9IHJlcXVpcmVkIHZhbHVlPXtzdWJqZWN0fSBvbkNoYW5nZT17ZT0+c2V0U3ViamVjdChlLnRhcmdldC52YWx1ZSl9Lz48L2xhYmVsPjxsYWJlbCBjbGFzc05hbWU9XCJzcGFuLXR3b1wiPk1lc3NhZ2U8dGV4dGFyZWEgcm93cz17N30gbWF4TGVuZ3RoPXs1MDAwfSByZXF1aXJlZCB2YWx1ZT17bWVzc2FnZX0gb25DaGFuZ2U9e2U9PnNldE1lc3NhZ2UoZS50YXJnZXQudmFsdWUpfS8+PC9sYWJlbD48L2Rpdj48ZGl2IGNsYXNzTmFtZT1cInRlbXBsYXRlLWhlbHBcIj48c3Ryb25nPlBlcnNvbmFsaXphdGlvbiBvcHRpb25zPC9zdHJvbmc+PHNwYW4+eyd7e25hbWV9fSd9IMK3IHsne3tlbWFpbH19J30gwrcgeyd7e21vYmlsZX19J30gwrcgeyd7e21vdmllfX0nfSDCtyB7J3t7c2hvd19kYXRlfX0nfSDCtyB7J3t7c2hvd190aW1lfX0nfSDCtyB7J3t7Ym9va2luZ19pZH19J308L3NwYW4+PHNtYWxsPkZvciBhbGwgdXNlcnMsIHNob3cgYW5kIGJvb2tpbmcgZGV0YWlscyBhcmUgZW1wdHkgd2hlbiB0aGUgcmVjaXBpZW50IGhhcyBubyBtYXRjaGluZyBib29raW5nLjwvc21hbGw+PC9kaXY+PC9zZWN0aW9uPlxyXG4gICB7ZXJyb3ImJjxOb3RpY2UgZXJyb3I+e2Vycm9yfTwvTm90aWNlPn17cmVzdWx0JiY8Tm90aWNlPntyZXN1bHR9PC9Ob3RpY2U+fVxyXG4gICA8ZGl2IGNsYXNzTmFtZT1cIm5vdGlmaWNhdGlvbi1zdWJtaXRcIj48c3Bhbj48VXNlcnMgc2l6ZT17MTZ9Lz57dGFyZ2V0PT09J0FMTF9VU0VSUyc/J0FsbCByZWdpc3RlcmVkIHVzZXJzJzp0YXJnZXQ9PT0nU0hPV19CT09LRVJTJz8nU2hvdyBib29rZXJzJzp0YXJnZXQ9PT0nTU9WSUVfQk9PS0VSUyc/J01vdmllIGJvb2tlcnMnOidTZWxlY3RlZCB1c2Vycyd9IMK3IHtjaGFubmVsfTwvc3Bhbj48YnV0dG9uIGNsYXNzTmFtZT1cImJ1dHRvblwiIGRpc2FibGVkPXtidXN5fT57YnVzeT8nU2VuZGluZ+KApic6J1NlbmQgbm90aWZpY2F0aW9uJ30ge2J1c3k/PFNlbmQgc2l6ZT17MTZ9Lz46PENoZWNrIHNpemU9ezE2fS8+fTwvYnV0dG9uPjwvZGl2PlxyXG4gIDwvZm9ybT5cclxuIDwvZGl2PjtcclxufVxyXG4iXSwiZmlsZSI6IkU6L0FWIFdlYnNpdGUvQVYtZnJvbnRlbmQvc3JjL3BhZ2VzL0FkbWluTm90aWZpY2F0aW9ucy50c3gifQ==

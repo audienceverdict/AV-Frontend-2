@@ -25,7 +25,6 @@ export function BookMyShow() {
   const [activeTerm,setActiveTerm]=useState(0);
   const termsTrackRef=useRef<HTMLDivElement|null>(null);
   const [city,setCity]=useState('');
-  const [day,setDay]=useState('');
   const [error,setError]=useState('');
   const [availabilityError,setAvailabilityError]=useState('');
   const [availabilityUpdatedAt,setAvailabilityUpdatedAt]=useState(0);
@@ -48,18 +47,22 @@ export function BookMyShow() {
   const [typedTermText,setTypedTermText]=useState('');
   const [completedTerms,setCompletedTerms]=useState<string[]>([]);
 
-  const shows=useMemo(()=>data.shows.filter(show=>show.movieId===movie?.id&&show.status==='OPEN'&&new Date(`${show.date}T${show.startTime}`)>new Date()&&data.theatres.some(theatre=>theatre.id===show.theatreId&&theatre.status==='ACTIVE')),[data.shows,data.theatres,movie?.id]);
+  // Keep historical and cancelled screenings visible in the schedule. They are
+  // rendered as unavailable below, while booking still requires an open show.
+  const shows=useMemo(()=>data.shows.filter(show=>show.movieId===movie?.id&&data.theatres.some(theatre=>theatre.id===show.theatreId)),[data.shows,data.theatres,movie?.id]);
   const cities=useMemo(()=>[...new Set(shows.map(show=>data.theatres.find(theatre=>theatre.id===show.theatreId)?.city).filter(Boolean) as string[])],[shows,data.theatres]);
   const activeCity=city||cities[0]||'';
   const cityShows=shows.filter(show=>data.theatres.find(theatre=>theatre.id===show.theatreId)?.city===activeCity);
   const dates=[...new Set(cityShows.map(show=>show.date))].sort();
-  const activeDay=dates.includes(day)?day:dates[0]||'';
-  const datedShows=cityShows.filter(show=>show.date===activeDay);
   const show=shows.find(item=>item.id===showId);
+  const selectedShowStart=show?new Date(`${show.date}T${show.startTime}`).getTime():0;
+  const selectedShowEnd=show?new Date(`${show.date}T${show.endTime}`).getTime():0;
+  const selectedBookingOpens=show?.bookingOpens?new Date(show.bookingOpens).getTime():0;
+  const selectedBookingCloses=show?.bookingCloses?new Date(show.bookingCloses).getTime():0;
+  const selectedShowCanBook=Boolean(show&&show.status==='OPEN'&&selectedShowStart>availabilityNow&&(!selectedBookingOpens||selectedBookingOpens<=availabilityNow)&&(!selectedBookingCloses||selectedBookingCloses>=availabilityNow));
   const screen=data.screens.find(item=>item.id===show?.screenId);
 
   useEffect(()=>{if(cities.length&&!city)setCity(cities.includes('Hyderabad')?'Hyderabad':cities[0]);},[cities,city]);
-  useEffect(()=>{if(dates.length&&!dates.includes(day))setDay(dates[0]);},[dates,day]);
   useEffect(()=>{const timer=window.setInterval(()=>setAvailabilityNow(Date.now()),1000);return()=>window.clearInterval(timer);},[]);
   useEffect(()=>{if(!showId){setVersionSeats(null);setAvailabilityScreen(null);setBackendBooked([]);setBackendOfferedSeats([]);setAvailabilityError('');setAvailabilityColumns(0);setAvailabilityUpdatedAt(0);setWaitlistOffer(null);return;}let active=true;const refresh=()=>{getShowAvailability(showId).then(result=>{if(active){const layout=result.layout||{};setAvailabilityScreen(result.screen||null);setBackendBooked([...(result.bookedSeatIds||[]),...(result.reservedSeatIds||[]),...(result.heldSeatIds||[])]);setBackendOfferedSeats(result.waitlistOfferedSeatIds||[]);const columns=Number(result.screen?.seatsPerRow||layout.version?.seatsPerRow)||0;setAvailabilityColumns(columns);const layoutSeats=Array.isArray(layout.seats)?layout.seats:[];setVersionSeats(normalizeSeatLayout(layoutSeats,columns||12));setAvailabilityUpdatedAt(Date.now());setAvailabilityError('');}}).catch(reason=>{if(active){setVersionSeats(null);setBackendBooked([]);setBackendOfferedSeats([]);setAvailabilityUpdatedAt(0);setAvailabilityError((reason as Error).message);}});};const refreshOffer=()=>getMyShowWaitlistOffer(showId).then(value=>{if(active)setWaitlistOffer(value?.status==='ACTIVE'&&new Date(value.expiresAt).getTime()>Date.now()?value:value?.status==='COMPLETED'?value:null);}).catch(()=>{if(active)setWaitlistOffer(null);});setVersionSeats(null);setAvailabilityScreen(null);setBackendBooked([]);setBackendOfferedSeats([]);setAvailabilityError('');setAvailabilityColumns(0);setAvailabilityUpdatedAt(0);setWaitlistOffer(null);refresh();void refreshOffer();const timer=window.setInterval(()=>{refresh();void refreshOffer();setOfferNow(Date.now());},5000);return()=>{active=false;window.clearInterval(timer);};},[showId]);
   useEffect(()=>{if(!showId||!user)return;let active=true;getWaitingList().then(entries=>{if(active)setWaitEntry((requestedWaitlistEntryId?entries.find((entry:any)=>entry.id===requestedWaitlistEntryId&&entry.showId===showId&&['WAITING','OFFERED'].includes(String(entry.status).toUpperCase())):null)||entries.find((entry:any)=>entry.showId===showId&&['WAITING','OFFERED'].includes(String(entry.status).toUpperCase()))||null);}).catch(()=>{});return()=>{active=false;};},[showId,user?.id,requestedWaitlistEntryId]);
@@ -83,6 +86,8 @@ export function BookMyShow() {
   const holdClock=`${Math.floor(holdSeconds/60)}:${String(holdSeconds%60).padStart(2,'0')}`;
   const offerSeconds=Math.max(0,Math.ceil((new Date(waitlistOffer?.expiresAt||0).getTime()-offerNow)/1000));
   const offerClock=`${Math.floor(offerSeconds/60)}:${String(offerSeconds%60).padStart(2,'0')}`;
+  const bookingCountdown=(opensAt:number)=>{const remaining=Math.max(0,Math.ceil((opensAt-availabilityNow)/1000));const days=Math.floor(remaining/86400);const hours=Math.floor(remaining%86400/3600);const minutes=Math.floor(remaining%3600/60);const seconds=remaining%60;return `${days?`${days}d `:''}${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;};
+  const scheduleState=(scheduled:typeof shows[number])=>{const startsAt=new Date(`${scheduled.date}T${scheduled.startTime}`).getTime();const endsAt=new Date(`${scheduled.date}T${scheduled.endTime}`).getTime();const opensAt=scheduled.bookingOpens?new Date(scheduled.bookingOpens).getTime():0;const closesAt=scheduled.bookingCloses?new Date(scheduled.bookingCloses).getTime():0;if(endsAt<=availabilityNow)return 'COMPLETED';if(scheduled.status!=='OPEN'||(closesAt&&closesAt<availabilityNow))return 'BOOKING CLOSED';if(startsAt<=availabilityNow)return 'SHOW IN PROGRESS';if(opensAt>availabilityNow)return `BOOKING OPENS IN ${bookingCountdown(opensAt)}`;return 'AVAILABLE';};
   const holdDurationMinutes=Math.max(1,Number(show?.holdMinutes)||5);
   const friendlyBookingError=(message:string)=>/WAITLIST_SEAT_CLAIMED|OFFER_SEAT_UNAVAILABLE|claimed by another waitlist member/i.test(message)?'Sorry, this seat has been booked by another waitlist member. Please choose another offered seat.':/WAITLIST_OFFER_EXPIRED|OFFER_EXPIRED/i.test(message)?'This waitlist offer has expired. Please refresh availability and choose a regular available seat.':/SEAT_HELD|SEAT_UNAVAILABLE|held by another|currently unavailable/i.test(message)?`That seat is currently selected by another audience member. Please choose another seat, or wait up to ${holdDurationMinutes} minutes. If they do not complete their booking within that time, the seat will be released.`:message;
   const bookingScreen=availabilityScreen||screen;
@@ -126,24 +131,24 @@ export function BookMyShow() {
     </section>
 
     <div className="booking-content">
-      {!shows.length?<Empty title="No shows are currently available for this movie."/>:<div className={`booking-layout${confirming?' booking-layout-confirming':''}`}>
+      {!shows.length?<div className="booking-layout"><section className="booking-main-panel"><div className="booking-no-shows"><strong>No shows are scheduled for {movie.title} yet.</strong><p>There are no shows to book right now. Please check again later.</p></div><Link className="button secondary" to={`/movie/${movie.id}`}>Back to movie</Link></section></div>:<div className={`booking-layout${confirming?' booking-layout-confirming':''}`}>
         <section className="booking-main-panel">
-          {!seatMapOpen&&!confirming&&<>
+          {(!seatMapOpen||!selectedShowCanBook)&&!confirming&&<>
             <div className="booking-controls">
-              <label className="booking-city"><MapPin size={18}/><select aria-label="Choose a city" value={activeCity} onChange={event=>{setCity(event.target.value);setDay('');setShowId('');setSelectedSeats([]);}}>{cities.map(value=><option key={value} value={value}>{value}, Telangana</option>)}</select></label>
-              <div className="booking-date-list" aria-label="Choose a date">{dates.map(value=>{const label=dayLabel(value);return <button type="button" key={value} className={activeDay===value?'selected':''} onClick={()=>{setDay(value);setShowId('');setSelectedSeats([]);}}><span>{label.weekday}</span><strong>{label.day} {label.month}</strong></button>;})}</div>
+              <label className="booking-city"><MapPin size={18}/><select aria-label="Choose a city" value={activeCity} onChange={event=>{setCity(event.target.value);setShowId('');setSelectedSeats([]);}}>{cities.map(value=><option key={value} value={value}>{value}, Telangana</option>)}</select></label>
             </div>
-            <div className="booking-theatre-list">{data.theatres.filter(item=>item.status==='ACTIVE'&&item.city===activeCity&&datedShows.some(showing=>showing.theatreId===item.id)).map(item=>{
-              const itemShows=datedShows.filter(showing=>showing.theatreId===item.id);
+            {!cityShows.some(scheduled=>scheduleState(scheduled)==='AVAILABLE')&&<div className="booking-no-shows booking-no-bookable" role="status"><strong>No shows to book right now.</strong><span>Past shows and unavailable showtimes are still listed below.</span></div>}
+            <div className="booking-schedule-list">{dates.map(scheduleDate=>{const dailyShows=cityShows.filter(showing=>showing.date===scheduleDate);const label=dayLabel(scheduleDate);return <section className="booking-date-group" key={scheduleDate}><h2>{label.weekday}, {label.day} {label.month}</h2><div className="booking-theatre-list booking-date-theatres">{data.theatres.filter(item=>item.city===activeCity&&dailyShows.some(showing=>showing.theatreId===item.id)).map(item=>{
+              const itemShows=dailyShows.filter(showing=>showing.theatreId===item.id);
               return <article className="booking-theatre" key={item.id}>
                 <div className="booking-theatre-details"><h2>{item.name}</h2><p><MapPin size={13}/>{item.address}, {item.city}</p><div className="booking-perks"><span><Monitor size={12}/>Dolby Atmos</span><i/> <span>Recliners</span><i/> <span>Food & beverages</span><i/> <span>Parking</span></div></div>
-                <div className="booking-times">{itemShows.map(itemShow=><button key={itemShow.id} type="button" className={showId===itemShow.id?'chosen':''} onClick={()=>{const enabled=sessionStorage.getItem('av_location_enabled')==='true';setLocationEnabled(enabled);if(!enabled){setLocationMessage('Turn on location to book your ticket.');return;}chooseShow(itemShow);}}><strong>{itemShow.startTime}</strong><small>{itemShow.ticketType==='FREE'?'FREE':money(itemShow.ticketPrice)}</small></button>)}</div>
+                <div className="booking-times">{itemShows.map(itemShow=>{const state=scheduleState(itemShow);const available=state==='AVAILABLE';return <button key={itemShow.id} type="button" disabled={!available} aria-label={`${itemShow.startTime}, ${state==='AVAILABLE'?'booking available':state.toLowerCase()}`} className={`${showId===itemShow.id?'chosen':''} ${!available?'booking-time-unavailable':''}`} onClick={()=>{if(!available)return;const enabled=sessionStorage.getItem('av_location_enabled')==='true';setLocationEnabled(enabled);if(!enabled){setLocationMessage('Turn on location to book your ticket.');return;}chooseShow(itemShow);}}><strong>{itemShow.startTime}</strong><small>{state==='AVAILABLE'?(itemShow.ticketType==='FREE'?'FREE':money(itemShow.ticketPrice)):state}</small></button>;})}</div>
               </article>;
-            })}{!datedShows.length&&<div className="booking-no-shows">No showtimes are available on this date. Choose another day.</div>}</div>
+            })}</div></section>;})}{!dates.length&&<div className="booking-no-shows">No showtimes are available for this movie in this city.</div>}</div>
             {!!locationMessage&&<div className="booking-location-prompt" role="status"><MapPin size={20}/><div><strong>Location is turned off</strong><p>{locationMessage}</p></div><button type="button" className="button small" onClick={enableLocation}>Turn on location</button></div>}
           </>}
 
-          {seatMapOpen&&show&&!confirming&&<div className="booking-seat-step">
+          {seatMapOpen&&show&&selectedShowCanBook&&!confirming&&<div className="booking-seat-step">
             <button type="button" className="booking-step-back" onClick={()=>{setSeatMapOpen(false);setShowId('');setSelectedSeats([]);setError('');}}><ArrowLeft size={16}/> Back to cinemas</button>
             <div className="booking-seat-heading"><div><span className="eyebrow">SELECT YOUR SEATS</span><h2>{theatre?.name}</h2><p><CalendarDays size={14}/>{date(show.date)} <span>·</span><Clock3 size={14}/>{show.startTime} <span>·</span>{bookingScreen?.name||'Screen'}</p></div><span className="booking-seat-count">{selectedSeats.length} selected</span></div>
             {waitlistOffer&&(waitlistOffer.status==='COMPLETED'||offerSeconds>0)&&<div className="waitlist-offer-panel" role="status"><span className="eyebrow">WAITLIST OFFER</span>{waitlistOffer.status==='COMPLETED'?<strong>All offered seats have been booked by other waitlist members.</strong>:<strong>{visibleOfferSeatIds.size} {visibleOfferSeatIds.size===1?'seat':'seats'} remaining | offer ends in <b>{offerClock}</b></strong>}{waitlistOffer.status!=='COMPLETED'&&<p>Choose any remaining offered seat. You can also select regular seats outside this offer.</p>}{visibleOfferSeatIds.size>0&&<button type="button" className="button small" disabled={!selectedSeats.length||selectedSeats.some(id=>!visibleOfferSeatIds.has(id))||busy} onClick={()=>void proceedToConfirm()}>Convert and select seats <ArrowRight size={15}/></button>}{waitlistOffer.status!=='COMPLETED'&&visibleOfferSeatIds.size===0&&<p className="waitlist-offer-empty">No offered seats remain. Check the latest availability.</p>}</div>}
@@ -174,7 +179,7 @@ export function BookMyShow() {
           <p className="booking-demo-note">Frontend preview · No real tickets or payments</p>
         </aside>}
       </div>}
-      <aside className="booking-cinema-note"><Ticket size={37}/><div><strong>Enjoy the big screen experience!</strong><p>Great stories are always better with an audience.</p></div><span className="booking-seat-art"/></aside>
+      <aside className="booking-cinema-note"><span><Ticket size={17}/><strong>Why book through Audience Verdict?</strong></span><i/><span><Users size={16}/>Watch at the theatre</span><i/><span><Film size={16}/>Share your verdict</span><i/><span><ShieldCheck size={16}/>Transparent &amp; authentic</span></aside>
     </div>
   </main>;
 }

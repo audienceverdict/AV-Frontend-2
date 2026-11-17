@@ -1,0 +1,1429 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/MovieWizard.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=a954c2dd"; const Fragment = __vite__cjsImport0_react_jsxDevRuntime["Fragment"]; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+let prevRefreshReg;
+let prevRefreshSig;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("E:/AV Website/AV-frontend/src/components/MovieWizard.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=a954c2dd"; const useEffect = __vite__cjsImport3_react["useEffect"]; const useState = __vite__cjsImport3_react["useState"];
+import { createMovieProfile, repositories, listMovieCredits, saveMovieCredit, deleteMovieCredit, listMovieMedia, saveMovieMedia, updateMovieMedia, deleteMovieMedia, searchPeople, createPerson, addPersonSocialLink } from "/src/services/api.ts";
+import { MediaImage, Notice } from "/src/components/Common.tsx";
+import { GripVertical, Link2, Pencil, Plus, Save, Trash2 } from "/node_modules/.vite/deps/lucide-react.js?v=a954c2dd";
+import "/src/components/movie-wizard.css";
+const emptyCredit = () => ({ personId: "", creditType: "CAST", department: "ACTING", roleTitle: "Actor", characterName: "", characterDescription: "", characterImageUrl: "", characterCategory: "HERO", characterOccupation: "", characterRelationships: "{}", screenTimeMinutes: 0, billingOrder: 1, isMainCast: true, isCameo: false, isVoiceRole: false });
+const profile = (credit) => credit.person && typeof credit.person === "object" ? credit.person : {};
+const creditName = (credit) => String(profile(credit).fullName || credit.fullName || credit.personName || `Person ${credit.personId || ""}`);
+export function MovieWizard({ initial, isNew, onDone }) {
+  _s();
+  const [step, setStep] = useState(1);
+  const [movie, setMovie] = useState(structuredClone(initial));
+  const [credits, setCredits] = useState([]);
+  const [draft, setDraft] = useState(emptyCredit());
+  const [media, setMedia] = useState([]);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [mediaType, setMediaType] = useState("STILL");
+  const [mediaTitle, setMediaTitle] = useState("");
+  const [mediaUrl, setMediaUrl] = useState("");
+  const [editingMediaIndex, setEditingMediaIndex] = useState(null);
+  const [people, setPeople] = useState([]);
+  const [peopleSearch, setPeopleSearch] = useState("");
+  const [selectedPerson, setSelectedPerson] = useState(null);
+  const [personDraft, setPersonDraft] = useState({ fullName: "", biography: "", profileImageUrl: "", dateOfBirth: "", nationality: "", officialWebsite: "", skills: "" });
+  const [socialPlatform, setSocialPlatform] = useState("INSTAGRAM");
+  const [socialUrl, setSocialUrl] = useState("");
+  useEffect(() => {
+    if (step !== 2 || !movie.id) return;
+    let active = true;
+    setBusy(true);
+    listMovieCredits(movie.id).then((items) => {
+      if (active) setCredits(items);
+    }).catch((x) => {
+      if (active) setError(x.message);
+    }).finally(() => {
+      if (active) setBusy(false);
+    });
+    return () => {
+      active = false;
+    };
+  }, [step, movie.id]);
+  useEffect(() => {
+    if (step !== 2) return;
+    let active = true;
+    const timer = setTimeout(() => searchPeople(peopleSearch).then((items) => {
+      if (active) setPeople(items);
+    }).catch((x) => {
+      if (active) setError(x.message);
+    }), 250);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [step, peopleSearch]);
+  useEffect(() => {
+    if (step !== 3 || !movie.id) return;
+    let active = true;
+    setBusy(true);
+    listMovieMedia(movie.id).then((items) => {
+      if (active) setMedia(items.map((item) => ({ ...item, url: item.mediaUrl || item.url || "" })));
+    }).catch((x) => {
+      if (active) setError(x.message);
+    }).finally(() => {
+      if (active) setBusy(false);
+    });
+    return () => {
+      active = false;
+    };
+  }, [step, movie.id]);
+  const saveProfile = async (e) => {
+    e.preventDefault();
+    setBusy(true);
+    setError("");
+    try {
+      if (!movie.title.trim() || !movie.language.trim() || Number(movie.duration) < 1) throw new Error("Title, language, and a positive duration are required.");
+      const saved = isNew ? await createMovieProfile(movie) : (await repositories.movies.save(movie), movie);
+      if (!saved.id) throw new Error("The movie was saved, but the API did not return its ID.");
+      setMovie(saved);
+      setStep(2);
+    } catch (x) {
+      setError(x.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const addCredit = async (e) => {
+    e.preventDefault();
+    setBusy(true);
+    setError("");
+    try {
+      let person = selectedPerson;
+      if (!person) {
+        const profilePayload = { fullName: String(personDraft.fullName || "").trim(), biography: String(personDraft.biography || ""), profileImageUrl: String(personDraft.profileImageUrl || ""), dateOfBirth: String(personDraft.dateOfBirth || "") || void 0, nationality: String(personDraft.nationality || ""), officialWebsite: String(personDraft.officialWebsite || ""), skills: String(personDraft.skills || "").split(",").map((value) => value.trim()).filter(Boolean) };
+        if (!profilePayload.fullName) throw new Error("Enter the person name before saving.");
+        person = await createPerson(profilePayload);
+        if (!person?.id) throw new Error("Person profile was created, but the API did not return its ID.");
+        const createdPerson = person;
+        setSelectedPerson(createdPerson);
+        setDraft({ ...draft, personId: String(createdPerson.id) });
+        setPeople((current) => [createdPerson, ...current.filter((item) => item.id !== createdPerson.id)]);
+        if (socialUrl.trim()) await addPersonSocialLink(String(person.id), { platform: socialPlatform, profileUrl: socialUrl.trim() });
+      }
+      if (!person?.id) throw new Error("Select or create a person profile first.");
+      const resolvedPerson = person;
+      let relationships;
+      try {
+        relationships = JSON.parse(String(draft.characterRelationships || "{}"));
+      } catch {
+        throw new Error('Character relationships must be valid JSON, such as {"sister":"Maya"}.');
+      }
+      if (!relationships || typeof relationships !== "object" || Array.isArray(relationships) || Object.values(relationships).some((value) => typeof value !== "string")) throw new Error("Character relationships must be a JSON object with string values.");
+      const screenTimeMinutes = Number(draft.screenTimeMinutes) || 0, billingOrder = Number(draft.billingOrder) || 0;
+      if (!Number.isInteger(screenTimeMinutes) || screenTimeMinutes < 0 || !Number.isInteger(billingOrder) || billingOrder < 0) throw new Error("Screen time and billing order must be non-negative whole numbers.");
+      const payload = { personId: String(resolvedPerson.id), creditType: draft.creditType, department: String(draft.department).trim(), roleTitle: String(draft.roleTitle).trim(), characterName: String(draft.characterName || ""), characterDescription: String(draft.characterDescription || ""), characterImageUrl: String(draft.characterImageUrl || ""), characterCategory: draft.characterCategory || "HERO", characterOccupation: String(draft.characterOccupation || ""), characterRelationships: relationships, screenTimeMinutes, billingOrder, isMainCast: Boolean(draft.isMainCast), isCameo: Boolean(draft.isCameo), isVoiceRole: Boolean(draft.isVoiceRole) };
+      if (!payload.personId || !payload.roleTitle) throw new Error("Choose a person and enter a role.");
+      await saveMovieCredit(movie.id, payload);
+      setCredits(await listMovieCredits(movie.id));
+      setDraft(emptyCredit());
+      setSelectedPerson(null);
+      setPeopleSearch("");
+      setPersonDraft({ fullName: "", biography: "", profileImageUrl: "", dateOfBirth: "", nationality: "", officialWebsite: "", skills: "" });
+      setSocialUrl("");
+    } catch (x) {
+      setError(x.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const removeCredit = async (credit) => {
+    if (!credit.id) return;
+    setBusy(true);
+    setError("");
+    try {
+      await deleteMovieCredit(movie.id, String(credit.id));
+      setCredits(await listMovieCredits(movie.id));
+    } catch (x) {
+      setError(x.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const removeMedia = async (item, index) => {
+    setBusy(true);
+    setError("");
+    try {
+      if (item.id) await deleteMovieMedia(movie.id, String(item.id));
+      setMedia((current) => current.filter((_, itemIndex) => itemIndex !== index));
+      if (editingMediaIndex === index) {
+        setEditingMediaIndex(null);
+        setMediaTitle("");
+        setMediaUrl("");
+      } else if (editingMediaIndex !== null && editingMediaIndex > index) setEditingMediaIndex(editingMediaIndex - 1);
+    } catch (x) {
+      setError(x.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const saveMedia = async (e) => {
+    e.preventDefault();
+    setBusy(true);
+    setError("");
+    try {
+      for (const [index, item] of media.entries()) {
+        const payload = { mediaType: String(item.mediaType || "STILL"), title: item.title || "", description: item.description || "", mediaUrl: String(item.url || item.mediaUrl || ""), thumbnailUrl: item.thumbnailUrl || "", language: item.language || "", isOfficial: Boolean(item.isOfficial), isPrimary: Boolean(item.isPrimary), displayOrder: Number(item.displayOrder ?? index + 1), sourcePlatform: item.sourcePlatform || "", publishedAt: item.publishedAt || null };
+        if (!payload.mediaUrl) throw new Error("Every media item needs a direct media URL.");
+        if (item.id) await updateMovieMedia(movie.id, String(item.id), payload);
+        else await saveMovieMedia(movie.id, payload);
+      }
+      onDone();
+    } catch (x) {
+      setError(x.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const text = (key, label, type = "text") => /* @__PURE__ */ jsxDEV("label", { children: [
+    label,
+    /* @__PURE__ */ jsxDEV("input", { type, value: String(movie[key] ?? ""), onChange: (e) => setMovie({ ...movie, [key]: type === "number" ? Number(e.target.value) : e.target.value }) }, void 0, false, {
+      fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+      lineNumber: 42,
+      columnNumber: 82
+    }, this)
+  ] }, void 0, true, {
+    fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+    lineNumber: 42,
+    columnNumber: 68
+  }, this);
+  const creditInput = (key, label, type = "text") => /* @__PURE__ */ jsxDEV("label", { children: [
+    label,
+    /* @__PURE__ */ jsxDEV("input", { type, value: String(draft[key] ?? ""), onChange: (e) => setDraft({ ...draft, [key]: type === "number" ? Number(e.target.value) : e.target.value }) }, void 0, false, {
+      fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+      lineNumber: 43,
+      columnNumber: 84
+    }, this)
+  ] }, void 0, true, {
+    fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+    lineNumber: 43,
+    columnNumber: 70
+  }, this);
+  const personFields = (credit) => /* @__PURE__ */ jsxDEV("div", { className: "movie-credit-profile-details", children: [
+    /* @__PURE__ */ jsxDEV("h4", { children: "Person profile" }, void 0, false, {
+      fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+      lineNumber: 44,
+      columnNumber: 90
+    }, this),
+    /* @__PURE__ */ jsxDEV("dl", { children: [["Name", profile(credit).fullName], ["Nationality", profile(credit).nationality], ["Date of birth", profile(credit).dateOfBirth], ["Website", profile(credit).officialWebsite]].filter(([, v]) => v).map(([label, value]) => /* @__PURE__ */ jsxDEV("div", { children: [
+      /* @__PURE__ */ jsxDEV("dt", { children: label }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+        lineNumber: 44,
+        columnNumber: 365
+      }, this),
+      /* @__PURE__ */ jsxDEV("dd", { children: String(value) }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+        lineNumber: 44,
+        columnNumber: 381
+      }, this)
+    ] }, String(label), true, {
+      fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+      lineNumber: 44,
+      columnNumber: 340
+    }, this)) }, void 0, false, {
+      fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+      lineNumber: 44,
+      columnNumber: 113
+    }, this),
+    profile(credit).biography && /* @__PURE__ */ jsxDEV("p", { children: profile(credit).biography }, void 0, false, {
+      fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+      lineNumber: 44,
+      columnNumber: 448
+    }, this),
+    Array.isArray(profile(credit).skills) && profile(credit).skills.length > 0 && /* @__PURE__ */ jsxDEV("p", { children: [
+      /* @__PURE__ */ jsxDEV("strong", { children: "Skills:" }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+        lineNumber: 44,
+        columnNumber: 565
+      }, this),
+      " ",
+      profile(credit).skills.join(", ")
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+      lineNumber: 44,
+      columnNumber: 562
+    }, this),
+    Array.isArray(profile(credit).socialLinks) && profile(credit).socialLinks.length > 0 && /* @__PURE__ */ jsxDEV("p", { children: [
+      /* @__PURE__ */ jsxDEV("strong", { children: "Social:" }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+        lineNumber: 44,
+        columnNumber: 722
+      }, this),
+      " ",
+      profile(credit).socialLinks.map((link) => link.profileUrl || link.username).filter(Boolean).join(" · ")
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+      lineNumber: 44,
+      columnNumber: 719
+    }, this)
+  ] }, void 0, true, {
+    fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+    lineNumber: 44,
+    columnNumber: 44
+  }, this);
+  return /* @__PURE__ */ jsxDEV("div", { className: "entity-form movie-wizard", children: [
+    /* @__PURE__ */ jsxDEV("nav", { className: "tabs", "aria-label": "Movie form stages", children: ["Movie details", "Cast and crew", "Media"].map((label, i) => /* @__PURE__ */ jsxDEV("button", { type: "button", disabled: i + 1 > step, className: step === i + 1 ? "active" : "", children: [
+      i + 1,
+      ". ",
+      label
+    ] }, label, true, {
+      fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+      lineNumber: 45,
+      columnNumber: 168
+    }, this)) }, void 0, false, {
+      fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+      lineNumber: 45,
+      columnNumber: 52
+    }, this),
+    step === 1 && /* @__PURE__ */ jsxDEV("form", { onSubmit: saveProfile, children: [
+      /* @__PURE__ */ jsxDEV("div", { className: "form-grid", children: [
+        text("title", "Movie title"),
+        text("originalTitle", "Original title"),
+        text("tagline", "Tagline"),
+        text("language", "Language"),
+        text("originalLanguage", "Original language"),
+        text("duration", "Duration (minutes)", "number"),
+        text("releaseDate", "Release date", "date"),
+        text("announcementDate", "Announcement date", "date"),
+        text("productionStartDate", "Production start date", "date"),
+        text("productionEndDate", "Production end date", "date"),
+        text("certification", "Certification"),
+        text("director", "Director"),
+        text("production", "Production"),
+        text("distributor", "Distributor"),
+        text("officialWebsite", "Official website", "url"),
+        text("budget", "Budget", "number"),
+        text("currencyCode", "Currency code"),
+        text("posterUrl", "Poster URL", "url"),
+        text("backdropUrl", "Backdrop URL", "url"),
+        text("externalTrailerUrl", "External trailer URL", "url"),
+        /* @__PURE__ */ jsxDEV("label", { children: [
+          "Status",
+          /* @__PURE__ */ jsxDEV("select", { value: movie.status, onChange: (e) => setMovie({ ...movie, status: e.target.value }), children: [
+            /* @__PURE__ */ jsxDEV("option", { children: "UPCOMING" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 46,
+              columnNumber: 1055
+            }, this),
+            /* @__PURE__ */ jsxDEV("option", { children: "ACTIVE" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 46,
+              columnNumber: 1080
+            }, this),
+            /* @__PURE__ */ jsxDEV("option", { children: "ENDED" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 46,
+              columnNumber: 1103
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 46,
+            columnNumber: 942
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+          lineNumber: 46,
+          columnNumber: 929
+        }, this),
+        /* @__PURE__ */ jsxDEV("label", { children: [
+          "Genres (comma separated)",
+          /* @__PURE__ */ jsxDEV("input", { value: (movie.genres ?? movie.genre ?? []).join(", "), onChange: (e) => {
+            const genres = e.target.value.split(",").map((v) => v.trim()).filter(Boolean);
+            setMovie({ ...movie, genres, genre: genres });
+          } }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 46,
+            columnNumber: 1173
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+          lineNumber: 46,
+          columnNumber: 1142
+        }, this),
+        /* @__PURE__ */ jsxDEV("label", { children: [
+          "Languages (comma separated)",
+          /* @__PURE__ */ jsxDEV("input", { value: (movie.languages ?? []).join(", "), onChange: (e) => setMovie({ ...movie, languages: e.target.value.split(",").map((v) => v.trim()).filter(Boolean) }) }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 46,
+            columnNumber: 1424
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+          lineNumber: 46,
+          columnNumber: 1390
+        }, this),
+        /* @__PURE__ */ jsxDEV("label", { className: "span-two", children: [
+          "Synopsis",
+          /* @__PURE__ */ jsxDEV("textarea", { rows: 4, value: String(movie.synopsis ?? movie.description ?? ""), onChange: (e) => setMovie({ ...movie, synopsis: e.target.value, description: e.target.value }) }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 46,
+            columnNumber: 1636
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+          lineNumber: 46,
+          columnNumber: 1600
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+        lineNumber: 46,
+        columnNumber: 46
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "button-row", children: /* @__PURE__ */ jsxDEV("button", { className: "button", disabled: busy, children: busy ? "Saving…" : "Save details and continue" }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+        lineNumber: 46,
+        columnNumber: 1853
+      }, this) }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+        lineNumber: 46,
+        columnNumber: 1825
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+      lineNumber: 46,
+      columnNumber: 17
+    }, this),
+    step === 2 && /* @__PURE__ */ jsxDEV("div", { className: "movie-credit-stage", children: [
+      /* @__PURE__ */ jsxDEV("div", { className: "movie-credit-stage-heading", children: [
+        /* @__PURE__ */ jsxDEV("div", { children: [
+          /* @__PURE__ */ jsxDEV("h3", { children: [
+            "Cast and crew for ",
+            movie.title
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 48,
+            columnNumber: 52
+          }, this),
+          /* @__PURE__ */ jsxDEV("p", { className: "muted", children: "Enter the person and credit details together, then save once." }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 48,
+            columnNumber: 92
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+          lineNumber: 48,
+          columnNumber: 47
+        }, this),
+        /* @__PURE__ */ jsxDEV("span", { className: "movie-credit-count", children: [
+          credits.length,
+          " saved"
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+          lineNumber: 48,
+          columnNumber: 184
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+        lineNumber: 48,
+        columnNumber: 3
+      }, this),
+      /* @__PURE__ */ jsxDEV("form", { className: "movie-credit-editor", onSubmit: addCredit, children: [
+        /* @__PURE__ */ jsxDEV("section", { className: "movie-credit-form-section", children: [
+          /* @__PURE__ */ jsxDEV("div", { className: "movie-credit-section-heading", children: [
+            /* @__PURE__ */ jsxDEV("span", { children: "01" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 50,
+              columnNumber: 97
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { children: [
+              /* @__PURE__ */ jsxDEV("h4", { children: "Person details" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 50,
+                columnNumber: 117
+              }, this),
+              /* @__PURE__ */ jsxDEV("p", { children: "Choose an existing person or fill in a new profile below." }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 50,
+                columnNumber: 140
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 50,
+              columnNumber: 112
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 50,
+            columnNumber: 51
+          }, this),
+          /* @__PURE__ */ jsxDEV("label", { children: [
+            "Find existing person",
+            /* @__PURE__ */ jsxDEV("input", { value: peopleSearch, onChange: (e) => {
+              setPeopleSearch(e.target.value);
+              setSelectedPerson(null);
+              setDraft({ ...draft, personId: "" });
+            }, placeholder: "Search people by name" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 51,
+              columnNumber: 32
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 51,
+            columnNumber: 5
+          }, this),
+          !selectedPerson && peopleSearch.trim() && people.length > 0 && /* @__PURE__ */ jsxDEV("div", { className: "movie-person-results", children: people.slice(0, 6).map((person, index) => /* @__PURE__ */ jsxDEV("button", { type: "button", onClick: () => {
+            setSelectedPerson(person);
+            setDraft({ ...draft, personId: String(person.id) });
+          }, children: [
+            person.profileImageUrl && /* @__PURE__ */ jsxDEV(MediaImage, { className: "movie-person-photo", url: person.profileImageUrl, alt: `${person.fullName} profile`, showFallbackLink: false }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 52,
+              columnNumber: 321
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { children: [
+              /* @__PURE__ */ jsxDEV("strong", { children: person.fullName }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 52,
+                columnNumber: 462
+              }, this),
+              /* @__PURE__ */ jsxDEV("small", { children: [
+                person.nationality || "Person",
+                " - select profile"
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 52,
+                columnNumber: 496
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 52,
+              columnNumber: 456
+            }, this)
+          ] }, person.id || index, true, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 52,
+            columnNumber: 150
+          }, this)) }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 52,
+            columnNumber: 69
+          }, this),
+          selectedPerson ? /* @__PURE__ */ jsxDEV("div", { className: "movie-person-selected", children: [
+            selectedPerson.profileImageUrl && /* @__PURE__ */ jsxDEV(MediaImage, { className: "movie-person-photo", url: selectedPerson.profileImageUrl, alt: `${selectedPerson.fullName} profile`, showFallbackLink: false }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 53,
+              columnNumber: 97
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { children: [
+              /* @__PURE__ */ jsxDEV("strong", { children: selectedPerson.fullName }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 53,
+                columnNumber: 254
+              }, this),
+              /* @__PURE__ */ jsxDEV("small", { children: "Existing person selected" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 53,
+                columnNumber: 296
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 53,
+              columnNumber: 248
+            }, this),
+            /* @__PURE__ */ jsxDEV("button", { type: "button", className: "button secondary small", onClick: () => {
+              setSelectedPerson(null);
+              setDraft({ ...draft, personId: "" });
+            }, children: "Use new profile" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 53,
+              columnNumber: 342
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 53,
+            columnNumber: 23
+          }, this) : /* @__PURE__ */ jsxDEV("div", { className: "movie-person-create movie-person-create-inline", children: [
+            /* @__PURE__ */ jsxDEV("h5", { children: "New person profile" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 53,
+              columnNumber: 576
+            }, this),
+            /* @__PURE__ */ jsxDEV("label", { children: [
+              "Person name",
+              /* @__PURE__ */ jsxDEV("input", { required: true, value: personDraft.fullName, onChange: (e) => setPersonDraft({ ...personDraft, fullName: e.target.value }) }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 53,
+                columnNumber: 621
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 53,
+              columnNumber: 603
+            }, this),
+            /* @__PURE__ */ jsxDEV("label", { children: [
+              "Profile photo URL",
+              /* @__PURE__ */ jsxDEV("input", { type: "url", value: personDraft.profileImageUrl, onChange: (e) => setPersonDraft({ ...personDraft, profileImageUrl: e.target.value }) }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 53,
+                columnNumber: 779
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 53,
+              columnNumber: 755
+            }, this),
+            /* @__PURE__ */ jsxDEV("label", { children: [
+              "Date of birth",
+              /* @__PURE__ */ jsxDEV("input", { type: "date", value: personDraft.dateOfBirth, onChange: (e) => setPersonDraft({ ...personDraft, dateOfBirth: e.target.value }) }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 53,
+                columnNumber: 949
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 53,
+              columnNumber: 929
+            }, this),
+            /* @__PURE__ */ jsxDEV("label", { children: [
+              "Nationality",
+              /* @__PURE__ */ jsxDEV("input", { value: personDraft.nationality, onChange: (e) => setPersonDraft({ ...personDraft, nationality: e.target.value }) }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 53,
+                columnNumber: 1110
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 53,
+              columnNumber: 1092
+            }, this),
+            /* @__PURE__ */ jsxDEV("label", { children: [
+              "Official website",
+              /* @__PURE__ */ jsxDEV("input", { type: "url", value: personDraft.officialWebsite, onChange: (e) => setPersonDraft({ ...personDraft, officialWebsite: e.target.value }) }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 53,
+                columnNumber: 1264
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 53,
+              columnNumber: 1241
+            }, this),
+            /* @__PURE__ */ jsxDEV("label", { children: [
+              "Skills, comma separated",
+              /* @__PURE__ */ jsxDEV("input", { value: personDraft.skills, onChange: (e) => setPersonDraft({ ...personDraft, skills: e.target.value }) }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 53,
+                columnNumber: 1444
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 53,
+              columnNumber: 1414
+            }, this),
+            /* @__PURE__ */ jsxDEV("label", { className: "span-two", children: [
+              "Biography",
+              /* @__PURE__ */ jsxDEV("textarea", { rows: 3, value: personDraft.biography, onChange: (e) => setPersonDraft({ ...personDraft, biography: e.target.value }) }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 53,
+                columnNumber: 1602
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 53,
+              columnNumber: 1565
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "movie-person-social", children: [
+              /* @__PURE__ */ jsxDEV("label", { children: [
+                "Social platform",
+                /* @__PURE__ */ jsxDEV("select", { value: socialPlatform, onChange: (e) => setSocialPlatform(e.target.value), children: ["INSTAGRAM", "YOUTUBE", "FACEBOOK", "X", "TIKTOK", "OFFICIAL_WEBSITE", "OTHER"].map((value) => /* @__PURE__ */ jsxDEV("option", { children: value }, value, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                  lineNumber: 53,
+                  columnNumber: 1980
+                }, this)) }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                  lineNumber: 53,
+                  columnNumber: 1800
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 53,
+                columnNumber: 1778
+              }, this),
+              /* @__PURE__ */ jsxDEV("label", { children: [
+                "Social profile URL",
+                /* @__PURE__ */ jsxDEV("input", { type: "url", value: socialUrl, onChange: (e) => setSocialUrl(e.target.value) }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                  lineNumber: 53,
+                  columnNumber: 2060
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 53,
+                columnNumber: 2035
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 53,
+              columnNumber: 1741
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 53,
+            columnNumber: 512
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+          lineNumber: 50,
+          columnNumber: 4
+        }, this),
+        /* @__PURE__ */ jsxDEV("section", { className: "movie-credit-form-section", children: [
+          /* @__PURE__ */ jsxDEV("div", { className: "movie-credit-section-heading", children: [
+            /* @__PURE__ */ jsxDEV("span", { children: "02" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 55,
+              columnNumber: 97
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { children: [
+              /* @__PURE__ */ jsxDEV("h4", { children: "Character and role details" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 55,
+                columnNumber: 117
+              }, this),
+              /* @__PURE__ */ jsxDEV("p", { children: "These fields are saved with this movie credit." }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 55,
+                columnNumber: 152
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 55,
+              columnNumber: 112
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 55,
+            columnNumber: 51
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: "form-grid", children: [
+            draft.creditType === "CAST" && creditInput("characterName", "Character name"),
+            creditInput("roleTitle", "Role title"),
+            /* @__PURE__ */ jsxDEV("label", { children: [
+              "Credit type",
+              /* @__PURE__ */ jsxDEV("select", { value: draft.creditType, onChange: (e) => setDraft({ ...draft, creditType: e.target.value }), children: [
+                /* @__PURE__ */ jsxDEV("option", { value: "CAST", children: "Cast" }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                  lineNumber: 57,
+                  columnNumber: 125
+                }, this),
+                /* @__PURE__ */ jsxDEV("option", { value: "CREW", children: "Crew" }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                  lineNumber: 57,
+                  columnNumber: 159
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 57,
+                columnNumber: 23
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 57,
+              columnNumber: 5
+            }, this),
+            draft.creditType === "CREW" ? /* @__PURE__ */ jsxDEV("label", { children: [
+              "Department",
+              /* @__PURE__ */ jsxDEV("select", { value: draft.department, onChange: (e) => setDraft({ ...draft, department: e.target.value }), children: ["DIRECTING", "MUSIC", "CINEMATOGRAPHY", "PRODUCTION", "CAMERA", "VFX", "EDITING", "MAKEUP", "LIGHTING", "CRANE", "SOUND_SFX", "DI", "DUBBING", "STUNTS", "ART_DIRECTION", "OTHER"].map((item) => /* @__PURE__ */ jsxDEV("option", { children: item }, item, false, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 58,
+                columnNumber: 350
+              }, this)) }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 58,
+                columnNumber: 53
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 58,
+              columnNumber: 36
+            }, this) : /* @__PURE__ */ jsxDEV("label", { children: [
+              "Department",
+              /* @__PURE__ */ jsxDEV("input", { value: draft.department, onChange: (e) => setDraft({ ...draft, department: e.target.value }), placeholder: "e.g. Acting" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 58,
+                columnNumber: 423
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 58,
+              columnNumber: 406
+            }, this),
+            draft.creditType === "CAST" && /* @__PURE__ */ jsxDEV(Fragment, { children: [
+              /* @__PURE__ */ jsxDEV("label", { children: [
+                "Character category",
+                /* @__PURE__ */ jsxDEV("select", { value: draft.characterCategory, onChange: (e) => setDraft({ ...draft, characterCategory: e.target.value }), children: ["HERO", "VILLAIN", "ANTAGONIST", "SUPPORTING", "OTHER"].map((item) => /* @__PURE__ */ jsxDEV("option", { children: item }, item, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                  lineNumber: 59,
+                  columnNumber: 252
+                }, this)) }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                  lineNumber: 59,
+                  columnNumber: 64
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 59,
+                columnNumber: 39
+              }, this),
+              creditInput("characterOccupation", "Character occupation"),
+              creditInput("characterImageUrl", "Character image URL", "url"),
+              creditInput("screenTimeMinutes", "Screen time (minutes)", "number"),
+              creditInput("billingOrder", "Billing order", "number"),
+              /* @__PURE__ */ jsxDEV("label", { className: "span-two", children: [
+                "Character description",
+                /* @__PURE__ */ jsxDEV("textarea", { rows: 3, value: draft.characterDescription, onChange: (e) => setDraft({ ...draft, characterDescription: e.target.value }) }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                  lineNumber: 59,
+                  columnNumber: 603
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 59,
+                columnNumber: 554
+              }, this),
+              /* @__PURE__ */ jsxDEV("label", { className: "span-two", children: [
+                "Character relationships (JSON object)",
+                /* @__PURE__ */ jsxDEV("textarea", { rows: 2, value: draft.characterRelationships, placeholder: '{"sister":"Maya"}', onChange: (e) => setDraft({ ...draft, characterRelationships: e.target.value }) }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                  lineNumber: 59,
+                  columnNumber: 811
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 59,
+                columnNumber: 746
+              }, this),
+              /* @__PURE__ */ jsxDEV("label", { className: "movie-credit-check", children: [
+                /* @__PURE__ */ jsxDEV("input", { type: "checkbox", checked: draft.isMainCast, onChange: (e) => setDraft({ ...draft, isMainCast: e.target.checked }) }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                  lineNumber: 59,
+                  columnNumber: 1048
+                }, this),
+                " Main cast"
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 59,
+                columnNumber: 1010
+              }, this),
+              /* @__PURE__ */ jsxDEV("label", { className: "movie-credit-check", children: [
+                /* @__PURE__ */ jsxDEV("input", { type: "checkbox", checked: draft.isCameo, onChange: (e) => setDraft({ ...draft, isCameo: e.target.checked }) }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                  lineNumber: 59,
+                  columnNumber: 1227
+                }, this),
+                " Cameo"
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 59,
+                columnNumber: 1189
+              }, this),
+              /* @__PURE__ */ jsxDEV("label", { className: "movie-credit-check", children: [
+                /* @__PURE__ */ jsxDEV("input", { type: "checkbox", checked: draft.isVoiceRole, onChange: (e) => setDraft({ ...draft, isVoiceRole: e.target.checked }) }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                  lineNumber: 59,
+                  columnNumber: 1396
+                }, this),
+                " Voice role"
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 59,
+                columnNumber: 1358
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 59,
+              columnNumber: 37
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 55,
+            columnNumber: 217
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+          lineNumber: 55,
+          columnNumber: 4
+        }, this),
+        /* @__PURE__ */ jsxDEV("button", { type: "submit", className: "button", disabled: busy || !selectedPerson && !personDraft.fullName.trim(), children: busy ? "Saving person and credit..." : "Save person and credit" }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+          lineNumber: 60,
+          columnNumber: 20
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+        lineNumber: 49,
+        columnNumber: 3
+      }, this),
+      credits.length > 0 && /* @__PURE__ */ jsxDEV("div", { className: "movie-credit-saved", children: [
+        /* @__PURE__ */ jsxDEV("div", { className: "movie-credit-stage-heading", children: [
+          /* @__PURE__ */ jsxDEV("div", { children: [
+            /* @__PURE__ */ jsxDEV("h4", { children: "Added cast and crew" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 62,
+              columnNumber: 111
+            }, this),
+            /* @__PURE__ */ jsxDEV("p", { className: "muted", children: [
+              "Saved entries for ",
+              movie.title,
+              ". Open a card for the profile and credit details."
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 62,
+              columnNumber: 139
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 62,
+            columnNumber: 106
+          }, this),
+          /* @__PURE__ */ jsxDEV("span", { className: "movie-credit-count", children: credits.length }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 62,
+            columnNumber: 250
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+          lineNumber: 62,
+          columnNumber: 62
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "movie-credit-cards", children: credits.map((credit, index) => {
+          const person = profile(credit);
+          const name = creditName(credit);
+          const image = person.profileImageUrl || credit.characterImageUrl;
+          return /* @__PURE__ */ jsxDEV("div", { className: "movie-credit-saved-card", children: [
+            /* @__PURE__ */ jsxDEV("details", { className: "movie-credit-card", children: [
+              /* @__PURE__ */ jsxDEV("summary", { children: [
+                /* @__PURE__ */ jsxDEV("span", { className: "movie-credit-avatar", children: image ? /* @__PURE__ */ jsxDEV(MediaImage, { className: "movie-credit-photo", url: String(image), alt: `${name} profile`, showFallbackLink: false }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                  lineNumber: 62,
+                  columnNumber: 705
+                }, this) : name.split(/\s+/).map((part) => part[0] || "").join("").slice(0, 2).toUpperCase() }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                  lineNumber: 62,
+                  columnNumber: 658
+                }, this),
+                /* @__PURE__ */ jsxDEV("span", { className: "movie-credit-card-title", children: [
+                  /* @__PURE__ */ jsxDEV("strong", { children: name }, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                    lineNumber: 62,
+                    columnNumber: 953
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("small", { children: [
+                    credit.roleTitle || "Credit",
+                    credit.characterName ? ` / ${credit.characterName}` : ""
+                  ] }, void 0, true, {
+                    fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                    lineNumber: 62,
+                    columnNumber: 976
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("small", { children: [
+                    credit.creditType || "",
+                    credit.department ? ` / ${credit.department}` : ""
+                  ] }, void 0, true, {
+                    fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                    lineNumber: 62,
+                    columnNumber: 1079
+                  }, this)
+                ] }, void 0, true, {
+                  fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                  lineNumber: 62,
+                  columnNumber: 911
+                }, this),
+                /* @__PURE__ */ jsxDEV("span", { className: "movie-credit-open", children: "View details" }, void 0, false, {
+                  fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                  lineNumber: 62,
+                  columnNumber: 1178
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 62,
+                columnNumber: 649
+              }, this),
+              /* @__PURE__ */ jsxDEV("div", { className: "movie-credit-card-body", children: [
+                personFields(credit),
+                /* @__PURE__ */ jsxDEV("div", { className: "movie-credit-character-details", children: [
+                  /* @__PURE__ */ jsxDEV("h4", { children: "Character / credit details" }, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                    lineNumber: 62,
+                    columnNumber: 1353
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("dl", { children: [["Category", credit.characterCategory], ["Occupation", credit.characterOccupation], ["Screen time", credit.screenTimeMinutes], ["Billing order", credit.billingOrder], ["Main cast", credit.isMainCast ? "Yes" : "No"], ["Cameo", credit.isCameo ? "Yes" : "No"], ["Voice role", credit.isVoiceRole ? "Yes" : "No"]].filter(([, v]) => v !== "" && v != null).map(([label, value]) => /* @__PURE__ */ jsxDEV("div", { children: [
+                    /* @__PURE__ */ jsxDEV("dt", { children: label }, void 0, false, {
+                      fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                      lineNumber: 62,
+                      columnNumber: 1793
+                    }, this),
+                    /* @__PURE__ */ jsxDEV("dd", { children: String(value) }, void 0, false, {
+                      fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                      lineNumber: 62,
+                      columnNumber: 1809
+                    }, this)
+                  ] }, String(label), true, {
+                    fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                    lineNumber: 62,
+                    columnNumber: 1768
+                  }, this)) }, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                    lineNumber: 62,
+                    columnNumber: 1388
+                  }, this),
+                  credit.characterDescription && /* @__PURE__ */ jsxDEV("p", { children: credit.characterDescription }, void 0, false, {
+                    fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                    lineNumber: 62,
+                    columnNumber: 1878
+                  }, this),
+                  credit.characterRelationships && /* @__PURE__ */ jsxDEV("p", { children: [
+                    /* @__PURE__ */ jsxDEV("strong", { children: "Relationships:" }, void 0, false, {
+                      fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                      lineNumber: 62,
+                      columnNumber: 1952
+                    }, this),
+                    " ",
+                    typeof credit.characterRelationships === "string" ? credit.characterRelationships : JSON.stringify(credit.characterRelationships)
+                  ] }, void 0, true, {
+                    fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                    lineNumber: 62,
+                    columnNumber: 1949
+                  }, this)
+                ] }, void 0, true, {
+                  fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                  lineNumber: 62,
+                  columnNumber: 1305
+                }, this)
+              ] }, void 0, true, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 62,
+                columnNumber: 1243
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 62,
+              columnNumber: 610
+            }, this),
+            credit.id && /* @__PURE__ */ jsxDEV("button", { type: "button", className: "button secondary small movie-credit-remove", disabled: busy, onClick: () => void removeCredit(credit), children: "Remove" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 62,
+              columnNumber: 2156
+            }, this)
+          ] }, credit.id || `${credit.personId}-${index}`, true, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 62,
+            columnNumber: 520
+          }, this);
+        }) }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+          lineNumber: 62,
+          columnNumber: 316
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+        lineNumber: 62,
+        columnNumber: 26
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "button-row", children: /* @__PURE__ */ jsxDEV("button", { type: "button", className: "button", disabled: busy, onClick: () => setStep(3), children: "Continue to media" }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+        lineNumber: 63,
+        columnNumber: 31
+      }, this) }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+        lineNumber: 63,
+        columnNumber: 3
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+      lineNumber: 47,
+      columnNumber: 17
+    }, this),
+    step === 3 && /* @__PURE__ */ jsxDEV("form", { className: "movie-media-stage", onSubmit: saveMedia, children: [
+      /* @__PURE__ */ jsxDEV("header", { className: "movie-media-heading", children: /* @__PURE__ */ jsxDEV("div", { children: [
+        /* @__PURE__ */ jsxDEV("h3", { children: "Movie media" }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+          lineNumber: 65,
+          columnNumber: 119
+        }, this),
+        /* @__PURE__ */ jsxDEV("p", { className: "muted", children: "Add public media links from any website. Direct files embed when available; other links open on their original site." }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+          lineNumber: 65,
+          columnNumber: 139
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+        lineNumber: 65,
+        columnNumber: 114
+      }, this) }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+        lineNumber: 65,
+        columnNumber: 74
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "movie-media-entry", children: [
+        /* @__PURE__ */ jsxDEV("label", { children: [
+          "Media type",
+          /* @__PURE__ */ jsxDEV("select", { value: mediaType, onChange: (e) => setMediaType(e.target.value), children: [
+            /* @__PURE__ */ jsxDEV("option", { children: "STILL" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 420
+            }, this),
+            /* @__PURE__ */ jsxDEV("option", { children: "POSTER" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 442
+            }, this),
+            /* @__PURE__ */ jsxDEV("option", { children: "THEATRICAL_POSTER" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 465
+            }, this),
+            /* @__PURE__ */ jsxDEV("option", { children: "FIRST_LOOK_POSTER" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 499
+            }, this),
+            /* @__PURE__ */ jsxDEV("option", { children: "CHARACTER_POSTER" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 533
+            }, this),
+            /* @__PURE__ */ jsxDEV("option", { children: "BEHIND_THE_SCENES_PHOTO" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 566
+            }, this),
+            /* @__PURE__ */ jsxDEV("option", { children: "EVENT_PHOTO" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 606
+            }, this),
+            /* @__PURE__ */ jsxDEV("option", { children: "OTHER_IMAGE" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 634
+            }, this),
+            /* @__PURE__ */ jsxDEV("option", { children: "MOTION_POSTER" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 662
+            }, this),
+            /* @__PURE__ */ jsxDEV("option", { children: "TEASER" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 692
+            }, this),
+            /* @__PURE__ */ jsxDEV("option", { children: "TRAILER" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 715
+            }, this),
+            /* @__PURE__ */ jsxDEV("option", { children: "TRAILER_VERSION" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 739
+            }, this),
+            /* @__PURE__ */ jsxDEV("option", { children: "BEHIND_THE_SCENES" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 771
+            }, this),
+            /* @__PURE__ */ jsxDEV("option", { children: "MAKING_OF" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 805
+            }, this),
+            /* @__PURE__ */ jsxDEV("option", { children: "INTERVIEW" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 831
+            }, this),
+            /* @__PURE__ */ jsxDEV("option", { children: "EVENT_VIDEO" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 857
+            }, this),
+            /* @__PURE__ */ jsxDEV("option", { children: "PROMOTIONAL_VIDEO" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 885
+            }, this),
+            /* @__PURE__ */ jsxDEV("option", { children: "OTHER" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 919
+            }, this)
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 65,
+            columnNumber: 347
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+          lineNumber: 65,
+          columnNumber: 330
+        }, this),
+        /* @__PURE__ */ jsxDEV("label", { children: [
+          "Title / description",
+          /* @__PURE__ */ jsxDEV("input", { value: mediaTitle, onChange: (e) => setMediaTitle(e.target.value), placeholder: "e.g. Official trailer, Poster, Still from movie..." }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 65,
+            columnNumber: 984
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+          lineNumber: 65,
+          columnNumber: 958
+        }, this),
+        /* @__PURE__ */ jsxDEV("label", { children: [
+          "Media URL",
+          /* @__PURE__ */ jsxDEV("input", { type: "url", value: mediaUrl, onChange: (e) => setMediaUrl(e.target.value), placeholder: "https://..." }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 65,
+            columnNumber: 1149
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+          lineNumber: 65,
+          columnNumber: 1133
+        }, this),
+        /* @__PURE__ */ jsxDEV("button", { type: "button", className: "button movie-media-add", disabled: !mediaUrl.trim(), onClick: () => {
+          if (!mediaUrl.trim()) return;
+          const entry = { ...editingMediaIndex === null ? {} : media[editingMediaIndex], mediaType, title: mediaTitle, url: mediaUrl, description: mediaTitle, displayOrder: editingMediaIndex === null ? media.length + 1 : Number(media[editingMediaIndex]?.displayOrder ?? editingMediaIndex + 1) };
+          setMedia(editingMediaIndex === null ? [...media, entry] : media.map((item, index) => index === editingMediaIndex ? entry : item));
+          setEditingMediaIndex(null);
+          setMediaTitle("");
+          setMediaUrl("");
+        }, children: [
+          /* @__PURE__ */ jsxDEV(Plus, { size: 17 }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 65,
+            columnNumber: 1877
+          }, this),
+          " ",
+          editingMediaIndex === null ? "Add media" : "Update media"
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+          lineNumber: 65,
+          columnNumber: 1266
+        }, this),
+        editingMediaIndex !== null && /* @__PURE__ */ jsxDEV("button", { type: "button", className: "button secondary small", onClick: () => {
+          setEditingMediaIndex(null);
+          setMediaTitle("");
+          setMediaUrl("");
+          setMediaType("STILL");
+        }, children: "Cancel edit" }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+          lineNumber: 65,
+          columnNumber: 1995
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+        lineNumber: 65,
+        columnNumber: 295
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "movie-media-list-heading", children: [
+        /* @__PURE__ */ jsxDEV("h4", { children: [
+          "Added media ",
+          /* @__PURE__ */ jsxDEV("span", { children: [
+            "(",
+            media.length,
+            ")"
+          ] }, void 0, true, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 65,
+            columnNumber: 2239
+          }, this)
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+          lineNumber: 65,
+          columnNumber: 2223
+        }, this),
+        /* @__PURE__ */ jsxDEV("span", { className: "movie-media-sort", children: "↕   Sort by newest" }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+          lineNumber: 65,
+          columnNumber: 2273
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+        lineNumber: 65,
+        columnNumber: 2181
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "movie-media-list", children: [
+        media.map((item, i) => {
+          const url = String(item.url || item.mediaUrl || "");
+          const type = String(item.mediaType || "OTHER");
+          const title = String(item.title || item.description || `${type.replaceAll("_", " ")} ${i + 1}`);
+          const isImage = /(POSTER|STILL|IMAGE|PHOTO)/i.test(type);
+          const thumbnail = String(isImage ? url : item.thumbnailUrl || "");
+          return /* @__PURE__ */ jsxDEV("article", { className: "movie-media-row", children: [
+            /* @__PURE__ */ jsxDEV(GripVertical, { className: "movie-media-grip", size: 17 }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 2804
+            }, this),
+            thumbnail ? /* @__PURE__ */ jsxDEV(MediaImage, { className: "movie-media-thumb", url: thumbnail, alt: title, showFallbackLink: false }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 2872
+            }, this) : /* @__PURE__ */ jsxDEV("span", { className: "movie-media-thumb movie-media-thumb-empty", children: type === "TRAILER" || type.includes("VIDEO") ? "▶" : "AV" }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 2972
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { className: `movie-media-type ${type.toLowerCase().replaceAll("_", "-")}`, children: type === "THEATRICAL_POSTER" || type === "FIRST_LOOK_POSTER" || type === "CHARACTER_POSTER" ? "POSTER" : type === "MOTION_POSTER" ? "MOTION" : type === "TRAILER_VERSION" ? "TRAILER" : type }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 3099
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { className: "movie-media-copy", children: [
+              /* @__PURE__ */ jsxDEV("strong", { children: title }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 65,
+                columnNumber: 3411
+              }, this),
+              /* @__PURE__ */ jsxDEV("small", { children: item.description || { TRAILER: "Main trailer", POSTER: "Main movie poster", STILL: "Scene from movie" }[type] || "Movie media" }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 65,
+                columnNumber: 3435
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 3376
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { className: "movie-media-url", children: [
+              /* @__PURE__ */ jsxDEV(Link2, { size: 15 }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 65,
+                columnNumber: 3647
+              }, this),
+              /* @__PURE__ */ jsxDEV("span", { children: url }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 65,
+                columnNumber: 3666
+              }, this)
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 3613
+            }, this),
+            /* @__PURE__ */ jsxDEV("button", { type: "button", className: "button secondary small", onClick: () => {
+              setEditingMediaIndex(i);
+              setMediaType(type);
+              setMediaTitle(String(item.title || item.description || ""));
+              setMediaUrl(url);
+            }, "aria-label": `Edit ${title}`, children: [
+              /* @__PURE__ */ jsxDEV(Pencil, { size: 15 }, void 0, false, {
+                fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+                lineNumber: 65,
+                columnNumber: 3916
+              }, this),
+              " Edit"
+            ] }, void 0, true, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 3691
+            }, this),
+            /* @__PURE__ */ jsxDEV("button", { type: "button", className: "icon-button danger movie-media-delete", disabled: busy, onClick: () => void removeMedia(item, i), "aria-label": `Remove ${title}`, children: /* @__PURE__ */ jsxDEV(Trash2, { size: 16 }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 4111
+            }, this) }, void 0, false, {
+              fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+              lineNumber: 65,
+              columnNumber: 3950
+            }, this)
+          ] }, String(item.id || `${url}-${i}`), true, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 65,
+            columnNumber: 2728
+          }, this);
+        }),
+        !media.length && /* @__PURE__ */ jsxDEV("p", { className: "movie-media-empty", children: "No movie media added yet." }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+          lineNumber: 65,
+          columnNumber: 4172
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+        lineNumber: 65,
+        columnNumber: 2344
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "button-row movie-media-actions", children: [
+        /* @__PURE__ */ jsxDEV("button", { className: "button", disabled: busy, children: [
+          /* @__PURE__ */ jsxDEV(Save, { size: 17 }, void 0, false, {
+            fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+            lineNumber: 65,
+            columnNumber: 4332
+          }, this),
+          busy ? "Saving…" : "Save media and finish"
+        ] }, void 0, true, {
+          fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+          lineNumber: 65,
+          columnNumber: 4289
+        }, this),
+        /* @__PURE__ */ jsxDEV("button", { type: "button", className: "button secondary", onClick: onDone, children: "Finish without media" }, void 0, false, {
+          fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+          lineNumber: 65,
+          columnNumber: 4403
+        }, this)
+      ] }, void 0, true, {
+        fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+        lineNumber: 65,
+        columnNumber: 4241
+      }, this),
+      error && /* @__PURE__ */ jsxDEV(Notice, { error: true, children: error }, void 0, false, {
+        fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+        lineNumber: 65,
+        columnNumber: 4516
+      }, this)
+    ] }, void 0, true, {
+      fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+      lineNumber: 65,
+      columnNumber: 17
+    }, this),
+    error && step !== 3 && /* @__PURE__ */ jsxDEV(Notice, { error: true, children: error }, void 0, false, {
+      fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+      lineNumber: 65,
+      columnNumber: 4579
+    }, this)
+  ] }, void 0, true, {
+    fileName: "E:/AV Website/AV-frontend/src/components/MovieWizard.tsx",
+    lineNumber: 45,
+    columnNumber: 10
+  }, this);
+}
+_s(MovieWizard, "i37XxGEL4ggQYpDv1S1rPurvamc=");
+_c = MovieWizard;
+var _c;
+$RefreshReg$(_c, "MovieWizard");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("E:/AV Website/AV-frontend/src/components/MovieWizard.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("E:/AV Website/AV-frontend/src/components/MovieWizard.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,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QUFBLCtCQUFDLFlBQU8sV0FBVSxVQUFTLFVBQVVsRyxNQUFNO0FBQUEsaUNBQUMsUUFBSyxNQUFNLE1BQVo7QUFBQTtBQUFBO0FBQUE7QUFBQSxpQkFBZTtBQUFBLFVBQUdBLE9BQUssWUFBVTtBQUFBLGFBQTVFO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFBb0c7QUFBQSxRQUFTLHVCQUFDLFlBQU8sTUFBSyxVQUFTLFdBQVUsb0JBQW1CLFNBQVNmLFFBQVEsb0NBQXBFO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFBd0Y7QUFBQSxXQUFyUDtBQUFBO0FBQUE7QUFBQTtBQUFBLGFBQThQO0FBQUEsTUFBT2EsU0FBTyx1QkFBQyxVQUFPLE9BQUssTUFBRUEsbUJBQWY7QUFBQTtBQUFBO0FBQUE7QUFBQSxhQUFxQjtBQUFBLFNBQWh2STtBQUFBO0FBQUE7QUFBQTtBQUFBLFdBQTB2STtBQUFBLElBQVNBLFNBQU9YLFNBQU8sS0FBRyx1QkFBQyxVQUFPLE9BQUssTUFBRVcsbUJBQWY7QUFBQTtBQUFBO0FBQUE7QUFBQSxXQUFxQjtBQUFBLE9BcEI3eUk7QUFBQTtBQUFBO0FBQUE7QUFBQSxTQW9CdXpJO0FBQy96STtBQUFDWixHQWxDZUosYUFBVztBQUFBLEtBQVhBO0FBQVcsSUFBQWdKO0FBQUEsYUFBQUEsSUFBQSIsIm5hbWVzIjpbInVzZUVmZmVjdCIsInVzZVN0YXRlIiwiY3JlYXRlTW92aWVQcm9maWxlIiwicmVwb3NpdG9yaWVzIiwibGlzdE1vdmllQ3JlZGl0cyIsInNhdmVNb3ZpZUNyZWRpdCIsImRlbGV0ZU1vdmllQ3JlZGl0IiwibGlzdE1vdmllTWVkaWEiLCJzYXZlTW92aWVNZWRpYSIsInVwZGF0ZU1vdmllTWVkaWEiLCJkZWxldGVNb3ZpZU1lZGlhIiwic2VhcmNoUGVvcGxlIiwiY3JlYXRlUGVyc29uIiwiYWRkUGVyc29uU29jaWFsTGluayIsIk1lZGlhSW1hZ2UiLCJOb3RpY2UiLCJHcmlwVmVydGljYWwiLCJMaW5rMiIsIlBlbmNpbCIsIlBsdXMiLCJTYXZlIiwiVHJhc2gyIiwiZW1wdHlDcmVkaXQiLCJwZXJzb25JZCIsImNyZWRpdFR5cGUiLCJkZXBhcnRtZW50Iiwicm9sZVRpdGxlIiwiY2hhcmFjdGVyTmFtZSIsImNoYXJhY3RlckRlc2NyaXB0aW9uIiwiY2hhcmFjdGVySW1hZ2VVcmwiLCJjaGFyYWN0ZXJDYXRlZ29yeSIsImNoYXJhY3Rlck9jY3VwYXRpb24iLCJjaGFyYWN0ZXJSZWxhdGlvbnNoaXBzIiwic2NyZWVuVGltZU1pbnV0ZXMiLCJiaWxsaW5nT3JkZXIiLCJpc01haW5DYXN0IiwiaXNDYW1lbyIsImlzVm9pY2VSb2xlIiwicHJvZmlsZSIsImNyZWRpdCIsInBlcnNvbiIsImNyZWRpdE5hbWUiLCJTdHJpbmciLCJmdWxsTmFtZSIsInBlcnNvbk5hbWUiLCJNb3ZpZVdpemFyZCIsImluaXRpYWwiLCJpc05ldyIsIm9uRG9uZSIsIl9zIiwic3RlcCIsInNldFN0ZXAiLCJtb3ZpZSIsInNldE1vdmllIiwic3RydWN0dXJlZENsb25lIiwiY3JlZGl0cyIsInNldENyZWRpdHMiLCJkcmFmdCIsInNldERyYWZ0IiwibWVkaWEiLCJzZXRNZWRpYSIsImVycm9yIiwic2V0RXJyb3IiLCJidXN5Iiwic2V0QnVzeSIsIm1lZGlhVHlwZSIsInNldE1lZGlhVHlwZSIsIm1lZGlhVGl0bGUiLCJzZXRNZWRpYVRpdGxlIiwibWVkaWFVcmwiLCJzZXRNZWRpYVVybCIsImVkaXRpbmdNZWRpYUluZGV4Iiwic2V0RWRpdGluZ01lZGlhSW5kZXgiLCJwZW9wbGUiLCJzZXRQZW9wbGUiLCJwZW9wbGVTZWFyY2giLCJzZXRQZW9wbGVTZWFyY2giLCJzZWxlY3RlZFBlcnNvbiIsInNldFNlbGVjdGVkUGVyc29uIiwicGVyc29uRHJhZnQiLCJzZXRQZXJzb25EcmFmdCIsImJpb2dyYXBoeSIsInByb2ZpbGVJbWFnZVVybCIsImRhdGVPZkJpcnRoIiwibmF0aW9uYWxpdHkiLCJvZmZpY2lhbFdlYnNpdGUiLCJza2lsbHMiLCJzb2NpYWxQbGF0Zm9ybSIsInNldFNvY2lhbFBsYXRmb3JtIiwic29jaWFsVXJsIiwic2V0U29jaWFsVXJsIiwiaWQiLCJhY3RpdmUiLCJ0aGVuIiwiaXRlbXMiLCJjYXRjaCIsIngiLCJtZXNzYWdlIiwiZmluYWxseSIsInRpbWVyIiwic2V0VGltZW91dCIsImNsZWFyVGltZW91dCIsIm1hcCIsIml0ZW0iLCJ1cmwiLCJzYXZlUHJvZmlsZSIsImUiLCJwcmV2ZW50RGVmYXVsdCIsInRpdGxlIiwidHJpbSIsImxhbmd1YWdlIiwiTnVtYmVyIiwiZHVyYXRpb24iLCJFcnJvciIsInNhdmVkIiwibW92aWVzIiwic2F2ZSIsImFkZENyZWRpdCIsInByb2ZpbGVQYXlsb2FkIiwidW5kZWZpbmVkIiwic3BsaXQiLCJ2YWx1ZSIsImZpbHRlciIsIkJvb2xlYW4iLCJjcmVhdGVkUGVyc29uIiwiY3VycmVudCIsInBsYXRmb3JtIiwicHJvZmlsZVVybCIsInJlc29sdmVkUGVyc29uIiwicmVsYXRpb25zaGlwcyIsIkpTT04iLCJwYXJzZSIsIkFycmF5IiwiaXNBcnJheSIsIk9iamVjdCIsInZhbHVlcyIsInNvbWUiLCJpc0ludGVnZXIiLCJwYXlsb2FkIiwicmVtb3ZlQ3JlZGl0IiwicmVtb3ZlTWVkaWEiLCJpbmRleCIsIl8iLCJpdGVtSW5kZXgiLCJzYXZlTWVkaWEiLCJlbnRyaWVzIiwiZGVzY3JpcHRpb24iLCJ0aHVtYm5haWxVcmwiLCJpc09mZmljaWFsIiwiaXNQcmltYXJ5IiwiZGlzcGxheU9yZGVyIiwic291cmNlUGxhdGZvcm0iLCJwdWJsaXNoZWRBdCIsInRleHQiLCJrZXkiLCJsYWJlbCIsInR5cGUiLCJ0YXJnZXQiLCJjcmVkaXRJbnB1dCIsInBlcnNvbkZpZWxkcyIsInYiLCJsZW5ndGgiLCJqb2luIiwic29jaWFsTGlua3MiLCJsaW5rIiwidXNlcm5hbWUiLCJpIiwic3RhdHVzIiwiZ2VucmVzIiwiZ2VucmUiLCJsYW5ndWFnZXMiLCJzeW5vcHNpcyIsInNsaWNlIiwiY2hlY2tlZCIsIm5hbWUiLCJpbWFnZSIsInBhcnQiLCJ0b1VwcGVyQ2FzZSIsInN0cmluZ2lmeSIsImVudHJ5IiwicmVwbGFjZUFsbCIsImlzSW1hZ2UiLCJ0ZXN0IiwidGh1bWJuYWlsIiwiaW5jbHVkZXMiLCJ0b0xvd2VyQ2FzZSIsIlRSQUlMRVIiLCJQT1NURVIiLCJTVElMTCIsIl9jIl0sImlnbm9yZUxpc3QiOltdLCJzb3VyY2VzIjpbIk1vdmllV2l6YXJkLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQge3VzZUVmZmVjdCx1c2VTdGF0ZSx0eXBlIEZvcm1FdmVudH0gZnJvbSAncmVhY3QnO1xyXG5pbXBvcnQgdHlwZSB7TW92aWV9IGZyb20gJy4uL3R5cGVzJztcclxuaW1wb3J0IHtjcmVhdGVNb3ZpZVByb2ZpbGUscmVwb3NpdG9yaWVzLGxpc3RNb3ZpZUNyZWRpdHMsc2F2ZU1vdmllQ3JlZGl0LGRlbGV0ZU1vdmllQ3JlZGl0LGxpc3RNb3ZpZU1lZGlhLHNhdmVNb3ZpZU1lZGlhLHVwZGF0ZU1vdmllTWVkaWEsZGVsZXRlTW92aWVNZWRpYSxzZWFyY2hQZW9wbGUsY3JlYXRlUGVyc29uLGFkZFBlcnNvblNvY2lhbExpbmt9IGZyb20gJy4uL3NlcnZpY2VzL2FwaSc7XHJcbmltcG9ydCB7TWVkaWFJbWFnZSxOb3RpY2V9IGZyb20gJy4vQ29tbW9uJztcclxuaW1wb3J0IHtHcmlwVmVydGljYWwsTGluazIsUGVuY2lsLFBsdXMsU2F2ZSxUcmFzaDJ9IGZyb20gJ2x1Y2lkZS1yZWFjdCc7XHJcbmltcG9ydCAnLi9tb3ZpZS13aXphcmQuY3NzJztcclxuXHJcbnR5cGUgQ3JlZGl0PVJlY29yZDxzdHJpbmcsYW55PjtcclxuY29uc3QgZW1wdHlDcmVkaXQ9KCk9Pih7cGVyc29uSWQ6JycsY3JlZGl0VHlwZTonQ0FTVCcsZGVwYXJ0bWVudDonQUNUSU5HJyxyb2xlVGl0bGU6J0FjdG9yJyxjaGFyYWN0ZXJOYW1lOicnLGNoYXJhY3RlckRlc2NyaXB0aW9uOicnLGNoYXJhY3RlckltYWdlVXJsOicnLGNoYXJhY3RlckNhdGVnb3J5OidIRVJPJyxjaGFyYWN0ZXJPY2N1cGF0aW9uOicnLGNoYXJhY3RlclJlbGF0aW9uc2hpcHM6J3t9JyxzY3JlZW5UaW1lTWludXRlczowLGJpbGxpbmdPcmRlcjoxLGlzTWFpbkNhc3Q6dHJ1ZSxpc0NhbWVvOmZhbHNlLGlzVm9pY2VSb2xlOmZhbHNlfSk7XHJcbmNvbnN0IHByb2ZpbGU9KGNyZWRpdDpDcmVkaXQpPT5jcmVkaXQucGVyc29uJiZ0eXBlb2YgY3JlZGl0LnBlcnNvbj09PSdvYmplY3QnP2NyZWRpdC5wZXJzb24gYXMgQ3JlZGl0Ont9O1xyXG5jb25zdCBjcmVkaXROYW1lPShjcmVkaXQ6Q3JlZGl0KT0+U3RyaW5nKHByb2ZpbGUoY3JlZGl0KS5mdWxsTmFtZXx8Y3JlZGl0LmZ1bGxOYW1lfHxjcmVkaXQucGVyc29uTmFtZXx8YFBlcnNvbiAke2NyZWRpdC5wZXJzb25JZHx8Jyd9YCk7XHJcblxyXG5leHBvcnQgZnVuY3Rpb24gTW92aWVXaXphcmQoe2luaXRpYWwsaXNOZXcsb25Eb25lfTp7aW5pdGlhbDpNb3ZpZTtpc05ldzpib29sZWFuO29uRG9uZTooKT0+dm9pZH0pe1xyXG4gY29uc3QgW3N0ZXAsc2V0U3RlcF09dXNlU3RhdGUoMSk7Y29uc3QgW21vdmllLHNldE1vdmllXT11c2VTdGF0ZTxNb3ZpZT4oc3RydWN0dXJlZENsb25lKGluaXRpYWwpKTtjb25zdCBbY3JlZGl0cyxzZXRDcmVkaXRzXT11c2VTdGF0ZTxDcmVkaXRbXT4oW10pO2NvbnN0IFtkcmFmdCxzZXREcmFmdF09dXNlU3RhdGU8Q3JlZGl0PihlbXB0eUNyZWRpdCgpKTtjb25zdCBbbWVkaWEsc2V0TWVkaWFdPXVzZVN0YXRlPENyZWRpdFtdPihbXSk7Y29uc3QgW2Vycm9yLHNldEVycm9yXT11c2VTdGF0ZSgnJyk7Y29uc3QgW2J1c3ksc2V0QnVzeV09dXNlU3RhdGUoZmFsc2UpO2NvbnN0IFttZWRpYVR5cGUsc2V0TWVkaWFUeXBlXT11c2VTdGF0ZSgnU1RJTEwnKTtjb25zdCBbbWVkaWFUaXRsZSxzZXRNZWRpYVRpdGxlXT11c2VTdGF0ZSgnJyk7Y29uc3QgW21lZGlhVXJsLHNldE1lZGlhVXJsXT11c2VTdGF0ZSgnJyk7Y29uc3QgW2VkaXRpbmdNZWRpYUluZGV4LHNldEVkaXRpbmdNZWRpYUluZGV4XT11c2VTdGF0ZTxudW1iZXJ8bnVsbD4obnVsbCk7Y29uc3QgW3Blb3BsZSxzZXRQZW9wbGVdPXVzZVN0YXRlPENyZWRpdFtdPihbXSk7Y29uc3QgW3Blb3BsZVNlYXJjaCxzZXRQZW9wbGVTZWFyY2hdPXVzZVN0YXRlKCcnKTtjb25zdCBbc2VsZWN0ZWRQZXJzb24sc2V0U2VsZWN0ZWRQZXJzb25dPXVzZVN0YXRlPENyZWRpdHxudWxsPihudWxsKTtjb25zdCBbcGVyc29uRHJhZnQsc2V0UGVyc29uRHJhZnRdPXVzZVN0YXRlPENyZWRpdD4oe2Z1bGxOYW1lOicnLGJpb2dyYXBoeTonJyxwcm9maWxlSW1hZ2VVcmw6JycsZGF0ZU9mQmlydGg6JycsbmF0aW9uYWxpdHk6Jycsb2ZmaWNpYWxXZWJzaXRlOicnLHNraWxsczonJ30pO2NvbnN0IFtzb2NpYWxQbGF0Zm9ybSxzZXRTb2NpYWxQbGF0Zm9ybV09dXNlU3RhdGUoJ0lOU1RBR1JBTScpO2NvbnN0IFtzb2NpYWxVcmwsc2V0U29jaWFsVXJsXT11c2VTdGF0ZSgnJyk7XHJcbiB1c2VFZmZlY3QoKCk9PntpZihzdGVwIT09Mnx8IW1vdmllLmlkKXJldHVybjtsZXQgYWN0aXZlPXRydWU7c2V0QnVzeSh0cnVlKTtsaXN0TW92aWVDcmVkaXRzKG1vdmllLmlkKS50aGVuKGl0ZW1zPT57aWYoYWN0aXZlKXNldENyZWRpdHMoaXRlbXMpO30pLmNhdGNoKHg9PntpZihhY3RpdmUpc2V0RXJyb3IoKHggYXMgRXJyb3IpLm1lc3NhZ2UpO30pLmZpbmFsbHkoKCk9PntpZihhY3RpdmUpc2V0QnVzeShmYWxzZSk7fSk7cmV0dXJuKCk9PnthY3RpdmU9ZmFsc2U7fTt9LFtzdGVwLG1vdmllLmlkXSk7XHJcbiB1c2VFZmZlY3QoKCk9PntpZihzdGVwIT09MilyZXR1cm47bGV0IGFjdGl2ZT10cnVlO2NvbnN0IHRpbWVyPXNldFRpbWVvdXQoKCk9PnNlYXJjaFBlb3BsZShwZW9wbGVTZWFyY2gpLnRoZW4oaXRlbXM9PntpZihhY3RpdmUpc2V0UGVvcGxlKGl0ZW1zKTt9KS5jYXRjaCh4PT57aWYoYWN0aXZlKXNldEVycm9yKCh4IGFzIEVycm9yKS5tZXNzYWdlKTt9KSwyNTApO3JldHVybigpPT57YWN0aXZlPWZhbHNlO2NsZWFyVGltZW91dCh0aW1lcik7fTt9LFtzdGVwLHBlb3BsZVNlYXJjaF0pO1xyXG4gdXNlRWZmZWN0KCgpPT57aWYoc3RlcCE9PTN8fCFtb3ZpZS5pZClyZXR1cm47bGV0IGFjdGl2ZT10cnVlO3NldEJ1c3kodHJ1ZSk7bGlzdE1vdmllTWVkaWEobW92aWUuaWQpLnRoZW4oaXRlbXM9PntpZihhY3RpdmUpc2V0TWVkaWEoaXRlbXMubWFwKChpdGVtOkNyZWRpdCk9Pih7Li4uaXRlbSx1cmw6aXRlbS5tZWRpYVVybHx8aXRlbS51cmx8fCcnfSkpKTt9KS5jYXRjaCh4PT57aWYoYWN0aXZlKXNldEVycm9yKCh4IGFzIEVycm9yKS5tZXNzYWdlKTt9KS5maW5hbGx5KCgpPT57aWYoYWN0aXZlKXNldEJ1c3koZmFsc2UpO30pO3JldHVybigpPT57YWN0aXZlPWZhbHNlO307fSxbc3RlcCxtb3ZpZS5pZF0pO1xyXG4gY29uc3Qgc2F2ZVByb2ZpbGU9YXN5bmMoZTpGb3JtRXZlbnQpPT57ZS5wcmV2ZW50RGVmYXVsdCgpO3NldEJ1c3kodHJ1ZSk7c2V0RXJyb3IoJycpO3RyeXtpZighbW92aWUudGl0bGUudHJpbSgpfHwhbW92aWUubGFuZ3VhZ2UudHJpbSgpfHxOdW1iZXIobW92aWUuZHVyYXRpb24pPDEpdGhyb3cgbmV3IEVycm9yKCdUaXRsZSwgbGFuZ3VhZ2UsIGFuZCBhIHBvc2l0aXZlIGR1cmF0aW9uIGFyZSByZXF1aXJlZC4nKTtjb25zdCBzYXZlZD1pc05ldz9hd2FpdCBjcmVhdGVNb3ZpZVByb2ZpbGUobW92aWUpOihhd2FpdCByZXBvc2l0b3JpZXMubW92aWVzLnNhdmUobW92aWUpLG1vdmllKTtpZighc2F2ZWQuaWQpdGhyb3cgbmV3IEVycm9yKCdUaGUgbW92aWUgd2FzIHNhdmVkLCBidXQgdGhlIEFQSSBkaWQgbm90IHJldHVybiBpdHMgSUQuJyk7c2V0TW92aWUoc2F2ZWQpO3NldFN0ZXAoMik7fWNhdGNoKHgpe3NldEVycm9yKCh4IGFzIEVycm9yKS5tZXNzYWdlKTt9ZmluYWxseXtzZXRCdXN5KGZhbHNlKTt9fTtcclxuIGNvbnN0IGFkZENyZWRpdD1hc3luYyhlOkZvcm1FdmVudCk9PntlLnByZXZlbnREZWZhdWx0KCk7c2V0QnVzeSh0cnVlKTtzZXRFcnJvcignJyk7dHJ5e2xldCBwZXJzb249c2VsZWN0ZWRQZXJzb247aWYoIXBlcnNvbil7Y29uc3QgcHJvZmlsZVBheWxvYWQ9e2Z1bGxOYW1lOlN0cmluZyhwZXJzb25EcmFmdC5mdWxsTmFtZXx8JycpLnRyaW0oKSxiaW9ncmFwaHk6U3RyaW5nKHBlcnNvbkRyYWZ0LmJpb2dyYXBoeXx8JycpLHByb2ZpbGVJbWFnZVVybDpTdHJpbmcocGVyc29uRHJhZnQucHJvZmlsZUltYWdlVXJsfHwnJyksZGF0ZU9mQmlydGg6U3RyaW5nKHBlcnNvbkRyYWZ0LmRhdGVPZkJpcnRofHwnJyl8fHVuZGVmaW5lZCxuYXRpb25hbGl0eTpTdHJpbmcocGVyc29uRHJhZnQubmF0aW9uYWxpdHl8fCcnKSxvZmZpY2lhbFdlYnNpdGU6U3RyaW5nKHBlcnNvbkRyYWZ0Lm9mZmljaWFsV2Vic2l0ZXx8JycpLHNraWxsczpTdHJpbmcocGVyc29uRHJhZnQuc2tpbGxzfHwnJykuc3BsaXQoJywnKS5tYXAoKHZhbHVlOnN0cmluZyk9PnZhbHVlLnRyaW0oKSkuZmlsdGVyKEJvb2xlYW4pfTtpZighcHJvZmlsZVBheWxvYWQuZnVsbE5hbWUpdGhyb3cgbmV3IEVycm9yKCdFbnRlciB0aGUgcGVyc29uIG5hbWUgYmVmb3JlIHNhdmluZy4nKTtwZXJzb249YXdhaXQgY3JlYXRlUGVyc29uKHByb2ZpbGVQYXlsb2FkKTtpZighcGVyc29uPy5pZCl0aHJvdyBuZXcgRXJyb3IoJ1BlcnNvbiBwcm9maWxlIHdhcyBjcmVhdGVkLCBidXQgdGhlIEFQSSBkaWQgbm90IHJldHVybiBpdHMgSUQuJyk7Y29uc3QgY3JlYXRlZFBlcnNvbj1wZXJzb24gYXMgQ3JlZGl0O3NldFNlbGVjdGVkUGVyc29uKGNyZWF0ZWRQZXJzb24pO3NldERyYWZ0KHsuLi5kcmFmdCxwZXJzb25JZDpTdHJpbmcoY3JlYXRlZFBlcnNvbi5pZCl9KTtzZXRQZW9wbGUoKGN1cnJlbnQ6Q3JlZGl0W10pPT5bY3JlYXRlZFBlcnNvbiwuLi5jdXJyZW50LmZpbHRlcihpdGVtPT5pdGVtLmlkIT09Y3JlYXRlZFBlcnNvbi5pZCldKTtpZihzb2NpYWxVcmwudHJpbSgpKWF3YWl0IGFkZFBlcnNvblNvY2lhbExpbmsoU3RyaW5nKHBlcnNvbi5pZCkse3BsYXRmb3JtOnNvY2lhbFBsYXRmb3JtLHByb2ZpbGVVcmw6c29jaWFsVXJsLnRyaW0oKX0pO31pZighcGVyc29uPy5pZCl0aHJvdyBuZXcgRXJyb3IoJ1NlbGVjdCBvciBjcmVhdGUgYSBwZXJzb24gcHJvZmlsZSBmaXJzdC4nKTtjb25zdCByZXNvbHZlZFBlcnNvbj1wZXJzb24gYXMgQ3JlZGl0O2xldCByZWxhdGlvbnNoaXBzOnVua25vd247dHJ5e3JlbGF0aW9uc2hpcHM9SlNPTi5wYXJzZShTdHJpbmcoZHJhZnQuY2hhcmFjdGVyUmVsYXRpb25zaGlwc3x8J3t9JykpO31jYXRjaHt0aHJvdyBuZXcgRXJyb3IoJ0NoYXJhY3RlciByZWxhdGlvbnNoaXBzIG11c3QgYmUgdmFsaWQgSlNPTiwgc3VjaCBhcyB7XCJzaXN0ZXJcIjpcIk1heWFcIn0uJyk7fWlmKCFyZWxhdGlvbnNoaXBzfHx0eXBlb2YgcmVsYXRpb25zaGlwcyE9PSdvYmplY3QnfHxBcnJheS5pc0FycmF5KHJlbGF0aW9uc2hpcHMpfHxPYmplY3QudmFsdWVzKHJlbGF0aW9uc2hpcHMpLnNvbWUodmFsdWU9PnR5cGVvZiB2YWx1ZSE9PSdzdHJpbmcnKSl0aHJvdyBuZXcgRXJyb3IoJ0NoYXJhY3RlciByZWxhdGlvbnNoaXBzIG11c3QgYmUgYSBKU09OIG9iamVjdCB3aXRoIHN0cmluZyB2YWx1ZXMuJyk7Y29uc3Qgc2NyZWVuVGltZU1pbnV0ZXM9TnVtYmVyKGRyYWZ0LnNjcmVlblRpbWVNaW51dGVzKXx8MCxiaWxsaW5nT3JkZXI9TnVtYmVyKGRyYWZ0LmJpbGxpbmdPcmRlcil8fDA7aWYoIU51bWJlci5pc0ludGVnZXIoc2NyZWVuVGltZU1pbnV0ZXMpfHxzY3JlZW5UaW1lTWludXRlczwwfHwhTnVtYmVyLmlzSW50ZWdlcihiaWxsaW5nT3JkZXIpfHxiaWxsaW5nT3JkZXI8MCl0aHJvdyBuZXcgRXJyb3IoJ1NjcmVlbiB0aW1lIGFuZCBiaWxsaW5nIG9yZGVyIG11c3QgYmUgbm9uLW5lZ2F0aXZlIHdob2xlIG51bWJlcnMuJyk7Y29uc3QgcGF5bG9hZD17cGVyc29uSWQ6U3RyaW5nKHJlc29sdmVkUGVyc29uLmlkKSxjcmVkaXRUeXBlOmRyYWZ0LmNyZWRpdFR5cGUsZGVwYXJ0bWVudDpTdHJpbmcoZHJhZnQuZGVwYXJ0bWVudCkudHJpbSgpLHJvbGVUaXRsZTpTdHJpbmcoZHJhZnQucm9sZVRpdGxlKS50cmltKCksY2hhcmFjdGVyTmFtZTpTdHJpbmcoZHJhZnQuY2hhcmFjdGVyTmFtZXx8JycpLGNoYXJhY3RlckRlc2NyaXB0aW9uOlN0cmluZyhkcmFmdC5jaGFyYWN0ZXJEZXNjcmlwdGlvbnx8JycpLGNoYXJhY3RlckltYWdlVXJsOlN0cmluZyhkcmFmdC5jaGFyYWN0ZXJJbWFnZVVybHx8JycpLGNoYXJhY3RlckNhdGVnb3J5OmRyYWZ0LmNoYXJhY3RlckNhdGVnb3J5fHwnSEVSTycsY2hhcmFjdGVyT2NjdXBhdGlvbjpTdHJpbmcoZHJhZnQuY2hhcmFjdGVyT2NjdXBhdGlvbnx8JycpLGNoYXJhY3RlclJlbGF0aW9uc2hpcHM6cmVsYXRpb25zaGlwcyBhcyBSZWNvcmQ8c3RyaW5nLHN0cmluZz4sc2NyZWVuVGltZU1pbnV0ZXMsYmlsbGluZ09yZGVyLGlzTWFpbkNhc3Q6Qm9vbGVhbihkcmFmdC5pc01haW5DYXN0KSxpc0NhbWVvOkJvb2xlYW4oZHJhZnQuaXNDYW1lbyksaXNWb2ljZVJvbGU6Qm9vbGVhbihkcmFmdC5pc1ZvaWNlUm9sZSl9O2lmKCFwYXlsb2FkLnBlcnNvbklkfHwhcGF5bG9hZC5yb2xlVGl0bGUpdGhyb3cgbmV3IEVycm9yKCdDaG9vc2UgYSBwZXJzb24gYW5kIGVudGVyIGEgcm9sZS4nKTthd2FpdCBzYXZlTW92aWVDcmVkaXQobW92aWUuaWQscGF5bG9hZCk7c2V0Q3JlZGl0cyhhd2FpdCBsaXN0TW92aWVDcmVkaXRzKG1vdmllLmlkKSk7c2V0RHJhZnQoZW1wdHlDcmVkaXQoKSk7c2V0U2VsZWN0ZWRQZXJzb24obnVsbCk7c2V0UGVvcGxlU2VhcmNoKCcnKTtzZXRQZXJzb25EcmFmdCh7ZnVsbE5hbWU6JycsYmlvZ3JhcGh5OicnLHByb2ZpbGVJbWFnZVVybDonJyxkYXRlT2ZCaXJ0aDonJyxuYXRpb25hbGl0eTonJyxvZmZpY2lhbFdlYnNpdGU6Jycsc2tpbGxzOicnfSk7c2V0U29jaWFsVXJsKCcnKTt9Y2F0Y2goeCl7c2V0RXJyb3IoKHggYXMgRXJyb3IpLm1lc3NhZ2UpO31maW5hbGx5e3NldEJ1c3koZmFsc2UpO319O1xyXG4gY29uc3QgcmVtb3ZlQ3JlZGl0PWFzeW5jKGNyZWRpdDpDcmVkaXQpPT57aWYoIWNyZWRpdC5pZClyZXR1cm47c2V0QnVzeSh0cnVlKTtzZXRFcnJvcignJyk7dHJ5e2F3YWl0IGRlbGV0ZU1vdmllQ3JlZGl0KG1vdmllLmlkLFN0cmluZyhjcmVkaXQuaWQpKTtzZXRDcmVkaXRzKGF3YWl0IGxpc3RNb3ZpZUNyZWRpdHMobW92aWUuaWQpKTt9Y2F0Y2goeCl7c2V0RXJyb3IoKHggYXMgRXJyb3IpLm1lc3NhZ2UpO31maW5hbGx5e3NldEJ1c3koZmFsc2UpO319O1xyXG4gY29uc3QgcmVtb3ZlTWVkaWE9YXN5bmMoaXRlbTpDcmVkaXQsaW5kZXg6bnVtYmVyKT0+e3NldEJ1c3kodHJ1ZSk7c2V0RXJyb3IoJycpO3RyeXtpZihpdGVtLmlkKWF3YWl0IGRlbGV0ZU1vdmllTWVkaWEobW92aWUuaWQsU3RyaW5nKGl0ZW0uaWQpKTtzZXRNZWRpYShjdXJyZW50PT5jdXJyZW50LmZpbHRlcigoXyxpdGVtSW5kZXgpPT5pdGVtSW5kZXghPT1pbmRleCkpO2lmKGVkaXRpbmdNZWRpYUluZGV4PT09aW5kZXgpe3NldEVkaXRpbmdNZWRpYUluZGV4KG51bGwpO3NldE1lZGlhVGl0bGUoJycpO3NldE1lZGlhVXJsKCcnKTt9ZWxzZSBpZihlZGl0aW5nTWVkaWFJbmRleCE9PW51bGwmJmVkaXRpbmdNZWRpYUluZGV4PmluZGV4KXNldEVkaXRpbmdNZWRpYUluZGV4KGVkaXRpbmdNZWRpYUluZGV4LTEpO31jYXRjaCh4KXtzZXRFcnJvcigoeCBhcyBFcnJvcikubWVzc2FnZSk7fWZpbmFsbHl7c2V0QnVzeShmYWxzZSk7fX07XHJcbiBjb25zdCBzYXZlTWVkaWE9YXN5bmMoZTpGb3JtRXZlbnQpPT57ZS5wcmV2ZW50RGVmYXVsdCgpO3NldEJ1c3kodHJ1ZSk7c2V0RXJyb3IoJycpO3RyeXtmb3IoY29uc3QgW2luZGV4LGl0ZW1dIG9mIG1lZGlhLmVudHJpZXMoKSl7Y29uc3QgcGF5bG9hZD17bWVkaWFUeXBlOlN0cmluZyhpdGVtLm1lZGlhVHlwZXx8J1NUSUxMJyksdGl0bGU6aXRlbS50aXRsZXx8JycsZGVzY3JpcHRpb246aXRlbS5kZXNjcmlwdGlvbnx8JycsbWVkaWFVcmw6U3RyaW5nKGl0ZW0udXJsfHxpdGVtLm1lZGlhVXJsfHwnJyksdGh1bWJuYWlsVXJsOml0ZW0udGh1bWJuYWlsVXJsfHwnJyxsYW5ndWFnZTppdGVtLmxhbmd1YWdlfHwnJyxpc09mZmljaWFsOkJvb2xlYW4oaXRlbS5pc09mZmljaWFsKSxpc1ByaW1hcnk6Qm9vbGVhbihpdGVtLmlzUHJpbWFyeSksZGlzcGxheU9yZGVyOk51bWJlcihpdGVtLmRpc3BsYXlPcmRlcj8/aW5kZXgrMSksc291cmNlUGxhdGZvcm06aXRlbS5zb3VyY2VQbGF0Zm9ybXx8JycscHVibGlzaGVkQXQ6aXRlbS5wdWJsaXNoZWRBdHx8bnVsbH07aWYoIXBheWxvYWQubWVkaWFVcmwpdGhyb3cgbmV3IEVycm9yKCdFdmVyeSBtZWRpYSBpdGVtIG5lZWRzIGEgZGlyZWN0IG1lZGlhIFVSTC4nKTtpZihpdGVtLmlkKWF3YWl0IHVwZGF0ZU1vdmllTWVkaWEobW92aWUuaWQsU3RyaW5nKGl0ZW0uaWQpLHBheWxvYWQpO2Vsc2UgYXdhaXQgc2F2ZU1vdmllTWVkaWEobW92aWUuaWQscGF5bG9hZCk7fW9uRG9uZSgpO31jYXRjaCh4KXtzZXRFcnJvcigoeCBhcyBFcnJvcikubWVzc2FnZSk7fWZpbmFsbHl7c2V0QnVzeShmYWxzZSk7fX07XHJcbiBjb25zdCB0ZXh0PShrZXk6a2V5b2YgTW92aWUsbGFiZWw6c3RyaW5nLHR5cGU9J3RleHQnKT0+PGxhYmVsPntsYWJlbH08aW5wdXQgdHlwZT17dHlwZX0gdmFsdWU9e1N0cmluZyhtb3ZpZVtrZXldPz8nJyl9IG9uQ2hhbmdlPXtlPT5zZXRNb3ZpZSh7Li4ubW92aWUsW2tleV06dHlwZT09PSdudW1iZXInP051bWJlcihlLnRhcmdldC52YWx1ZSk6ZS50YXJnZXQudmFsdWV9KX0vPjwvbGFiZWw+O1xyXG4gY29uc3QgY3JlZGl0SW5wdXQ9KGtleTpzdHJpbmcsbGFiZWw6c3RyaW5nLHR5cGU9J3RleHQnKT0+PGxhYmVsPntsYWJlbH08aW5wdXQgdHlwZT17dHlwZX0gdmFsdWU9e1N0cmluZyhkcmFmdFtrZXldPz8nJyl9IG9uQ2hhbmdlPXtlPT5zZXREcmFmdCh7Li4uZHJhZnQsW2tleV06dHlwZT09PSdudW1iZXInP051bWJlcihlLnRhcmdldC52YWx1ZSk6ZS50YXJnZXQudmFsdWV9KX0vPjwvbGFiZWw+O1xyXG4gY29uc3QgcGVyc29uRmllbGRzPShjcmVkaXQ6Q3JlZGl0KT0+PGRpdiBjbGFzc05hbWU9XCJtb3ZpZS1jcmVkaXQtcHJvZmlsZS1kZXRhaWxzXCI+PGg0PlBlcnNvbiBwcm9maWxlPC9oND48ZGw+e1tbJ05hbWUnLHByb2ZpbGUoY3JlZGl0KS5mdWxsTmFtZV0sWydOYXRpb25hbGl0eScscHJvZmlsZShjcmVkaXQpLm5hdGlvbmFsaXR5XSxbJ0RhdGUgb2YgYmlydGgnLHByb2ZpbGUoY3JlZGl0KS5kYXRlT2ZCaXJ0aF0sWydXZWJzaXRlJyxwcm9maWxlKGNyZWRpdCkub2ZmaWNpYWxXZWJzaXRlXV0uZmlsdGVyKChbLHZdKT0+dikubWFwKChbbGFiZWwsdmFsdWVdKT0+PGRpdiBrZXk9e1N0cmluZyhsYWJlbCl9PjxkdD57bGFiZWx9PC9kdD48ZGQ+e1N0cmluZyh2YWx1ZSl9PC9kZD48L2Rpdj4pfTwvZGw+e3Byb2ZpbGUoY3JlZGl0KS5iaW9ncmFwaHkmJjxwPntwcm9maWxlKGNyZWRpdCkuYmlvZ3JhcGh5fTwvcD59e0FycmF5LmlzQXJyYXkocHJvZmlsZShjcmVkaXQpLnNraWxscykmJnByb2ZpbGUoY3JlZGl0KS5za2lsbHMubGVuZ3RoPjAmJjxwPjxzdHJvbmc+U2tpbGxzOjwvc3Ryb25nPiB7cHJvZmlsZShjcmVkaXQpLnNraWxscy5qb2luKCcsICcpfTwvcD59e0FycmF5LmlzQXJyYXkocHJvZmlsZShjcmVkaXQpLnNvY2lhbExpbmtzKSYmcHJvZmlsZShjcmVkaXQpLnNvY2lhbExpbmtzLmxlbmd0aD4wJiY8cD48c3Ryb25nPlNvY2lhbDo8L3N0cm9uZz4ge3Byb2ZpbGUoY3JlZGl0KS5zb2NpYWxMaW5rcy5tYXAoKGxpbms6Q3JlZGl0KT0+bGluay5wcm9maWxlVXJsfHxsaW5rLnVzZXJuYW1lKS5maWx0ZXIoQm9vbGVhbikuam9pbignIMK3ICcpfTwvcD59PC9kaXY+O1xyXG4gcmV0dXJuIDxkaXYgY2xhc3NOYW1lPVwiZW50aXR5LWZvcm0gbW92aWUtd2l6YXJkXCI+PG5hdiBjbGFzc05hbWU9XCJ0YWJzXCIgYXJpYS1sYWJlbD1cIk1vdmllIGZvcm0gc3RhZ2VzXCI+e1snTW92aWUgZGV0YWlscycsJ0Nhc3QgYW5kIGNyZXcnLCdNZWRpYSddLm1hcCgobGFiZWwsaSk9PjxidXR0b24gdHlwZT1cImJ1dHRvblwiIGtleT17bGFiZWx9IGRpc2FibGVkPXtpKzE+c3RlcH0gY2xhc3NOYW1lPXtzdGVwPT09aSsxPydhY3RpdmUnOicnfT57aSsxfS4ge2xhYmVsfTwvYnV0dG9uPil9PC9uYXY+XHJcbiB7c3RlcD09PTEmJjxmb3JtIG9uU3VibWl0PXtzYXZlUHJvZmlsZX0+PGRpdiBjbGFzc05hbWU9XCJmb3JtLWdyaWRcIj57dGV4dCgndGl0bGUnLCdNb3ZpZSB0aXRsZScpfXt0ZXh0KCdvcmlnaW5hbFRpdGxlJywnT3JpZ2luYWwgdGl0bGUnKX17dGV4dCgndGFnbGluZScsJ1RhZ2xpbmUnKX17dGV4dCgnbGFuZ3VhZ2UnLCdMYW5ndWFnZScpfXt0ZXh0KCdvcmlnaW5hbExhbmd1YWdlJywnT3JpZ2luYWwgbGFuZ3VhZ2UnKX17dGV4dCgnZHVyYXRpb24nLCdEdXJhdGlvbiAobWludXRlcyknLCdudW1iZXInKX17dGV4dCgncmVsZWFzZURhdGUnLCdSZWxlYXNlIGRhdGUnLCdkYXRlJyl9e3RleHQoJ2Fubm91bmNlbWVudERhdGUnLCdBbm5vdW5jZW1lbnQgZGF0ZScsJ2RhdGUnKX17dGV4dCgncHJvZHVjdGlvblN0YXJ0RGF0ZScsJ1Byb2R1Y3Rpb24gc3RhcnQgZGF0ZScsJ2RhdGUnKX17dGV4dCgncHJvZHVjdGlvbkVuZERhdGUnLCdQcm9kdWN0aW9uIGVuZCBkYXRlJywnZGF0ZScpfXt0ZXh0KCdjZXJ0aWZpY2F0aW9uJywnQ2VydGlmaWNhdGlvbicpfXt0ZXh0KCdkaXJlY3RvcicsJ0RpcmVjdG9yJyl9e3RleHQoJ3Byb2R1Y3Rpb24nLCdQcm9kdWN0aW9uJyl9e3RleHQoJ2Rpc3RyaWJ1dG9yJywnRGlzdHJpYnV0b3InKX17dGV4dCgnb2ZmaWNpYWxXZWJzaXRlJywnT2ZmaWNpYWwgd2Vic2l0ZScsJ3VybCcpfXt0ZXh0KCdidWRnZXQnLCdCdWRnZXQnLCdudW1iZXInKX17dGV4dCgnY3VycmVuY3lDb2RlJywnQ3VycmVuY3kgY29kZScpfXt0ZXh0KCdwb3N0ZXJVcmwnLCdQb3N0ZXIgVVJMJywndXJsJyl9e3RleHQoJ2JhY2tkcm9wVXJsJywnQmFja2Ryb3AgVVJMJywndXJsJyl9e3RleHQoJ2V4dGVybmFsVHJhaWxlclVybCcsJ0V4dGVybmFsIHRyYWlsZXIgVVJMJywndXJsJyl9PGxhYmVsPlN0YXR1czxzZWxlY3QgdmFsdWU9e21vdmllLnN0YXR1c30gb25DaGFuZ2U9e2U9PnNldE1vdmllKHsuLi5tb3ZpZSxzdGF0dXM6ZS50YXJnZXQudmFsdWUgYXMgTW92aWVbJ3N0YXR1cyddfSl9PjxvcHRpb24+VVBDT01JTkc8L29wdGlvbj48b3B0aW9uPkFDVElWRTwvb3B0aW9uPjxvcHRpb24+RU5ERUQ8L29wdGlvbj48L3NlbGVjdD48L2xhYmVsPjxsYWJlbD5HZW5yZXMgKGNvbW1hIHNlcGFyYXRlZCk8aW5wdXQgdmFsdWU9eyhtb3ZpZS5nZW5yZXM/P21vdmllLmdlbnJlPz9bXSkuam9pbignLCAnKX0gb25DaGFuZ2U9e2U9Pntjb25zdCBnZW5yZXM9ZS50YXJnZXQudmFsdWUuc3BsaXQoJywnKS5tYXAodj0+di50cmltKCkpLmZpbHRlcihCb29sZWFuKTtzZXRNb3ZpZSh7Li4ubW92aWUsZ2VucmVzLGdlbnJlOmdlbnJlc30pO319Lz48L2xhYmVsPjxsYWJlbD5MYW5ndWFnZXMgKGNvbW1hIHNlcGFyYXRlZCk8aW5wdXQgdmFsdWU9eyhtb3ZpZS5sYW5ndWFnZXM/P1tdKS5qb2luKCcsICcpfSBvbkNoYW5nZT17ZT0+c2V0TW92aWUoey4uLm1vdmllLGxhbmd1YWdlczplLnRhcmdldC52YWx1ZS5zcGxpdCgnLCcpLm1hcCh2PT52LnRyaW0oKSkuZmlsdGVyKEJvb2xlYW4pfSl9Lz48L2xhYmVsPjxsYWJlbCBjbGFzc05hbWU9XCJzcGFuLXR3b1wiPlN5bm9wc2lzPHRleHRhcmVhIHJvd3M9ezR9IHZhbHVlPXtTdHJpbmcobW92aWUuc3lub3BzaXM/P21vdmllLmRlc2NyaXB0aW9uPz8nJyl9IG9uQ2hhbmdlPXtlPT5zZXRNb3ZpZSh7Li4ubW92aWUsc3lub3BzaXM6ZS50YXJnZXQudmFsdWUsZGVzY3JpcHRpb246ZS50YXJnZXQudmFsdWV9KX0vPjwvbGFiZWw+PC9kaXY+PGRpdiBjbGFzc05hbWU9XCJidXR0b24tcm93XCI+PGJ1dHRvbiBjbGFzc05hbWU9XCJidXR0b25cIiBkaXNhYmxlZD17YnVzeX0+e2J1c3k/J1NhdmluZ+KApic6J1NhdmUgZGV0YWlscyBhbmQgY29udGludWUnfTwvYnV0dG9uPjwvZGl2PjwvZm9ybT59XHJcbiB7c3RlcD09PTImJjxkaXYgY2xhc3NOYW1lPVwibW92aWUtY3JlZGl0LXN0YWdlXCI+XHJcbiAgPGRpdiBjbGFzc05hbWU9XCJtb3ZpZS1jcmVkaXQtc3RhZ2UtaGVhZGluZ1wiPjxkaXY+PGgzPkNhc3QgYW5kIGNyZXcgZm9yIHttb3ZpZS50aXRsZX08L2gzPjxwIGNsYXNzTmFtZT1cIm11dGVkXCI+RW50ZXIgdGhlIHBlcnNvbiBhbmQgY3JlZGl0IGRldGFpbHMgdG9nZXRoZXIsIHRoZW4gc2F2ZSBvbmNlLjwvcD48L2Rpdj48c3BhbiBjbGFzc05hbWU9XCJtb3ZpZS1jcmVkaXQtY291bnRcIj57Y3JlZGl0cy5sZW5ndGh9IHNhdmVkPC9zcGFuPjwvZGl2PlxyXG4gIDxmb3JtIGNsYXNzTmFtZT1cIm1vdmllLWNyZWRpdC1lZGl0b3JcIiBvblN1Ym1pdD17YWRkQ3JlZGl0fT5cclxuICAgPHNlY3Rpb24gY2xhc3NOYW1lPVwibW92aWUtY3JlZGl0LWZvcm0tc2VjdGlvblwiPjxkaXYgY2xhc3NOYW1lPVwibW92aWUtY3JlZGl0LXNlY3Rpb24taGVhZGluZ1wiPjxzcGFuPjAxPC9zcGFuPjxkaXY+PGg0PlBlcnNvbiBkZXRhaWxzPC9oND48cD5DaG9vc2UgYW4gZXhpc3RpbmcgcGVyc29uIG9yIGZpbGwgaW4gYSBuZXcgcHJvZmlsZSBiZWxvdy48L3A+PC9kaXY+PC9kaXY+XHJcbiAgICA8bGFiZWw+RmluZCBleGlzdGluZyBwZXJzb248aW5wdXQgdmFsdWU9e3Blb3BsZVNlYXJjaH0gb25DaGFuZ2U9e2U9PntzZXRQZW9wbGVTZWFyY2goZS50YXJnZXQudmFsdWUpO3NldFNlbGVjdGVkUGVyc29uKG51bGwpO3NldERyYWZ0KHsuLi5kcmFmdCxwZXJzb25JZDonJ30pO319IHBsYWNlaG9sZGVyPVwiU2VhcmNoIHBlb3BsZSBieSBuYW1lXCIvPjwvbGFiZWw+XHJcbiAgICB7IXNlbGVjdGVkUGVyc29uJiZwZW9wbGVTZWFyY2gudHJpbSgpJiZwZW9wbGUubGVuZ3RoPjAmJjxkaXYgY2xhc3NOYW1lPVwibW92aWUtcGVyc29uLXJlc3VsdHNcIj57cGVvcGxlLnNsaWNlKDAsNikubWFwKChwZXJzb24saW5kZXgpPT48YnV0dG9uIHR5cGU9XCJidXR0b25cIiBrZXk9e3BlcnNvbi5pZHx8aW5kZXh9IG9uQ2xpY2s9eygpPT57c2V0U2VsZWN0ZWRQZXJzb24ocGVyc29uKTtzZXREcmFmdCh7Li4uZHJhZnQscGVyc29uSWQ6U3RyaW5nKHBlcnNvbi5pZCl9KTt9fT57cGVyc29uLnByb2ZpbGVJbWFnZVVybCYmPE1lZGlhSW1hZ2UgY2xhc3NOYW1lPVwibW92aWUtcGVyc29uLXBob3RvXCIgdXJsPXtwZXJzb24ucHJvZmlsZUltYWdlVXJsfSBhbHQ9e2Ake3BlcnNvbi5mdWxsTmFtZX0gcHJvZmlsZWB9IHNob3dGYWxsYmFja0xpbms9e2ZhbHNlfS8+fTxzcGFuPjxzdHJvbmc+e3BlcnNvbi5mdWxsTmFtZX08L3N0cm9uZz48c21hbGw+e3BlcnNvbi5uYXRpb25hbGl0eXx8J1BlcnNvbid9IC0gc2VsZWN0IHByb2ZpbGU8L3NtYWxsPjwvc3Bhbj48L2J1dHRvbj4pfTwvZGl2Pn1cclxuICAgIHtzZWxlY3RlZFBlcnNvbj88ZGl2IGNsYXNzTmFtZT1cIm1vdmllLXBlcnNvbi1zZWxlY3RlZFwiPntzZWxlY3RlZFBlcnNvbi5wcm9maWxlSW1hZ2VVcmwmJjxNZWRpYUltYWdlIGNsYXNzTmFtZT1cIm1vdmllLXBlcnNvbi1waG90b1wiIHVybD17c2VsZWN0ZWRQZXJzb24ucHJvZmlsZUltYWdlVXJsfSBhbHQ9e2Ake3NlbGVjdGVkUGVyc29uLmZ1bGxOYW1lfSBwcm9maWxlYH0gc2hvd0ZhbGxiYWNrTGluaz17ZmFsc2V9Lz59PHNwYW4+PHN0cm9uZz57c2VsZWN0ZWRQZXJzb24uZnVsbE5hbWV9PC9zdHJvbmc+PHNtYWxsPkV4aXN0aW5nIHBlcnNvbiBzZWxlY3RlZDwvc21hbGw+PC9zcGFuPjxidXR0b24gdHlwZT1cImJ1dHRvblwiIGNsYXNzTmFtZT1cImJ1dHRvbiBzZWNvbmRhcnkgc21hbGxcIiBvbkNsaWNrPXsoKT0+e3NldFNlbGVjdGVkUGVyc29uKG51bGwpO3NldERyYWZ0KHsuLi5kcmFmdCxwZXJzb25JZDonJ30pO319PlVzZSBuZXcgcHJvZmlsZTwvYnV0dG9uPjwvZGl2Pjo8ZGl2IGNsYXNzTmFtZT1cIm1vdmllLXBlcnNvbi1jcmVhdGUgbW92aWUtcGVyc29uLWNyZWF0ZS1pbmxpbmVcIj48aDU+TmV3IHBlcnNvbiBwcm9maWxlPC9oNT48bGFiZWw+UGVyc29uIG5hbWU8aW5wdXQgcmVxdWlyZWQgdmFsdWU9e3BlcnNvbkRyYWZ0LmZ1bGxOYW1lfSBvbkNoYW5nZT17ZT0+c2V0UGVyc29uRHJhZnQoey4uLnBlcnNvbkRyYWZ0LGZ1bGxOYW1lOmUudGFyZ2V0LnZhbHVlfSl9Lz48L2xhYmVsPjxsYWJlbD5Qcm9maWxlIHBob3RvIFVSTDxpbnB1dCB0eXBlPVwidXJsXCIgdmFsdWU9e3BlcnNvbkRyYWZ0LnByb2ZpbGVJbWFnZVVybH0gb25DaGFuZ2U9e2U9PnNldFBlcnNvbkRyYWZ0KHsuLi5wZXJzb25EcmFmdCxwcm9maWxlSW1hZ2VVcmw6ZS50YXJnZXQudmFsdWV9KX0vPjwvbGFiZWw+PGxhYmVsPkRhdGUgb2YgYmlydGg8aW5wdXQgdHlwZT1cImRhdGVcIiB2YWx1ZT17cGVyc29uRHJhZnQuZGF0ZU9mQmlydGh9IG9uQ2hhbmdlPXtlPT5zZXRQZXJzb25EcmFmdCh7Li4ucGVyc29uRHJhZnQsZGF0ZU9mQmlydGg6ZS50YXJnZXQudmFsdWV9KX0vPjwvbGFiZWw+PGxhYmVsPk5hdGlvbmFsaXR5PGlucHV0IHZhbHVlPXtwZXJzb25EcmFmdC5uYXRpb25hbGl0eX0gb25DaGFuZ2U9e2U9PnNldFBlcnNvbkRyYWZ0KHsuLi5wZXJzb25EcmFmdCxuYXRpb25hbGl0eTplLnRhcmdldC52YWx1ZX0pfS8+PC9sYWJlbD48bGFiZWw+T2ZmaWNpYWwgd2Vic2l0ZTxpbnB1dCB0eXBlPVwidXJsXCIgdmFsdWU9e3BlcnNvbkRyYWZ0Lm9mZmljaWFsV2Vic2l0ZX0gb25DaGFuZ2U9e2U9PnNldFBlcnNvbkRyYWZ0KHsuLi5wZXJzb25EcmFmdCxvZmZpY2lhbFdlYnNpdGU6ZS50YXJnZXQudmFsdWV9KX0vPjwvbGFiZWw+PGxhYmVsPlNraWxscywgY29tbWEgc2VwYXJhdGVkPGlucHV0IHZhbHVlPXtwZXJzb25EcmFmdC5za2lsbHN9IG9uQ2hhbmdlPXtlPT5zZXRQZXJzb25EcmFmdCh7Li4ucGVyc29uRHJhZnQsc2tpbGxzOmUudGFyZ2V0LnZhbHVlfSl9Lz48L2xhYmVsPjxsYWJlbCBjbGFzc05hbWU9XCJzcGFuLXR3b1wiPkJpb2dyYXBoeTx0ZXh0YXJlYSByb3dzPXszfSB2YWx1ZT17cGVyc29uRHJhZnQuYmlvZ3JhcGh5fSBvbkNoYW5nZT17ZT0+c2V0UGVyc29uRHJhZnQoey4uLnBlcnNvbkRyYWZ0LGJpb2dyYXBoeTplLnRhcmdldC52YWx1ZX0pfS8+PC9sYWJlbD48ZGl2IGNsYXNzTmFtZT1cIm1vdmllLXBlcnNvbi1zb2NpYWxcIj48bGFiZWw+U29jaWFsIHBsYXRmb3JtPHNlbGVjdCB2YWx1ZT17c29jaWFsUGxhdGZvcm19IG9uQ2hhbmdlPXtlPT5zZXRTb2NpYWxQbGF0Zm9ybShlLnRhcmdldC52YWx1ZSl9PntbJ0lOU1RBR1JBTScsJ1lPVVRVQkUnLCdGQUNFQk9PSycsJ1gnLCdUSUtUT0snLCdPRkZJQ0lBTF9XRUJTSVRFJywnT1RIRVInXS5tYXAodmFsdWU9PjxvcHRpb24ga2V5PXt2YWx1ZX0+e3ZhbHVlfTwvb3B0aW9uPil9PC9zZWxlY3Q+PC9sYWJlbD48bGFiZWw+U29jaWFsIHByb2ZpbGUgVVJMPGlucHV0IHR5cGU9XCJ1cmxcIiB2YWx1ZT17c29jaWFsVXJsfSBvbkNoYW5nZT17ZT0+c2V0U29jaWFsVXJsKGUudGFyZ2V0LnZhbHVlKX0vPjwvbGFiZWw+PC9kaXY+PC9kaXY+fVxyXG4gICA8L3NlY3Rpb24+XHJcbiAgIDxzZWN0aW9uIGNsYXNzTmFtZT1cIm1vdmllLWNyZWRpdC1mb3JtLXNlY3Rpb25cIj48ZGl2IGNsYXNzTmFtZT1cIm1vdmllLWNyZWRpdC1zZWN0aW9uLWhlYWRpbmdcIj48c3Bhbj4wMjwvc3Bhbj48ZGl2PjxoND5DaGFyYWN0ZXIgYW5kIHJvbGUgZGV0YWlsczwvaDQ+PHA+VGhlc2UgZmllbGRzIGFyZSBzYXZlZCB3aXRoIHRoaXMgbW92aWUgY3JlZGl0LjwvcD48L2Rpdj48L2Rpdj48ZGl2IGNsYXNzTmFtZT1cImZvcm0tZ3JpZFwiPlxyXG4gICAge2RyYWZ0LmNyZWRpdFR5cGU9PT0nQ0FTVCcmJmNyZWRpdElucHV0KCdjaGFyYWN0ZXJOYW1lJywnQ2hhcmFjdGVyIG5hbWUnKX17Y3JlZGl0SW5wdXQoJ3JvbGVUaXRsZScsJ1JvbGUgdGl0bGUnKX1cclxuICAgIDxsYWJlbD5DcmVkaXQgdHlwZTxzZWxlY3QgdmFsdWU9e2RyYWZ0LmNyZWRpdFR5cGV9IG9uQ2hhbmdlPXtlPT5zZXREcmFmdCh7Li4uZHJhZnQsY3JlZGl0VHlwZTplLnRhcmdldC52YWx1ZX0pfT48b3B0aW9uIHZhbHVlPVwiQ0FTVFwiPkNhc3Q8L29wdGlvbj48b3B0aW9uIHZhbHVlPVwiQ1JFV1wiPkNyZXc8L29wdGlvbj48L3NlbGVjdD48L2xhYmVsPlxyXG4gICAge2RyYWZ0LmNyZWRpdFR5cGU9PT0nQ1JFVyc/PGxhYmVsPkRlcGFydG1lbnQ8c2VsZWN0IHZhbHVlPXtkcmFmdC5kZXBhcnRtZW50fSBvbkNoYW5nZT17ZT0+c2V0RHJhZnQoey4uLmRyYWZ0LGRlcGFydG1lbnQ6ZS50YXJnZXQudmFsdWV9KX0+e1snRElSRUNUSU5HJywnTVVTSUMnLCdDSU5FTUFUT0dSQVBIWScsJ1BST0RVQ1RJT04nLCdDQU1FUkEnLCdWRlgnLCdFRElUSU5HJywnTUFLRVVQJywnTElHSFRJTkcnLCdDUkFORScsJ1NPVU5EX1NGWCcsJ0RJJywnRFVCQklORycsJ1NUVU5UUycsJ0FSVF9ESVJFQ1RJT04nLCdPVEhFUiddLm1hcChpdGVtPT48b3B0aW9uIGtleT17aXRlbX0+e2l0ZW19PC9vcHRpb24+KX08L3NlbGVjdD48L2xhYmVsPjo8bGFiZWw+RGVwYXJ0bWVudDxpbnB1dCB2YWx1ZT17ZHJhZnQuZGVwYXJ0bWVudH0gb25DaGFuZ2U9e2U9PnNldERyYWZ0KHsuLi5kcmFmdCxkZXBhcnRtZW50OmUudGFyZ2V0LnZhbHVlfSl9IHBsYWNlaG9sZGVyPVwiZS5nLiBBY3RpbmdcIi8+PC9sYWJlbD59XHJcbiAgICB7ZHJhZnQuY3JlZGl0VHlwZT09PSdDQVNUJyYmPD48bGFiZWw+Q2hhcmFjdGVyIGNhdGVnb3J5PHNlbGVjdCB2YWx1ZT17ZHJhZnQuY2hhcmFjdGVyQ2F0ZWdvcnl9IG9uQ2hhbmdlPXtlPT5zZXREcmFmdCh7Li4uZHJhZnQsY2hhcmFjdGVyQ2F0ZWdvcnk6ZS50YXJnZXQudmFsdWV9KX0+e1snSEVSTycsJ1ZJTExBSU4nLCdBTlRBR09OSVNUJywnU1VQUE9SVElORycsJ09USEVSJ10ubWFwKGl0ZW09PjxvcHRpb24ga2V5PXtpdGVtfT57aXRlbX08L29wdGlvbj4pfTwvc2VsZWN0PjwvbGFiZWw+e2NyZWRpdElucHV0KCdjaGFyYWN0ZXJPY2N1cGF0aW9uJywnQ2hhcmFjdGVyIG9jY3VwYXRpb24nKX17Y3JlZGl0SW5wdXQoJ2NoYXJhY3RlckltYWdlVXJsJywnQ2hhcmFjdGVyIGltYWdlIFVSTCcsJ3VybCcpfXtjcmVkaXRJbnB1dCgnc2NyZWVuVGltZU1pbnV0ZXMnLCdTY3JlZW4gdGltZSAobWludXRlcyknLCdudW1iZXInKX17Y3JlZGl0SW5wdXQoJ2JpbGxpbmdPcmRlcicsJ0JpbGxpbmcgb3JkZXInLCdudW1iZXInKX08bGFiZWwgY2xhc3NOYW1lPVwic3Bhbi10d29cIj5DaGFyYWN0ZXIgZGVzY3JpcHRpb248dGV4dGFyZWEgcm93cz17M30gdmFsdWU9e2RyYWZ0LmNoYXJhY3RlckRlc2NyaXB0aW9ufSBvbkNoYW5nZT17ZT0+c2V0RHJhZnQoey4uLmRyYWZ0LGNoYXJhY3RlckRlc2NyaXB0aW9uOmUudGFyZ2V0LnZhbHVlfSl9Lz48L2xhYmVsPjxsYWJlbCBjbGFzc05hbWU9XCJzcGFuLXR3b1wiPkNoYXJhY3RlciByZWxhdGlvbnNoaXBzIChKU09OIG9iamVjdCk8dGV4dGFyZWEgcm93cz17Mn0gdmFsdWU9e2RyYWZ0LmNoYXJhY3RlclJlbGF0aW9uc2hpcHN9IHBsYWNlaG9sZGVyPVwieyZxdW90O3Npc3RlciZxdW90OzomcXVvdDtNYXlhJnF1b3Q7fVwiIG9uQ2hhbmdlPXtlPT5zZXREcmFmdCh7Li4uZHJhZnQsY2hhcmFjdGVyUmVsYXRpb25zaGlwczplLnRhcmdldC52YWx1ZX0pfS8+PC9sYWJlbD48bGFiZWwgY2xhc3NOYW1lPVwibW92aWUtY3JlZGl0LWNoZWNrXCI+PGlucHV0IHR5cGU9XCJjaGVja2JveFwiIGNoZWNrZWQ9e2RyYWZ0LmlzTWFpbkNhc3R9IG9uQ2hhbmdlPXtlPT5zZXREcmFmdCh7Li4uZHJhZnQsaXNNYWluQ2FzdDplLnRhcmdldC5jaGVja2VkfSl9Lz4gTWFpbiBjYXN0PC9sYWJlbD48bGFiZWwgY2xhc3NOYW1lPVwibW92aWUtY3JlZGl0LWNoZWNrXCI+PGlucHV0IHR5cGU9XCJjaGVja2JveFwiIGNoZWNrZWQ9e2RyYWZ0LmlzQ2FtZW99IG9uQ2hhbmdlPXtlPT5zZXREcmFmdCh7Li4uZHJhZnQsaXNDYW1lbzplLnRhcmdldC5jaGVja2VkfSl9Lz4gQ2FtZW88L2xhYmVsPjxsYWJlbCBjbGFzc05hbWU9XCJtb3ZpZS1jcmVkaXQtY2hlY2tcIj48aW5wdXQgdHlwZT1cImNoZWNrYm94XCIgY2hlY2tlZD17ZHJhZnQuaXNWb2ljZVJvbGV9IG9uQ2hhbmdlPXtlPT5zZXREcmFmdCh7Li4uZHJhZnQsaXNWb2ljZVJvbGU6ZS50YXJnZXQuY2hlY2tlZH0pfS8+IFZvaWNlIHJvbGU8L2xhYmVsPjwvPn1cclxuICAgPC9kaXY+PC9zZWN0aW9uPjxidXR0b24gdHlwZT1cInN1Ym1pdFwiIGNsYXNzTmFtZT1cImJ1dHRvblwiIGRpc2FibGVkPXtidXN5fHwoIXNlbGVjdGVkUGVyc29uJiYhcGVyc29uRHJhZnQuZnVsbE5hbWUudHJpbSgpKX0+e2J1c3k/J1NhdmluZyBwZXJzb24gYW5kIGNyZWRpdC4uLic6J1NhdmUgcGVyc29uIGFuZCBjcmVkaXQnfTwvYnV0dG9uPlxyXG4gIDwvZm9ybT5cclxuICB7Y3JlZGl0cy5sZW5ndGg+MCYmPGRpdiBjbGFzc05hbWU9XCJtb3ZpZS1jcmVkaXQtc2F2ZWRcIj48ZGl2IGNsYXNzTmFtZT1cIm1vdmllLWNyZWRpdC1zdGFnZS1oZWFkaW5nXCI+PGRpdj48aDQ+QWRkZWQgY2FzdCBhbmQgY3JldzwvaDQ+PHAgY2xhc3NOYW1lPVwibXV0ZWRcIj5TYXZlZCBlbnRyaWVzIGZvciB7bW92aWUudGl0bGV9LiBPcGVuIGEgY2FyZCBmb3IgdGhlIHByb2ZpbGUgYW5kIGNyZWRpdCBkZXRhaWxzLjwvcD48L2Rpdj48c3BhbiBjbGFzc05hbWU9XCJtb3ZpZS1jcmVkaXQtY291bnRcIj57Y3JlZGl0cy5sZW5ndGh9PC9zcGFuPjwvZGl2PjxkaXYgY2xhc3NOYW1lPVwibW92aWUtY3JlZGl0LWNhcmRzXCI+e2NyZWRpdHMubWFwKChjcmVkaXQsaW5kZXgpPT57Y29uc3QgcGVyc29uPXByb2ZpbGUoY3JlZGl0KTtjb25zdCBuYW1lPWNyZWRpdE5hbWUoY3JlZGl0KTtjb25zdCBpbWFnZT1wZXJzb24ucHJvZmlsZUltYWdlVXJsfHxjcmVkaXQuY2hhcmFjdGVySW1hZ2VVcmw7cmV0dXJuIDxkaXYgY2xhc3NOYW1lPVwibW92aWUtY3JlZGl0LXNhdmVkLWNhcmRcIiBrZXk9e2NyZWRpdC5pZHx8YCR7Y3JlZGl0LnBlcnNvbklkfS0ke2luZGV4fWB9PjxkZXRhaWxzIGNsYXNzTmFtZT1cIm1vdmllLWNyZWRpdC1jYXJkXCI+PHN1bW1hcnk+PHNwYW4gY2xhc3NOYW1lPVwibW92aWUtY3JlZGl0LWF2YXRhclwiPntpbWFnZT88TWVkaWFJbWFnZSBjbGFzc05hbWU9XCJtb3ZpZS1jcmVkaXQtcGhvdG9cIiB1cmw9e1N0cmluZyhpbWFnZSl9IGFsdD17YCR7bmFtZX0gcHJvZmlsZWB9IHNob3dGYWxsYmFja0xpbms9e2ZhbHNlfS8+Om5hbWUuc3BsaXQoL1xccysvKS5tYXAocGFydD0+cGFydFswXXx8JycpLmpvaW4oJycpLnNsaWNlKDAsMikudG9VcHBlckNhc2UoKX08L3NwYW4+PHNwYW4gY2xhc3NOYW1lPVwibW92aWUtY3JlZGl0LWNhcmQtdGl0bGVcIj48c3Ryb25nPntuYW1lfTwvc3Ryb25nPjxzbWFsbD57Y3JlZGl0LnJvbGVUaXRsZXx8J0NyZWRpdCd9e2NyZWRpdC5jaGFyYWN0ZXJOYW1lP2AgLyAke2NyZWRpdC5jaGFyYWN0ZXJOYW1lfWA6Jyd9PC9zbWFsbD48c21hbGw+e2NyZWRpdC5jcmVkaXRUeXBlfHwnJ317Y3JlZGl0LmRlcGFydG1lbnQ/YCAvICR7Y3JlZGl0LmRlcGFydG1lbnR9YDonJ308L3NtYWxsPjwvc3Bhbj48c3BhbiBjbGFzc05hbWU9XCJtb3ZpZS1jcmVkaXQtb3BlblwiPlZpZXcgZGV0YWlsczwvc3Bhbj48L3N1bW1hcnk+PGRpdiBjbGFzc05hbWU9XCJtb3ZpZS1jcmVkaXQtY2FyZC1ib2R5XCI+e3BlcnNvbkZpZWxkcyhjcmVkaXQpfTxkaXYgY2xhc3NOYW1lPVwibW92aWUtY3JlZGl0LWNoYXJhY3Rlci1kZXRhaWxzXCI+PGg0PkNoYXJhY3RlciAvIGNyZWRpdCBkZXRhaWxzPC9oND48ZGw+e1tbJ0NhdGVnb3J5JyxjcmVkaXQuY2hhcmFjdGVyQ2F0ZWdvcnldLFsnT2NjdXBhdGlvbicsY3JlZGl0LmNoYXJhY3Rlck9jY3VwYXRpb25dLFsnU2NyZWVuIHRpbWUnLGNyZWRpdC5zY3JlZW5UaW1lTWludXRlc10sWydCaWxsaW5nIG9yZGVyJyxjcmVkaXQuYmlsbGluZ09yZGVyXSxbJ01haW4gY2FzdCcsY3JlZGl0LmlzTWFpbkNhc3Q/J1llcyc6J05vJ10sWydDYW1lbycsY3JlZGl0LmlzQ2FtZW8/J1llcyc6J05vJ10sWydWb2ljZSByb2xlJyxjcmVkaXQuaXNWb2ljZVJvbGU/J1llcyc6J05vJ11dLmZpbHRlcigoWyx2XSk9PnYhPT0nJyYmdiE9bnVsbCkubWFwKChbbGFiZWwsdmFsdWVdKT0+PGRpdiBrZXk9e1N0cmluZyhsYWJlbCl9PjxkdD57bGFiZWx9PC9kdD48ZGQ+e1N0cmluZyh2YWx1ZSl9PC9kZD48L2Rpdj4pfTwvZGw+e2NyZWRpdC5jaGFyYWN0ZXJEZXNjcmlwdGlvbiYmPHA+e2NyZWRpdC5jaGFyYWN0ZXJEZXNjcmlwdGlvbn08L3A+fXtjcmVkaXQuY2hhcmFjdGVyUmVsYXRpb25zaGlwcyYmPHA+PHN0cm9uZz5SZWxhdGlvbnNoaXBzOjwvc3Ryb25nPiB7dHlwZW9mIGNyZWRpdC5jaGFyYWN0ZXJSZWxhdGlvbnNoaXBzPT09J3N0cmluZyc/Y3JlZGl0LmNoYXJhY3RlclJlbGF0aW9uc2hpcHM6SlNPTi5zdHJpbmdpZnkoY3JlZGl0LmNoYXJhY3RlclJlbGF0aW9uc2hpcHMpfTwvcD59PC9kaXY+PC9kaXY+PC9kZXRhaWxzPntjcmVkaXQuaWQmJjxidXR0b24gdHlwZT1cImJ1dHRvblwiIGNsYXNzTmFtZT1cImJ1dHRvbiBzZWNvbmRhcnkgc21hbGwgbW92aWUtY3JlZGl0LXJlbW92ZVwiIGRpc2FibGVkPXtidXN5fSBvbkNsaWNrPXsoKT0+dm9pZCByZW1vdmVDcmVkaXQoY3JlZGl0KX0+UmVtb3ZlPC9idXR0b24+fTwvZGl2Pjt9KX08L2Rpdj48L2Rpdj59XHJcbiAgPGRpdiBjbGFzc05hbWU9XCJidXR0b24tcm93XCI+PGJ1dHRvbiB0eXBlPVwiYnV0dG9uXCIgY2xhc3NOYW1lPVwiYnV0dG9uXCIgZGlzYWJsZWQ9e2J1c3l9IG9uQ2xpY2s9eygpPT5zZXRTdGVwKDMpfT5Db250aW51ZSB0byBtZWRpYTwvYnV0dG9uPjwvZGl2PlxyXG4gPC9kaXY+fVxyXG4ge3N0ZXA9PT0zJiY8Zm9ybSBjbGFzc05hbWU9XCJtb3ZpZS1tZWRpYS1zdGFnZVwiIG9uU3VibWl0PXtzYXZlTWVkaWF9PjxoZWFkZXIgY2xhc3NOYW1lPVwibW92aWUtbWVkaWEtaGVhZGluZ1wiPjxkaXY+PGgzPk1vdmllIG1lZGlhPC9oMz48cCBjbGFzc05hbWU9XCJtdXRlZFwiPkFkZCBwdWJsaWMgbWVkaWEgbGlua3MgZnJvbSBhbnkgd2Vic2l0ZS4gRGlyZWN0IGZpbGVzIGVtYmVkIHdoZW4gYXZhaWxhYmxlOyBvdGhlciBsaW5rcyBvcGVuIG9uIHRoZWlyIG9yaWdpbmFsIHNpdGUuPC9wPjwvZGl2PjwvaGVhZGVyPjxkaXYgY2xhc3NOYW1lPVwibW92aWUtbWVkaWEtZW50cnlcIj48bGFiZWw+TWVkaWEgdHlwZTxzZWxlY3QgdmFsdWU9e21lZGlhVHlwZX0gb25DaGFuZ2U9e2U9PnNldE1lZGlhVHlwZShlLnRhcmdldC52YWx1ZSl9PjxvcHRpb24+U1RJTEw8L29wdGlvbj48b3B0aW9uPlBPU1RFUjwvb3B0aW9uPjxvcHRpb24+VEhFQVRSSUNBTF9QT1NURVI8L29wdGlvbj48b3B0aW9uPkZJUlNUX0xPT0tfUE9TVEVSPC9vcHRpb24+PG9wdGlvbj5DSEFSQUNURVJfUE9TVEVSPC9vcHRpb24+PG9wdGlvbj5CRUhJTkRfVEhFX1NDRU5FU19QSE9UTzwvb3B0aW9uPjxvcHRpb24+RVZFTlRfUEhPVE88L29wdGlvbj48b3B0aW9uPk9USEVSX0lNQUdFPC9vcHRpb24+PG9wdGlvbj5NT1RJT05fUE9TVEVSPC9vcHRpb24+PG9wdGlvbj5URUFTRVI8L29wdGlvbj48b3B0aW9uPlRSQUlMRVI8L29wdGlvbj48b3B0aW9uPlRSQUlMRVJfVkVSU0lPTjwvb3B0aW9uPjxvcHRpb24+QkVISU5EX1RIRV9TQ0VORVM8L29wdGlvbj48b3B0aW9uPk1BS0lOR19PRjwvb3B0aW9uPjxvcHRpb24+SU5URVJWSUVXPC9vcHRpb24+PG9wdGlvbj5FVkVOVF9WSURFTzwvb3B0aW9uPjxvcHRpb24+UFJPTU9USU9OQUxfVklERU88L29wdGlvbj48b3B0aW9uPk9USEVSPC9vcHRpb24+PC9zZWxlY3Q+PC9sYWJlbD48bGFiZWw+VGl0bGUgLyBkZXNjcmlwdGlvbjxpbnB1dCB2YWx1ZT17bWVkaWFUaXRsZX0gb25DaGFuZ2U9e2U9PnNldE1lZGlhVGl0bGUoZS50YXJnZXQudmFsdWUpfSBwbGFjZWhvbGRlcj1cImUuZy4gT2ZmaWNpYWwgdHJhaWxlciwgUG9zdGVyLCBTdGlsbCBmcm9tIG1vdmllLi4uXCIvPjwvbGFiZWw+PGxhYmVsPk1lZGlhIFVSTDxpbnB1dCB0eXBlPVwidXJsXCIgdmFsdWU9e21lZGlhVXJsfSBvbkNoYW5nZT17ZT0+c2V0TWVkaWFVcmwoZS50YXJnZXQudmFsdWUpfSBwbGFjZWhvbGRlcj1cImh0dHBzOi8vLi4uXCIvPjwvbGFiZWw+PGJ1dHRvbiB0eXBlPVwiYnV0dG9uXCIgY2xhc3NOYW1lPVwiYnV0dG9uIG1vdmllLW1lZGlhLWFkZFwiIGRpc2FibGVkPXshbWVkaWFVcmwudHJpbSgpfSBvbkNsaWNrPXsoKT0+e2lmKCFtZWRpYVVybC50cmltKCkpcmV0dXJuO2NvbnN0IGVudHJ5PXsuLi4oZWRpdGluZ01lZGlhSW5kZXg9PT1udWxsP3t9Om1lZGlhW2VkaXRpbmdNZWRpYUluZGV4XSksbWVkaWFUeXBlLHRpdGxlOm1lZGlhVGl0bGUsdXJsOm1lZGlhVXJsLGRlc2NyaXB0aW9uOm1lZGlhVGl0bGUsZGlzcGxheU9yZGVyOmVkaXRpbmdNZWRpYUluZGV4PT09bnVsbD9tZWRpYS5sZW5ndGgrMTpOdW1iZXIobWVkaWFbZWRpdGluZ01lZGlhSW5kZXhdPy5kaXNwbGF5T3JkZXI/P2VkaXRpbmdNZWRpYUluZGV4KzEpfTtzZXRNZWRpYShlZGl0aW5nTWVkaWFJbmRleD09PW51bGw/Wy4uLm1lZGlhLGVudHJ5XTptZWRpYS5tYXAoKGl0ZW0saW5kZXgpPT5pbmRleD09PWVkaXRpbmdNZWRpYUluZGV4P2VudHJ5Oml0ZW0pKTtzZXRFZGl0aW5nTWVkaWFJbmRleChudWxsKTtzZXRNZWRpYVRpdGxlKCcnKTtzZXRNZWRpYVVybCgnJyk7fX0+PFBsdXMgc2l6ZT17MTd9Lz4ge2VkaXRpbmdNZWRpYUluZGV4PT09bnVsbD8nQWRkIG1lZGlhJzonVXBkYXRlIG1lZGlhJ308L2J1dHRvbj57ZWRpdGluZ01lZGlhSW5kZXghPT1udWxsJiY8YnV0dG9uIHR5cGU9XCJidXR0b25cIiBjbGFzc05hbWU9XCJidXR0b24gc2Vjb25kYXJ5IHNtYWxsXCIgb25DbGljaz17KCk9PntzZXRFZGl0aW5nTWVkaWFJbmRleChudWxsKTtzZXRNZWRpYVRpdGxlKCcnKTtzZXRNZWRpYVVybCgnJyk7c2V0TWVkaWFUeXBlKCdTVElMTCcpO319PkNhbmNlbCBlZGl0PC9idXR0b24+fTwvZGl2PjxkaXYgY2xhc3NOYW1lPVwibW92aWUtbWVkaWEtbGlzdC1oZWFkaW5nXCI+PGg0PkFkZGVkIG1lZGlhIDxzcGFuPih7bWVkaWEubGVuZ3RofSk8L3NwYW4+PC9oND48c3BhbiBjbGFzc05hbWU9XCJtb3ZpZS1tZWRpYS1zb3J0XCI+4oaVICZuYnNwOyBTb3J0IGJ5IG5ld2VzdDwvc3Bhbj48L2Rpdj48ZGl2IGNsYXNzTmFtZT1cIm1vdmllLW1lZGlhLWxpc3RcIj57bWVkaWEubWFwKChpdGVtLGkpPT57Y29uc3QgdXJsPVN0cmluZyhpdGVtLnVybHx8aXRlbS5tZWRpYVVybHx8JycpO2NvbnN0IHR5cGU9U3RyaW5nKGl0ZW0ubWVkaWFUeXBlfHwnT1RIRVInKTtjb25zdCB0aXRsZT1TdHJpbmcoaXRlbS50aXRsZXx8aXRlbS5kZXNjcmlwdGlvbnx8YCR7dHlwZS5yZXBsYWNlQWxsKCdfJywnICcpfSAke2krMX1gKTtjb25zdCBpc0ltYWdlPS8oUE9TVEVSfFNUSUxMfElNQUdFfFBIT1RPKS9pLnRlc3QodHlwZSk7Y29uc3QgdGh1bWJuYWlsPVN0cmluZyhpc0ltYWdlP3VybDooaXRlbS50aHVtYm5haWxVcmx8fCcnKSk7cmV0dXJuIDxhcnRpY2xlIGNsYXNzTmFtZT1cIm1vdmllLW1lZGlhLXJvd1wiIGtleT17U3RyaW5nKGl0ZW0uaWR8fGAke3VybH0tJHtpfWApfT48R3JpcFZlcnRpY2FsIGNsYXNzTmFtZT1cIm1vdmllLW1lZGlhLWdyaXBcIiBzaXplPXsxN30vPnt0aHVtYm5haWw/PE1lZGlhSW1hZ2UgY2xhc3NOYW1lPVwibW92aWUtbWVkaWEtdGh1bWJcIiB1cmw9e3RodW1ibmFpbH0gYWx0PXt0aXRsZX0gc2hvd0ZhbGxiYWNrTGluaz17ZmFsc2V9Lz46PHNwYW4gY2xhc3NOYW1lPVwibW92aWUtbWVkaWEtdGh1bWIgbW92aWUtbWVkaWEtdGh1bWItZW1wdHlcIj57dHlwZT09PSdUUkFJTEVSJ3x8dHlwZS5pbmNsdWRlcygnVklERU8nKT8n4pa2JzonQVYnfTwvc3Bhbj59PHNwYW4gY2xhc3NOYW1lPXtgbW92aWUtbWVkaWEtdHlwZSAke3R5cGUudG9Mb3dlckNhc2UoKS5yZXBsYWNlQWxsKCdfJywnLScpfWB9Pnt0eXBlPT09J1RIRUFUUklDQUxfUE9TVEVSJ3x8dHlwZT09PSdGSVJTVF9MT09LX1BPU1RFUid8fHR5cGU9PT0nQ0hBUkFDVEVSX1BPU1RFUic/J1BPU1RFUic6dHlwZT09PSdNT1RJT05fUE9TVEVSJz8nTU9USU9OJzp0eXBlPT09J1RSQUlMRVJfVkVSU0lPTic/J1RSQUlMRVInOnR5cGV9PC9zcGFuPjxzcGFuIGNsYXNzTmFtZT1cIm1vdmllLW1lZGlhLWNvcHlcIj48c3Ryb25nPnt0aXRsZX08L3N0cm9uZz48c21hbGw+e2l0ZW0uZGVzY3JpcHRpb258fCh7VFJBSUxFUjonTWFpbiB0cmFpbGVyJyxQT1NURVI6J01haW4gbW92aWUgcG9zdGVyJyxTVElMTDonU2NlbmUgZnJvbSBtb3ZpZSd9IGFzIFJlY29yZDxzdHJpbmcsc3RyaW5nPilbdHlwZV18fCdNb3ZpZSBtZWRpYSd9PC9zbWFsbD48L3NwYW4+PHNwYW4gY2xhc3NOYW1lPVwibW92aWUtbWVkaWEtdXJsXCI+PExpbmsyIHNpemU9ezE1fS8+PHNwYW4+e3VybH08L3NwYW4+PC9zcGFuPjxidXR0b24gdHlwZT1cImJ1dHRvblwiIGNsYXNzTmFtZT1cImJ1dHRvbiBzZWNvbmRhcnkgc21hbGxcIiBvbkNsaWNrPXsoKT0+e3NldEVkaXRpbmdNZWRpYUluZGV4KGkpO3NldE1lZGlhVHlwZSh0eXBlKTtzZXRNZWRpYVRpdGxlKFN0cmluZyhpdGVtLnRpdGxlfHxpdGVtLmRlc2NyaXB0aW9ufHwnJykpO3NldE1lZGlhVXJsKHVybCk7fX0gYXJpYS1sYWJlbD17YEVkaXQgJHt0aXRsZX1gfT48UGVuY2lsIHNpemU9ezE1fS8+IEVkaXQ8L2J1dHRvbj48YnV0dG9uIHR5cGU9XCJidXR0b25cIiBjbGFzc05hbWU9XCJpY29uLWJ1dHRvbiBkYW5nZXIgbW92aWUtbWVkaWEtZGVsZXRlXCIgZGlzYWJsZWQ9e2J1c3l9IG9uQ2xpY2s9eygpPT52b2lkIHJlbW92ZU1lZGlhKGl0ZW0saSl9IGFyaWEtbGFiZWw9e2BSZW1vdmUgJHt0aXRsZX1gfT48VHJhc2gyIHNpemU9ezE2fS8+PC9idXR0b24+PC9hcnRpY2xlPjt9KX17IW1lZGlhLmxlbmd0aCYmPHAgY2xhc3NOYW1lPVwibW92aWUtbWVkaWEtZW1wdHlcIj5ObyBtb3ZpZSBtZWRpYSBhZGRlZCB5ZXQuPC9wPn08L2Rpdj48ZGl2IGNsYXNzTmFtZT1cImJ1dHRvbi1yb3cgbW92aWUtbWVkaWEtYWN0aW9uc1wiPjxidXR0b24gY2xhc3NOYW1lPVwiYnV0dG9uXCIgZGlzYWJsZWQ9e2J1c3l9PjxTYXZlIHNpemU9ezE3fS8+e2J1c3k/J1NhdmluZ+KApic6J1NhdmUgbWVkaWEgYW5kIGZpbmlzaCd9PC9idXR0b24+PGJ1dHRvbiB0eXBlPVwiYnV0dG9uXCIgY2xhc3NOYW1lPVwiYnV0dG9uIHNlY29uZGFyeVwiIG9uQ2xpY2s9e29uRG9uZX0+RmluaXNoIHdpdGhvdXQgbWVkaWE8L2J1dHRvbj48L2Rpdj57ZXJyb3ImJjxOb3RpY2UgZXJyb3I+e2Vycm9yfTwvTm90aWNlPn08L2Zvcm0+fXtlcnJvciYmc3RlcCE9PTMmJjxOb3RpY2UgZXJyb3I+e2Vycm9yfTwvTm90aWNlPn08L2Rpdj47XHJcbn1cclxuIl0sImZpbGUiOiJFOi9BViBXZWJzaXRlL0FWLWZyb250ZW5kL3NyYy9jb21wb25lbnRzL01vdmllV2l6YXJkLnRzeCJ9

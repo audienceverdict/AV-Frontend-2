@@ -1,0 +1,130 @@
+import featuredFilmVideo from "/videos and photos/WhatsApp Video 2026-10-02 at 2.26.29 PM.mp4?import&url";
+import systemOverview from "/videos and photos/WhatsApp Image 2026-10-02 at 2.26.31 PM.jpeg?import&url";
+import page01 from "/videos and photos/The_AAV_Operating_System_page-0001.jpg?import&url";
+import page02 from "/videos and photos/The_AAV_Operating_System_page-0002.jpg?import&url";
+import page03 from "/videos and photos/The_AAV_Operating_System_page-0003.jpg?import&url";
+import page04 from "/videos and photos/The_AAV_Operating_System_page-0004.jpg?import&url";
+import page05 from "/videos and photos/The_AAV_Operating_System_page-0005.jpg?import&url";
+import page06 from "/videos and photos/The_AAV_Operating_System_page-0006.jpg?import&url";
+import page07 from "/videos and photos/The_AAV_Operating_System_page-0007.jpg?import&url";
+import page08 from "/videos and photos/The_AAV_Operating_System_page-0008.jpg?import&url";
+import page09 from "/videos and photos/The_AAV_Operating_System_page-0009.jpg?import&url";
+import page10 from "/videos and photos/The_AAV_Operating_System_page-0010.jpg?import&url";
+import page11 from "/videos and photos/The_AAV_Operating_System_page-0011.jpg?import&url";
+import page12 from "/videos and photos/The_AAV_Operating_System_page-0012.jpg?import&url";
+import page13 from "/videos and photos/The_AAV_Operating_System_page-0013.jpg?import&url";
+import page14 from "/videos and photos/The_AAV_Operating_System_page-0014.jpg?import&url";
+import page15 from "/videos and photos/The_AAV_Operating_System_page-0015.jpg?import&url";
+export { featuredFilmVideo };
+export const operatingSystemPages = [
+  systemOverview,
+  page01,
+  page02,
+  page03,
+  page04,
+  page05,
+  page06,
+  page07,
+  page08,
+  page09,
+  page10,
+  page11,
+  page12,
+  page13,
+  page14,
+  page15
+];
+export const operatingSystemImageTitles = [
+  "Audience Verdict Operating System Overview",
+  "The AAV Operating System",
+  "Shifting the Promotional Paradigm",
+  "The System Architecture at a Glance",
+  "The Cultural Software",
+  "The Stakeholder Ecosystem",
+  "Anatomy of an AAV Role — Registration Lead",
+  "The 6-Stage Execution Engine",
+  "Stages 1–3 — The Hype and Capture Funnel",
+  "Stages 4–6 — Truth and Transaction",
+  "Standard Operating Procedures & Resilience",
+  "The Artifacts Component Library",
+  "The Content Cadence Timeline",
+  "The Analytics Command Center",
+  "The Long-Term Ecosystem Roadmap",
+  "The Ultimate Deliverable"
+];
+export const frameworkChapters = [
+  {
+    id: "overview",
+    eyebrow: "02 / SYSTEM OVERVIEW",
+    title: "The Audience Verdict operating system, at a glance",
+    description: "A single view of the Audience Verdict model: its principles, campaign stages, team responsibilities, operating tools, and measurable outcomes.",
+    link: "Explore the framework",
+    pages: [0]
+  },
+  {
+    id: "framework",
+    eyebrow: "03 / THE FRAMEWORK",
+    title: "The AAV Operating System",
+    description: "A documented operating model and execution lifecycle designed to help teams run audience-led film campaigns with consistent, verifiable feedback.",
+    link: "Explore the framework",
+    pages: [1]
+  },
+  {
+    id: "insights",
+    eyebrow: "04 / KEY INSIGHTS",
+    title: "A connected system, from promotion to insight",
+    description: "The framework shifts decision-making toward the audience, then connects the campaign workflow through six stages—from planning and registration to screening, verdict, and business outcomes.",
+    link: "See how the system connects",
+    pages: [2, 3]
+  },
+  {
+    id: "principles",
+    eyebrow: "05 / PRINCIPLES & PEOPLE",
+    title: "Built on audience-first principles",
+    description: "Transparency, authenticity, respect, courage, and accountability guide the culture. A coordinated stakeholder network brings internal teams, audiences, theatres, distributors, and platforms into one operating model.",
+    link: "Explore the principles",
+    pages: [4, 5]
+  },
+  {
+    id: "execution",
+    eyebrow: "06 / EXECUTION",
+    title: "Clear roles. A six-stage engine.",
+    description: "Role profiles define responsibilities, artifacts, and performance measures. The six-stage engine takes a campaign from planning and awareness through registration, screening, audience verdict, and business outcomes.",
+    link: "View the execution model",
+    pages: [6, 7]
+  },
+  {
+    id: "campaign-flow",
+    eyebrow: "07 / CAMPAIGN FLOW",
+    title: "From first awareness to a verified verdict",
+    description: "The campaign funnel builds awareness and captures registrations before the screening. The final stages focus on the audience experience, honest feedback, and using verified results for business decisions.",
+    link: "Follow the campaign stages",
+    pages: [8, 9]
+  },
+  {
+    id: "operations",
+    eyebrow: "08 / OPERATIONS",
+    title: "Repeatable operations, ready-to-use artifacts",
+    description: "Standard procedures pair common campaign risks with defined responses. The artifact library covers brand, theatre, and digital materials teams need at each touchpoint.",
+    link: "Review the operating tools",
+    pages: [10, 11]
+  },
+  {
+    id: "measurement",
+    eyebrow: "09 / MEASUREMENT",
+    title: "A cadence that leads to useful intelligence",
+    description: "A planned content timeline supports each campaign moment. Analytics bring registration, attendance, audience profile, and verdict measures together for review.",
+    link: "See the measurement approach",
+    pages: [12, 13]
+  },
+  {
+    id: "roadmap",
+    eyebrow: "10 / WHAT COMES NEXT",
+    title: "Designed to grow beyond a single campaign",
+    description: "The roadmap describes near-term digital infrastructure, a mid-term audience network, and longer-term industry integration—supported by a documented operations handbook.",
+    link: "Start a conversation",
+    pages: [14, 15]
+  }
+];
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIm9wZXJhdGluZ1N5c3RlbUFzc2V0cy50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgZmVhdHVyZWRGaWxtVmlkZW8gZnJvbSAnLi4vLi4vdmlkZW9zIGFuZCBwaG90b3MvV2hhdHNBcHAgVmlkZW8gMjAyNi0xMC0wMiBhdCAyLjI2LjI5IFBNLm1wND91cmwnO1xyXG5pbXBvcnQgc3lzdGVtT3ZlcnZpZXcgZnJvbSAnLi4vLi4vdmlkZW9zIGFuZCBwaG90b3MvV2hhdHNBcHAgSW1hZ2UgMjAyNi0xMC0wMiBhdCAyLjI2LjMxIFBNLmpwZWc/dXJsJztcclxuaW1wb3J0IHBhZ2UwMSBmcm9tICcuLi8uLi92aWRlb3MgYW5kIHBob3Rvcy9UaGVfQUFWX09wZXJhdGluZ19TeXN0ZW1fcGFnZS0wMDAxLmpwZz91cmwnO1xyXG5pbXBvcnQgcGFnZTAyIGZyb20gJy4uLy4uL3ZpZGVvcyBhbmQgcGhvdG9zL1RoZV9BQVZfT3BlcmF0aW5nX1N5c3RlbV9wYWdlLTAwMDIuanBnP3VybCc7XHJcbmltcG9ydCBwYWdlMDMgZnJvbSAnLi4vLi4vdmlkZW9zIGFuZCBwaG90b3MvVGhlX0FBVl9PcGVyYXRpbmdfU3lzdGVtX3BhZ2UtMDAwMy5qcGc/dXJsJztcclxuaW1wb3J0IHBhZ2UwNCBmcm9tICcuLi8uLi92aWRlb3MgYW5kIHBob3Rvcy9UaGVfQUFWX09wZXJhdGluZ19TeXN0ZW1fcGFnZS0wMDA0LmpwZz91cmwnO1xyXG5pbXBvcnQgcGFnZTA1IGZyb20gJy4uLy4uL3ZpZGVvcyBhbmQgcGhvdG9zL1RoZV9BQVZfT3BlcmF0aW5nX1N5c3RlbV9wYWdlLTAwMDUuanBnP3VybCc7XHJcbmltcG9ydCBwYWdlMDYgZnJvbSAnLi4vLi4vdmlkZW9zIGFuZCBwaG90b3MvVGhlX0FBVl9PcGVyYXRpbmdfU3lzdGVtX3BhZ2UtMDAwNi5qcGc/dXJsJztcclxuaW1wb3J0IHBhZ2UwNyBmcm9tICcuLi8uLi92aWRlb3MgYW5kIHBob3Rvcy9UaGVfQUFWX09wZXJhdGluZ19TeXN0ZW1fcGFnZS0wMDA3LmpwZz91cmwnO1xyXG5pbXBvcnQgcGFnZTA4IGZyb20gJy4uLy4uL3ZpZGVvcyBhbmQgcGhvdG9zL1RoZV9BQVZfT3BlcmF0aW5nX1N5c3RlbV9wYWdlLTAwMDguanBnP3VybCc7XHJcbmltcG9ydCBwYWdlMDkgZnJvbSAnLi4vLi4vdmlkZW9zIGFuZCBwaG90b3MvVGhlX0FBVl9PcGVyYXRpbmdfU3lzdGVtX3BhZ2UtMDAwOS5qcGc/dXJsJztcclxuaW1wb3J0IHBhZ2UxMCBmcm9tICcuLi8uLi92aWRlb3MgYW5kIHBob3Rvcy9UaGVfQUFWX09wZXJhdGluZ19TeXN0ZW1fcGFnZS0wMDEwLmpwZz91cmwnO1xyXG5pbXBvcnQgcGFnZTExIGZyb20gJy4uLy4uL3ZpZGVvcyBhbmQgcGhvdG9zL1RoZV9BQVZfT3BlcmF0aW5nX1N5c3RlbV9wYWdlLTAwMTEuanBnP3VybCc7XHJcbmltcG9ydCBwYWdlMTIgZnJvbSAnLi4vLi4vdmlkZW9zIGFuZCBwaG90b3MvVGhlX0FBVl9PcGVyYXRpbmdfU3lzdGVtX3BhZ2UtMDAxMi5qcGc/dXJsJztcclxuaW1wb3J0IHBhZ2UxMyBmcm9tICcuLi8uLi92aWRlb3MgYW5kIHBob3Rvcy9UaGVfQUFWX09wZXJhdGluZ19TeXN0ZW1fcGFnZS0wMDEzLmpwZz91cmwnO1xyXG5pbXBvcnQgcGFnZTE0IGZyb20gJy4uLy4uL3ZpZGVvcyBhbmQgcGhvdG9zL1RoZV9BQVZfT3BlcmF0aW5nX1N5c3RlbV9wYWdlLTAwMTQuanBnP3VybCc7XHJcbmltcG9ydCBwYWdlMTUgZnJvbSAnLi4vLi4vdmlkZW9zIGFuZCBwaG90b3MvVGhlX0FBVl9PcGVyYXRpbmdfU3lzdGVtX3BhZ2UtMDAxNS5qcGc/dXJsJztcclxuXHJcbmV4cG9ydCB7ZmVhdHVyZWRGaWxtVmlkZW99O1xyXG5cclxuZXhwb3J0IGNvbnN0IG9wZXJhdGluZ1N5c3RlbVBhZ2VzID0gW1xyXG4gIHN5c3RlbU92ZXJ2aWV3LCBwYWdlMDEsIHBhZ2UwMiwgcGFnZTAzLCBwYWdlMDQsIHBhZ2UwNSwgcGFnZTA2LCBwYWdlMDcsIHBhZ2UwOCxcclxuICBwYWdlMDksIHBhZ2UxMCwgcGFnZTExLCBwYWdlMTIsIHBhZ2UxMywgcGFnZTE0LCBwYWdlMTUsXHJcbl07XHJcblxyXG5leHBvcnQgY29uc3Qgb3BlcmF0aW5nU3lzdGVtSW1hZ2VUaXRsZXMgPSBbXHJcbiAgJ0F1ZGllbmNlIFZlcmRpY3QgT3BlcmF0aW5nIFN5c3RlbSBPdmVydmlldycsXHJcbiAgJ1RoZSBBQVYgT3BlcmF0aW5nIFN5c3RlbScsXHJcbiAgJ1NoaWZ0aW5nIHRoZSBQcm9tb3Rpb25hbCBQYXJhZGlnbScsXHJcbiAgJ1RoZSBTeXN0ZW0gQXJjaGl0ZWN0dXJlIGF0IGEgR2xhbmNlJyxcclxuICAnVGhlIEN1bHR1cmFsIFNvZnR3YXJlJyxcclxuICAnVGhlIFN0YWtlaG9sZGVyIEVjb3N5c3RlbScsXHJcbiAgJ0FuYXRvbXkgb2YgYW4gQUFWIFJvbGUg4oCUIFJlZ2lzdHJhdGlvbiBMZWFkJyxcclxuICAnVGhlIDYtU3RhZ2UgRXhlY3V0aW9uIEVuZ2luZScsXHJcbiAgJ1N0YWdlcyAx4oCTMyDigJQgVGhlIEh5cGUgYW5kIENhcHR1cmUgRnVubmVsJyxcclxuICAnU3RhZ2VzIDTigJM2IOKAlCBUcnV0aCBhbmQgVHJhbnNhY3Rpb24nLFxyXG4gICdTdGFuZGFyZCBPcGVyYXRpbmcgUHJvY2VkdXJlcyAmIFJlc2lsaWVuY2UnLFxyXG4gICdUaGUgQXJ0aWZhY3RzIENvbXBvbmVudCBMaWJyYXJ5JyxcclxuICAnVGhlIENvbnRlbnQgQ2FkZW5jZSBUaW1lbGluZScsXHJcbiAgJ1RoZSBBbmFseXRpY3MgQ29tbWFuZCBDZW50ZXInLFxyXG4gICdUaGUgTG9uZy1UZXJtIEVjb3N5c3RlbSBSb2FkbWFwJyxcclxuICAnVGhlIFVsdGltYXRlIERlbGl2ZXJhYmxlJyxcclxuXTtcclxuXHJcbmV4cG9ydCBjb25zdCBmcmFtZXdvcmtDaGFwdGVycyA9IFtcclxuICB7XHJcbiAgICBpZDogJ292ZXJ2aWV3JywgZXllYnJvdzogJzAyIC8gU1lTVEVNIE9WRVJWSUVXJywgdGl0bGU6ICdUaGUgQXVkaWVuY2UgVmVyZGljdCBvcGVyYXRpbmcgc3lzdGVtLCBhdCBhIGdsYW5jZScsXHJcbiAgICBkZXNjcmlwdGlvbjogJ0Egc2luZ2xlIHZpZXcgb2YgdGhlIEF1ZGllbmNlIFZlcmRpY3QgbW9kZWw6IGl0cyBwcmluY2lwbGVzLCBjYW1wYWlnbiBzdGFnZXMsIHRlYW0gcmVzcG9uc2liaWxpdGllcywgb3BlcmF0aW5nIHRvb2xzLCBhbmQgbWVhc3VyYWJsZSBvdXRjb21lcy4nLFxyXG4gICAgbGluazogJ0V4cGxvcmUgdGhlIGZyYW1ld29yaycsIHBhZ2VzOiBbMF0sXHJcbiAgfSxcclxuICB7XHJcbiAgICBpZDogJ2ZyYW1ld29yaycsIGV5ZWJyb3c6ICcwMyAvIFRIRSBGUkFNRVdPUksnLCB0aXRsZTogJ1RoZSBBQVYgT3BlcmF0aW5nIFN5c3RlbScsXHJcbiAgICBkZXNjcmlwdGlvbjogJ0EgZG9jdW1lbnRlZCBvcGVyYXRpbmcgbW9kZWwgYW5kIGV4ZWN1dGlvbiBsaWZlY3ljbGUgZGVzaWduZWQgdG8gaGVscCB0ZWFtcyBydW4gYXVkaWVuY2UtbGVkIGZpbG0gY2FtcGFpZ25zIHdpdGggY29uc2lzdGVudCwgdmVyaWZpYWJsZSBmZWVkYmFjay4nLFxyXG4gICAgbGluazogJ0V4cGxvcmUgdGhlIGZyYW1ld29yaycsIHBhZ2VzOiBbMV0sXHJcbiAgfSxcclxuICB7XHJcbiAgICBpZDogJ2luc2lnaHRzJywgZXllYnJvdzogJzA0IC8gS0VZIElOU0lHSFRTJywgdGl0bGU6ICdBIGNvbm5lY3RlZCBzeXN0ZW0sIGZyb20gcHJvbW90aW9uIHRvIGluc2lnaHQnLFxyXG4gICAgZGVzY3JpcHRpb246ICdUaGUgZnJhbWV3b3JrIHNoaWZ0cyBkZWNpc2lvbi1tYWtpbmcgdG93YXJkIHRoZSBhdWRpZW5jZSwgdGhlbiBjb25uZWN0cyB0aGUgY2FtcGFpZ24gd29ya2Zsb3cgdGhyb3VnaCBzaXggc3RhZ2Vz4oCUZnJvbSBwbGFubmluZyBhbmQgcmVnaXN0cmF0aW9uIHRvIHNjcmVlbmluZywgdmVyZGljdCwgYW5kIGJ1c2luZXNzIG91dGNvbWVzLicsXHJcbiAgICBsaW5rOiAnU2VlIGhvdyB0aGUgc3lzdGVtIGNvbm5lY3RzJywgcGFnZXM6IFsyLCAzXSxcclxuICB9LFxyXG4gIHtcclxuICAgIGlkOiAncHJpbmNpcGxlcycsIGV5ZWJyb3c6ICcwNSAvIFBSSU5DSVBMRVMgJiBQRU9QTEUnLCB0aXRsZTogJ0J1aWx0IG9uIGF1ZGllbmNlLWZpcnN0IHByaW5jaXBsZXMnLFxyXG4gICAgZGVzY3JpcHRpb246ICdUcmFuc3BhcmVuY3ksIGF1dGhlbnRpY2l0eSwgcmVzcGVjdCwgY291cmFnZSwgYW5kIGFjY291bnRhYmlsaXR5IGd1aWRlIHRoZSBjdWx0dXJlLiBBIGNvb3JkaW5hdGVkIHN0YWtlaG9sZGVyIG5ldHdvcmsgYnJpbmdzIGludGVybmFsIHRlYW1zLCBhdWRpZW5jZXMsIHRoZWF0cmVzLCBkaXN0cmlidXRvcnMsIGFuZCBwbGF0Zm9ybXMgaW50byBvbmUgb3BlcmF0aW5nIG1vZGVsLicsXHJcbiAgICBsaW5rOiAnRXhwbG9yZSB0aGUgcHJpbmNpcGxlcycsIHBhZ2VzOiBbNCwgNV0sXHJcbiAgfSxcclxuICB7XHJcbiAgICBpZDogJ2V4ZWN1dGlvbicsIGV5ZWJyb3c6ICcwNiAvIEVYRUNVVElPTicsIHRpdGxlOiAnQ2xlYXIgcm9sZXMuIEEgc2l4LXN0YWdlIGVuZ2luZS4nLFxyXG4gICAgZGVzY3JpcHRpb246ICdSb2xlIHByb2ZpbGVzIGRlZmluZSByZXNwb25zaWJpbGl0aWVzLCBhcnRpZmFjdHMsIGFuZCBwZXJmb3JtYW5jZSBtZWFzdXJlcy4gVGhlIHNpeC1zdGFnZSBlbmdpbmUgdGFrZXMgYSBjYW1wYWlnbiBmcm9tIHBsYW5uaW5nIGFuZCBhd2FyZW5lc3MgdGhyb3VnaCByZWdpc3RyYXRpb24sIHNjcmVlbmluZywgYXVkaWVuY2UgdmVyZGljdCwgYW5kIGJ1c2luZXNzIG91dGNvbWVzLicsXHJcbiAgICBsaW5rOiAnVmlldyB0aGUgZXhlY3V0aW9uIG1vZGVsJywgcGFnZXM6IFs2LCA3XSxcclxuICB9LFxyXG4gIHtcclxuICAgIGlkOiAnY2FtcGFpZ24tZmxvdycsIGV5ZWJyb3c6ICcwNyAvIENBTVBBSUdOIEZMT1cnLCB0aXRsZTogJ0Zyb20gZmlyc3QgYXdhcmVuZXNzIHRvIGEgdmVyaWZpZWQgdmVyZGljdCcsXHJcbiAgICBkZXNjcmlwdGlvbjogJ1RoZSBjYW1wYWlnbiBmdW5uZWwgYnVpbGRzIGF3YXJlbmVzcyBhbmQgY2FwdHVyZXMgcmVnaXN0cmF0aW9ucyBiZWZvcmUgdGhlIHNjcmVlbmluZy4gVGhlIGZpbmFsIHN0YWdlcyBmb2N1cyBvbiB0aGUgYXVkaWVuY2UgZXhwZXJpZW5jZSwgaG9uZXN0IGZlZWRiYWNrLCBhbmQgdXNpbmcgdmVyaWZpZWQgcmVzdWx0cyBmb3IgYnVzaW5lc3MgZGVjaXNpb25zLicsXHJcbiAgICBsaW5rOiAnRm9sbG93IHRoZSBjYW1wYWlnbiBzdGFnZXMnLCBwYWdlczogWzgsIDldLFxyXG4gIH0sXHJcbiAge1xyXG4gICAgaWQ6ICdvcGVyYXRpb25zJywgZXllYnJvdzogJzA4IC8gT1BFUkFUSU9OUycsIHRpdGxlOiAnUmVwZWF0YWJsZSBvcGVyYXRpb25zLCByZWFkeS10by11c2UgYXJ0aWZhY3RzJyxcclxuICAgIGRlc2NyaXB0aW9uOiAnU3RhbmRhcmQgcHJvY2VkdXJlcyBwYWlyIGNvbW1vbiBjYW1wYWlnbiByaXNrcyB3aXRoIGRlZmluZWQgcmVzcG9uc2VzLiBUaGUgYXJ0aWZhY3QgbGlicmFyeSBjb3ZlcnMgYnJhbmQsIHRoZWF0cmUsIGFuZCBkaWdpdGFsIG1hdGVyaWFscyB0ZWFtcyBuZWVkIGF0IGVhY2ggdG91Y2hwb2ludC4nLFxyXG4gICAgbGluazogJ1JldmlldyB0aGUgb3BlcmF0aW5nIHRvb2xzJywgcGFnZXM6IFsxMCwgMTFdLFxyXG4gIH0sXHJcbiAge1xyXG4gICAgaWQ6ICdtZWFzdXJlbWVudCcsIGV5ZWJyb3c6ICcwOSAvIE1FQVNVUkVNRU5UJywgdGl0bGU6ICdBIGNhZGVuY2UgdGhhdCBsZWFkcyB0byB1c2VmdWwgaW50ZWxsaWdlbmNlJyxcclxuICAgIGRlc2NyaXB0aW9uOiAnQSBwbGFubmVkIGNvbnRlbnQgdGltZWxpbmUgc3VwcG9ydHMgZWFjaCBjYW1wYWlnbiBtb21lbnQuIEFuYWx5dGljcyBicmluZyByZWdpc3RyYXRpb24sIGF0dGVuZGFuY2UsIGF1ZGllbmNlIHByb2ZpbGUsIGFuZCB2ZXJkaWN0IG1lYXN1cmVzIHRvZ2V0aGVyIGZvciByZXZpZXcuJyxcclxuICAgIGxpbms6ICdTZWUgdGhlIG1lYXN1cmVtZW50IGFwcHJvYWNoJywgcGFnZXM6IFsxMiwgMTNdLFxyXG4gIH0sXHJcbiAge1xyXG4gICAgaWQ6ICdyb2FkbWFwJywgZXllYnJvdzogJzEwIC8gV0hBVCBDT01FUyBORVhUJywgdGl0bGU6ICdEZXNpZ25lZCB0byBncm93IGJleW9uZCBhIHNpbmdsZSBjYW1wYWlnbicsXHJcbiAgICBkZXNjcmlwdGlvbjogJ1RoZSByb2FkbWFwIGRlc2NyaWJlcyBuZWFyLXRlcm0gZGlnaXRhbCBpbmZyYXN0cnVjdHVyZSwgYSBtaWQtdGVybSBhdWRpZW5jZSBuZXR3b3JrLCBhbmQgbG9uZ2VyLXRlcm0gaW5kdXN0cnkgaW50ZWdyYXRpb27igJRzdXBwb3J0ZWQgYnkgYSBkb2N1bWVudGVkIG9wZXJhdGlvbnMgaGFuZGJvb2suJyxcclxuICAgIGxpbms6ICdTdGFydCBhIGNvbnZlcnNhdGlvbicsIHBhZ2VzOiBbMTQsIDE1XSxcclxuICB9LFxyXG5dO1xyXG4iXSwibWFwcGluZ3MiOiJBQUFBLE9BQU8sdUJBQXVCO0FBQzlCLE9BQU8sb0JBQW9CO0FBQzNCLE9BQU8sWUFBWTtBQUNuQixPQUFPLFlBQVk7QUFDbkIsT0FBTyxZQUFZO0FBQ25CLE9BQU8sWUFBWTtBQUNuQixPQUFPLFlBQVk7QUFDbkIsT0FBTyxZQUFZO0FBQ25CLE9BQU8sWUFBWTtBQUNuQixPQUFPLFlBQVk7QUFDbkIsT0FBTyxZQUFZO0FBQ25CLE9BQU8sWUFBWTtBQUNuQixPQUFP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

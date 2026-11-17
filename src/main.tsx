@@ -14,4 +14,5 @@ import './profile-page.css';
 import './reviews-page.css';
 import './movie-reviews.css';
 import './responsive-overrides.css';
+import './home-verification-hero.css';
 ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><LoadingScreen><App/></LoadingScreen></React.StrictMode>);
